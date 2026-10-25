@@ -1,0 +1,9 @@
+/* Keep long summary cards inside a narrow conversation column. */
+.message.assistant { width: min(100%, 620px); }
+.bubble { min-width: 0; }
+.assistant .bubble { width: 100%; }
+.credit-summary { min-width: 0; width: 100%; }
+
+@media (max-width: 800px) {
+  .message { max-width: 100%; }
+}
