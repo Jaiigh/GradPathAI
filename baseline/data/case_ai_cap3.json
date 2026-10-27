@@ -1,0 +1,11 @@
+{
+  "case_id": "smoke-01",
+  "request": "I want to finish within the next two terms, focus on AI, and take at most 3 credits per term.",
+  "goal": {
+    "goal_version": 1,
+    "terms": [{"label": "2027-1", "semester": 1, "cap": 3}, {"label": "2027-2", "semester": 2, "cap": 3}],
+    "finish_by_horizon": true,
+    "must_take": []
+  },
+  "expected": {"status": "plan", "terms": [["C102"], ["E202"]]}
+}

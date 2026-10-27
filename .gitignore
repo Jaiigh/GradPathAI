@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .vite/
+tmp/
+baseline/.venv/
+baseline/__pycache__/

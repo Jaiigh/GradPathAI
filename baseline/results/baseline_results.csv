@@ -1,0 +1,2 @@
+time,model,case,final_state,matches_expected,terms,llm_calls,tool_calls,revisions,e2e_s,llm_s,tool_s
+20261028-001001,mock,smoke-01,DONE,True,"[[""C102""], [""E202""]]",5,3,1,1.69,0.0,1.686

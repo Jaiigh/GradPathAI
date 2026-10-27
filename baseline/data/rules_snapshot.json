@@ -1,0 +1,14 @@
+{
+  "snapshot_id": "synthetic-v1",
+  "note": "Synthetic rule snapshot matching slide 10. Replace with the verified CP 2566 snapshot later.",
+  "courses": {
+    "C101": {"title": "Intro Programming",        "credits": 3, "categories": ["core"],              "prereqs": [],       "offered": [1, 2], "desc": "Programming fundamentals in Python."},
+    "C102": {"title": "Data Structures",          "credits": 3, "categories": ["core"],              "prereqs": ["C101"], "offered": [1],    "desc": "Lists, trees, graphs, hashing and complexity."},
+    "G101": {"title": "Thai Society",             "credits": 3, "categories": ["gen_ed"],            "prereqs": [],       "offered": [1, 2], "desc": "General education course on Thai society."},
+    "E202": {"title": "Artificial Intelligence I","credits": 3, "categories": ["elective"],          "prereqs": ["C102"], "offered": [2],    "desc": "Search, knowledge representation, machine learning basics, AI agents."},
+    "E203": {"title": "Computer Networks II",     "credits": 3, "categories": ["elective"],          "prereqs": ["C102"], "offered": [2],    "desc": "Routing, transport protocols and network systems."},
+    "E204": {"title": "Data Science Tools",       "credits": 3, "categories": ["elective", "free"],  "prereqs": [],       "offered": [1, 2], "desc": "Data analysis, visualization and machine learning tooling."}
+  },
+  "required_courses": ["C101", "C102", "G101"],
+  "category_minimums": {"core": 6, "gen_ed": 3, "elective": 3}
+}
