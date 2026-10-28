@@ -1,2 +1,4 @@
 time,model,case,final_state,matches_expected,terms,llm_calls,tool_calls,revisions,e2e_s,llm_s,tool_s
 20261028-001001,mock,smoke-01,DONE,True,"[[""C102""], [""E202""]]",5,3,1,1.69,0.0,1.686
+20261028-112835,qwen3:8b,smoke-01,DONE,True,"[[""C102""], [""E202""]]",4,3,0,19.93,16.58,3.346
+20261028-112944,qwen3:4b,smoke-01,DONE,True,"[[""C102""], [""E202""]]",4,2,0,32.21,31.89,0.32
