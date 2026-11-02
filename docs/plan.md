@@ -32,17 +32,19 @@ week 13). Decisions D1-D15 are in `decisions.md`.
 
 1. UAT plan v1.1 as a Thai PDF: the team's v1.0 structure re-based on `cp2566-v0` (D13).
    Deliver test set v1.1 (`data/test_set.jsonl`) with it and freeze both with the snapshot
-   version (D15) by Wed 12:00.
+   version (D15) by Wed 12:00. Draft PDF and test set done on 2 Nov; rebuild the PDF after
+   any test-set change so that its hashes match.
 2. Language check (D11): 10 Thai and 10 English goal statements on `qwen3:8b`; choose the
    conversation language for UAT.
 3. MVP build:
    - done on 2 Nov: contracts, `cp2566-v0` snapshot, personas, multi-term planner,
      independent validator, audit, 26 tests;
-   - runtime v2: interactive state machine, sessions, `propose_goal` / `ask_user` /
-     `reply`, `plan_id`, budget, traces, run record;
-   - FastAPI app and React wiring: persona picker, record review, chat, goal card, plan,
-     consent and blocker cards;
-   - warm-up script and UAT machine checklist.
+   - done on 2 Nov (night): runtime v2 (interactive state machine, sessions, `propose_goal` /
+     `ask_user` / `reply`, `plan_id`, budget, faults, traces, run record), BM25 retrieval,
+     FastAPI app, React UI (operator task picker, persona picker, record review, chat, goal,
+     consent, plan, blocker and stop cards), test-set runner and scorer, UAT setup and check
+     scripts; 43 tests; test set v1.1 at 40/40 PASS on the development machine;
+   - still open: run `scripts/uat_check.py` on the UAT laptop.
 4. Measure first-response and turn times on the UAT machine; set the Q3 limits.
 
 ## Curriculum data

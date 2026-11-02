@@ -132,3 +132,11 @@ def test_allocation_uses_small_courses_where_they_fit():
                "2110573": 3, "2110574": 3, "2110443": 3}
     totals, _ = allocate(SNAP, courses, [])
     assert totals["DEPT_ELECTIVE"] >= 18 and totals["FREE"] >= 6
+
+
+def test_requested_core_electives_fill_the_core_elective_category_before_a_slot():
+    wanted = ["2110404", "2110452", "2110531"]
+    st, goal, plan = plan_for("y3-base", must_take=wanted)
+    cats = {i.course_id: i.category for t in plan.terms for i in t.items if i.course_id}
+    assert [cats[c] for c in wanted].count("CORE_ELECTIVE") == 2
+    assert not any(i.slot == "CORE_ELECTIVE" for t in plan.terms for i in t.items)

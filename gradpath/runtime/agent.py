@@ -1,0 +1,732 @@
+"""Agent runtime v2: interactive state machine, tool dispatch, budget, final gate and traces.
+
+States (docs/architecture.md): VERIFY_INPUT -> CLARIFY -> ACT -> WAIT_USER | FINAL_GATE -> DONE | EVIDENCED_BLOCKER,
+plus NEED_INFO and STOP_UNVERIFIED. The LLM never edits trusted state: the record changes only through record
+decisions, the goal only through approved cards, and every plan shown is the stored candidate that passed the gate.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import subprocess
+import threading
+import time
+import uuid
+from datetime import datetime, timezone
+
+from .. import snapshot as snapshot_mod, terms as T
+from ..contracts import ConsentRef, GoalConstraints, StudentState
+from ..fixtures import load_persona
+from ..snapshot import ROOT, Snapshot
+from ..tools import planner, validator
+from ..tools.audit import audit
+from ..tools.retrieval import Index, retrieve
+from . import llm as llm_mod
+from .prompts import SYSTEM, lang_of, text
+from .session import Card, Session, Store, TurnRecord, new_id
+from .tools import ProposeGoalArgs, parse, schemas
+
+BUDGET = {"tool_calls": 8, "revisions": 2, "seconds": 120.0}
+SOLVER_TIME_LIMIT_S = 10.0
+ID_RE = re.compile(r"\b\d{5}[0-9xX?]{2}\b")
+THINK_RE = re.compile(r"<think>.*?</think>", re.S)
+TEST_SET = ROOT / "data" / "test_set.jsonl"
+PERSONA_LABELS = {
+    "y1-start": "นิสิตปี 1 (เพิ่งจบภาค 1)", "y2-mid": "นิสิตปี 2", "y3-base": "นิสิตปี 3",
+    "y3-retake-open": "นิสิตปี 3 (มีวิชาที่ได้ F)", "y3-retake-passed": "นิสิตปี 3 (เคยเรียนซ้ำ)",
+    "y3-unclear-grade": "นิสิตปี 3 (เกรดบางวิชาอ่านไม่ออก)", "y3-unclear-id": "นิสิตปี 3 (รหัสวิชาบางตัวอ่านไม่ออก)",
+    "y4-final": "นิสิตปี 4 (เทอมสุดท้าย)",
+}
+ALT_LABELS = {"raise_caps": ("เพิ่มเพดานหน่วยกิต", "Raise the credit cap"),
+              "allow_summer": ("ใช้ภาคฤดูร้อน", "Use summer terms"),
+              "extend_horizon": ("ขยายเวลาจบ", "Extend the finishing term")}
+
+
+class Stop(Exception):
+    """End the turn in STOP_UNVERIFIED (budget, timeout, model failure, solver UNKNOWN, gate exhausted)."""
+
+    def __init__(self, key: str, **kw):
+        super().__init__(key)
+        self.key, self.kw = key, kw
+
+
+def load_tasks() -> dict[str, dict]:
+    if not TEST_SET.exists():
+        return {}
+    lines = TEST_SET.read_text(encoding="utf-8").splitlines()
+    return {t["id"]: t for t in map(json.loads, filter(None, lines))}
+
+
+def _git_commit() -> str:
+    try:
+        rev = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True,
+                             timeout=5).stdout.strip()
+        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True,
+                               timeout=5).stdout.strip()
+        return rev + ("+dirty" if dirty else "")
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
+
+
+def _gpu() -> str:
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"],
+                             capture_output=True, text=True, timeout=5).stdout.strip()
+        return out or "none"
+    except (OSError, subprocess.SubprocessError):
+        return "none"
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+class Ctx:
+    """Per-turn accounting."""
+
+    def __init__(self, rec: TurnRecord):
+        self.rec, self.t0, self.need_info, self.end = rec, time.monotonic(), False, None
+
+    def remaining(self) -> float:
+        return BUDGET["seconds"] - (time.monotonic() - self.t0)
+
+
+class Runtime:
+    def __init__(self, llm=None, store: Store | None = None, solver_time_limit_s: float = SOLVER_TIME_LIMIT_S):
+        self.llm = llm or llm_mod.OllamaLLM()
+        self.store = store or Store()
+        self.solver_time_limit_s = solver_time_limit_s
+        self.sessions: dict[str, Session] = {}
+        self.locks: dict[str, threading.Lock] = {}
+        self._snaps: dict[str, tuple[Snapshot, Index]] = {}
+        self.tool_schemas = schemas()
+        self.static = {"git_commit": _git_commit(), "gpu": _gpu(),
+                       "test_set_sha256": hashlib.sha256(TEST_SET.read_bytes()).hexdigest() if TEST_SET.exists() else None}
+
+    # ------------------------------------------------------------ sessions
+    def snap(self, s: Session) -> tuple[Snapshot, Index]:
+        key = s.snapshot_id + json.dumps(s.overlay, sort_keys=True)
+        if key not in self._snaps:
+            snap = snapshot_mod.load(s.snapshot_id, s.overlay)
+            self._snaps[key] = (snap, Index(snap))
+        return self._snaps[key]
+
+    def create_session(self, persona: str | None = None, task_id: str | None = None, fault: str | None = None,
+                       overlay: dict | None = None) -> Session:
+        snapshot_id = "cp2566-v0"
+        if task_id:
+            task = load_tasks()[task_id]
+            persona, snapshot_id = task["persona"], task["snapshot_id"]
+            inject = task.get("inject") or {}
+            fault, overlay = inject.get("fault", fault), inject.get("snapshot_overlay", overlay)
+        if fault not in (None, "planner_timeout", "model_unavailable"):
+            raise ValueError(f"unknown fault {fault!r}")
+        student: StudentState = load_persona(persona)
+        s = Session(session_id=new_id(), created_at=time.time(), persona=persona, task_id=task_id, fault=fault,
+                    overlay=overlay, snapshot_id=snapshot_id, snapshot_hash="", student=student)
+        snap, _ = self.snap(s)
+        s.snapshot_hash = snap.content_hash
+        s.state = "VERIFY_INPUT"
+        s.run_record = {**self.static, **llm_mod.model_info(getattr(self.llm, "model", llm_mod.MODEL)),
+                        "llm_options": llm_mod.OPTIONS, "budget": BUDGET, "session_id": s.session_id,
+                        "task_id": task_id, "persona": persona, "fault": fault, "overlay": bool(overlay),
+                        "snapshot_id": snapshot_id, "snapshot_hash": snap.content_hash, "started_at": _now()}
+        self.sessions[s.session_id] = s
+        self.locks[s.session_id] = threading.Lock()
+        self.store.trace(s.session_id, "session_created", run_record=s.run_record)
+        self.store.save(s)
+        return s
+
+    def get(self, session_id: str) -> Session:
+        if session_id not in self.sessions:
+            self.sessions[session_id] = self.store.load(session_id)
+            self.locks[session_id] = threading.Lock()
+        return self.sessions[session_id]
+
+    def lock(self, session_id: str) -> threading.Lock:
+        self.get(session_id)
+        return self.locks[session_id]
+
+    def _save(self, s: Session):
+        self.store.save(s)
+
+    def _end(self, s: Session, outcome: str, ctx: Ctx | None = None, reason: str | None = None):
+        s.outcome = outcome
+        s.outcomes.append(outcome)
+        s.state = outcome
+        if ctx:
+            ctx.end = outcome
+            ctx.rec.outcome, ctx.rec.reason = outcome, reason
+        self.store.trace(s.session_id, "outcome", outcome=outcome, reason=reason,
+                         record_version=s.student.record_version, goal_version=s.goal.goal_version if s.goal else None)
+
+    # ------------------------------------------------------------ entry points (callers hold the session lock)
+    def message(self, session_id: str, msg: str) -> Session:
+        s = self.get(session_id)
+        msg = msg.strip()[:2000]
+        s.lang = lang_of(msg)
+        s.add("student", "text", msg)
+        self.store.trace(s.session_id, "student_message", text=msg)
+        if not s.student.confirmed:
+            s.queued = msg
+            if s.student.unresolved:
+                s.add("system", "need_info", text("need_info_record", s.lang, items=self._unresolved_text(s)))
+                self._end(s, "NEED_INFO", reason="record has unresolved identity fields")
+            else:
+                s.add("system", "text", text("confirm_records", s.lang))
+                self._end(s, "WAIT_USER", reason="records not confirmed")
+            self._save(s)
+            return s
+        self._run_agent(s, msg)
+        return s
+
+    def record(self, session_id: str, resolve: list[dict], confirm: bool) -> Session:
+        s = self.get(session_id)
+        snap, _ = self.snap(s)
+        st = s.student
+        if st.confirmed:
+            raise ValueError("records are already confirmed")
+        changed = []
+        for r in resolve:
+            idx, field, value = r.get("record_index"), r.get("field"), str(r.get("value", "")).strip()
+            u = next((u for u in st.unresolved if u.record_index == idx and u.field == field), None)
+            if u is None:
+                raise ValueError(f"record {idx} has no unresolved field {field!r}")
+            if field == "grade" and value not in snap.data["grades"]:
+                raise ValueError(f"{value!r} is not a grade in the snapshot")
+            if field == "course_id" and value not in snap.courses:
+                raise ValueError(f"{value!r} is not a course ID in the snapshot")
+            st.records[idx] = st.records[idx].model_copy(update={field: value})
+            st.unresolved = [x for x in st.unresolved if x is not u]
+            changed.append({"record_index": idx, "field": field, "value": value})
+        if changed:
+            st.record_version += 1
+            self.store.trace(s.session_id, "record_resolved", changes=changed, record_version=st.record_version)
+        if confirm:
+            if st.unresolved:
+                raise ValueError("some record fields are still unresolved")
+            st.confirmed = True
+            s.state = "CLARIFY"
+            s.add("system", "event", text("record_confirmed", s.lang, v=st.record_version))
+            self.store.trace(s.session_id, "record_confirmed", record_version=st.record_version)
+            if s.queued:
+                queued, s.queued = s.queued, None
+                self._run_agent(s, queued)
+                return s
+        self._save(s)
+        return s
+
+    def goal_decision(self, session_id: str, card_id: str, approve: bool) -> Session:
+        s = self.get(session_id)
+        card = self._card(s, card_id, "goal")
+        prev = s.goal
+        if approve:
+            new = GoalConstraints(**card.data["goal"])
+            self._apply_goal(s, new, card.card_id, card.data["changes"])
+            card.status = "approved"
+            s.add("system", "event", text("goal_approved", s.lang, v=s.goal.goal_version))
+            event = (f"[UI event] The student approved the goal card. Goal v{s.goal.goal_version} is now confirmed: "
+                     f"{self._goal_summary(s, s.goal)}. Continue with the student's request.")
+        else:
+            card.status = "declined"
+            s.consent_events.append({"card_id": card_id, "approved": False, "at": _now(),
+                                     "goal_version": prev.goal_version if prev else None})
+            s.add("system", "event", text("goal_declined", s.lang))
+            event = ("[UI event] The student declined the goal card; the goal is unchanged "
+                     f"({self._goal_summary(s, prev) if prev else 'no confirmed goal'}). Ask what they want instead, "
+                     "or continue with the current goal.")
+        self.store.trace(s.session_id, "goal_decision", card_id=card_id, approve=approve,
+                         goal_version=s.goal.goal_version if s.goal else None)
+        self._run_agent(s, event)
+        return s
+
+    def blocker_decision(self, session_id: str, card_id: str, choose: str | None = None, decline: bool = False) -> Session:
+        s = self.get(session_id)
+        card = self._card(s, card_id, "blocker")
+        if decline or not choose:
+            card.status = "declined"
+            s.consent_events.append({"card_id": card_id, "approved": False, "at": _now(),
+                                     "goal_version": s.goal.goal_version})
+            s.add("system", "event", text("blocker_declined", s.lang, v=s.goal.goal_version))
+            self.store.trace(s.session_id, "blocker_decision", card_id=card_id, declined=True)
+            self._save(s)
+            return s
+        alt = next((a for a in card.data["alternatives"] if a["kind"] == choose), None)
+        if alt is None:
+            raise ValueError(f"alternative {choose!r} is not offered by this blocker")
+        update, change = {}, []
+        if alt["kind"] == "raise_caps":
+            update["caps"] = {**s.goal.caps, **alt["caps"]}
+            change.append({"field": "caps", "from": s.goal.caps, "to": update["caps"]})
+        elif alt["kind"] == "allow_summer":
+            update["allow_summer"] = True
+            change.append({"field": "allow_summer", "from": False, "to": True})
+        elif alt["kind"] == "extend_horizon":
+            update["horizon_end"] = alt["horizon_end"]
+            change.append({"field": "horizon_end", "from": s.goal.horizon_end, "to": alt["horizon_end"]})
+        self._apply_goal(s, s.goal.model_copy(update=update), card_id, change)
+        card.status = "approved"
+        label = alt["label_th"] if s.lang == "th" else alt["label_en"]
+        s.add("system", "event", text("alt_approved", s.lang, alt=label, v=s.goal.goal_version))
+        self.store.trace(s.session_id, "blocker_decision", card_id=card_id, choose=choose,
+                         goal_version=s.goal.goal_version)
+        self._run_agent(s, f"[UI event] The student approved the alternative '{alt['label_en']}'. Goal "
+                           f"v{s.goal.goal_version}: {self._goal_summary(s, s.goal)}. Run solve_plan again and submit "
+                           "the plan.")
+        return s
+
+    def _card(self, s: Session, card_id: str, kind: str) -> Card:
+        card = next((c for c in s.cards if c.card_id == card_id), None)
+        if card is None or card.kind != kind:
+            raise ValueError(f"no {kind} card {card_id}")
+        if card.status != "pending":
+            raise ValueError(f"card {card_id} is already {card.status}")
+        return card
+
+    def _apply_goal(self, s: Session, new: GoalConstraints, consent_id: str, changes: list):
+        """The only place where the goal changes: after an explicit approval in the UI (invariant 3)."""
+        prev = s.goal
+        version = prev.goal_version + 1 if prev else 1
+        ref = ConsentRef(consent_id=consent_id, change={"changes": changes, "initial": prev is None}, approved=True,
+                         at=_now())
+        s.goal = new.model_copy(update={"goal_version": version, "confirmed": True, "preferred_course_ids": [],
+                                        "consent_refs": (prev.consent_refs if prev else []) + [ref]})
+        s.goal_history.append(s.goal)
+        s.consent_events.append({"card_id": consent_id, "approved": True, "at": ref.at, "goal_version": version,
+                                 "changes": changes})
+        self.store.trace(s.session_id, "goal_changed", goal=s.goal.model_dump(), consent=ref.model_dump())
+
+    # ------------------------------------------------------------ the agent loop
+    def _system(self, s: Session) -> str:
+        st = s.student
+        pending = s.pending("goal")
+        goal_status = (f"v{s.goal.goal_version} confirmed: {self._goal_summary(s, s.goal)}" if s.goal
+                       else "none confirmed yet")
+        if pending:
+            goal_status += "; a goal card is waiting for the student's approval"
+        return SYSTEM.format(snapshot_id=s.snapshot_id, entry_year=st.entry_year, next_term=st.next_term,
+                             end_y4=T.end_of_year4(st.entry_year),
+                             record_status=self._record_summary(s), goal_status=goal_status,
+                             language="Thai" if s.lang == "th" else "English")
+
+    def _record_summary(self, s: Session) -> str:
+        snap, _ = self.snap(s)
+        a = audit(snap, s.student, s.goal)
+        out = (f"confirmed version {s.student.record_version} (already bound; never ask the student for it); "
+               f"{a['earned_credits']} of {snap.total_credits} credits earned")
+        if a["must_retake"]:
+            out += "; must retake " + ", ".join(f"{c} {snap.courses[c]['name_en']}" for c in a["must_retake"]) +                    " (the planner schedules retakes)"
+        return out
+
+    def _progress(self, s: Session, step: str):
+        s.progress.append({"step": step, "at": time.time()})
+
+    def _run_agent(self, s: Session, content: str):
+        s.llm_messages.append({"role": "user", "content": content})
+        rec = TurnRecord(turn=len(s.turns) + 1, trigger=content[:300], started=time.time())
+        s.turns.append(rec)
+        s.progress = []
+        s.state = "ACT"
+        ctx = Ctx(rec)
+        llm = llm_mod.FaultyLLM() if s.fault == "model_unavailable" else self.llm
+        nudged = False
+        try:
+            while ctx.end is None:
+                if ctx.remaining() <= 0:
+                    raise Stop("reason_budget", what="120 s")
+                if rec.tool_calls >= BUDGET["tool_calls"]:
+                    raise Stop("reason_budget", what=f"{BUDGET['tool_calls']} tool calls")
+                self._progress(s, "think")
+                t0 = time.monotonic()
+                try:
+                    msg, stats = llm.chat([{"role": "system", "content": self._system(s)}] + s.llm_messages,
+                                          self.tool_schemas, ctx.remaining())
+                except llm_mod.ModelUnavailable as e:
+                    raise Stop("reason_model", detail=str(e)) from e
+                rec.llm_calls += 1
+                rec.llm_s = round(rec.llm_s + time.monotonic() - t0, 3)
+                content_out = THINK_RE.sub("", msg.get("content") or "").strip()
+                calls = msg.get("tool_calls") or []
+                self.store.trace(s.session_id, "llm", turn=rec.turn, content=content_out, tool_calls=calls, stats=stats)
+                s.llm_messages.append({"role": "assistant", "content": content_out,
+                                       **({"tool_calls": calls} if calls else {})})
+                if not calls:
+                    calls = self._calls_in_text(content_out)
+                if not calls:
+                    if not nudged and ctx.remaining() > 5:
+                        nudged = True
+                        s.llm_messages.append({"role": "user", "content": "[runtime] Answer by calling a tool "
+                                               "(reply, ask_user, propose_goal, solve_plan or submit_final)."})
+                        continue
+                    self._finish_text(s, ctx, "info", content_out or "-", [])
+                    break
+                for call in calls:
+                    fn = call.get("function") or {}
+                    name, raw = fn.get("name"), fn.get("arguments")
+                    if isinstance(raw, str):
+                        try:
+                            raw = json.loads(raw)
+                        except json.JSONDecodeError:
+                            pass
+                    rec.tool_calls += 1
+                    rec.tools.append(str(name))
+                    if rec.tool_calls > BUDGET["tool_calls"]:
+                        raise Stop("reason_budget", what=f"{BUDGET['tool_calls']} tool calls")
+                    self._progress(s, str(name))
+                    t1 = time.monotonic()
+                    args, err = parse(name, raw)
+                    obs = {"status": "ERROR", "error": err} if err else getattr(self, f"_t_{name}")(s, ctx, args)
+                    rec.tool_s = round(rec.tool_s + time.monotonic() - t1, 3)
+                    self.store.trace(s.session_id, "tool", turn=rec.turn, name=name, args=raw, observation=obs,
+                                     wall_s=round(time.monotonic() - t1, 3))
+                    s.llm_messages.append({"role": "tool", "tool_name": str(name),
+                                           "content": json.dumps(obs, ensure_ascii=False)})
+                    if ctx.end is not None:
+                        break
+        except Stop as e:
+            reason = text(e.key, s.lang, **{k: v for k, v in e.kw.items() if k != "detail"})
+            s.add("system", "stop", text("stop", s.lang, reason=reason), detail=e.kw.get("detail"))
+            self._end(s, "STOP_UNVERIFIED", ctx, reason=f"{e.key}: {e.kw}")
+        finally:
+            rec.ended = time.time()
+            s.progress = []
+            self.store.trace(s.session_id, "turn", **rec.model_dump())
+            self._save(s)
+
+    @staticmethod
+    def _calls_in_text(content: str) -> list[dict]:
+        """Small models sometimes write a tool call as JSON text; accept it only when it parses as one."""
+        try:
+            obj = json.loads(content.strip().removeprefix("```json").removesuffix("```").strip())
+        except (json.JSONDecodeError, AttributeError):
+            return []
+        if not isinstance(obj, dict):
+            return []
+        if isinstance(obj.get("name"), str) and isinstance(obj.get("arguments"), dict):
+            return [{"function": {"name": obj["name"], "arguments": obj["arguments"]}}]
+        if obj.get("kind") in ("info", "decline") and isinstance(obj.get("message"), str):
+            return [{"function": {"name": "reply", "arguments": obj}}]
+        return []
+
+    # ------------------------------------------------------------ grounding
+    def _allowed_ids(self, s: Session, plan_ids: set[str] | None = None) -> set[str]:
+        snap, index = self.snap(s)
+        ids = {r.course_id for r in s.student.records} | (plan_ids or set())
+        for p in index.docs:
+            if p.source_id in s.retrieved:
+                ids |= {p.course_id} if p.course_id else set()
+                ids |= set(ID_RE.findall(p.text))
+        if plan_ids is None:
+            ids |= set(snap.courses)
+        return ids
+
+    def _ungrounded(self, s: Session, msg: str, plan_ids: set[str] | None = None) -> list[str]:
+        allowed = self._allowed_ids(s, plan_ids)
+        return sorted({i for i in ID_RE.findall(msg) if i not in allowed})
+
+    def _finish_text(self, s: Session, ctx: Ctx, kind: str, msg: str, citations: list[str]):
+        s.add("agent", "decline" if kind == "decline" else "text", msg, citations=citations)
+        self._end(s, "NEED_INFO" if ctx.need_info else "WAIT_USER", ctx, reason=f"reply {kind}")
+
+    # ------------------------------------------------------------ tools
+    def _t_audit(self, s, ctx, args):
+        snap, _ = self.snap(s)
+        return audit(snap, s.student, s.goal)
+
+    def _t_retrieve_courses(self, s, ctx, args):
+        _, index = self.snap(s)
+        results = retrieve(index, args.query)
+        for r in results:
+            if r["source_id"] not in s.retrieved:
+                s.retrieved.append(r["source_id"])
+        keep = ("source_id", "course_id", "title", "credits", "status", "snippet")
+        out = []
+        for r in results:
+            row = {k: r[k] for k in keep if r.get(k) not in (None, "", [])}
+            if r.get("categories"):
+                row["may_count_toward_one_of"] = r["categories"]
+            out.append(row)
+        return {"results": out, "note": "a course counts toward exactly one category"}
+
+    def _t_propose_goal(self, s, ctx, args: ProposeGoalArgs):
+        snap, _ = self.snap(s)
+        st = s.student
+        base = s.goal or GoalConstraints(horizon_end=T.end_of_year4(st.entry_year))
+        update = args.model_dump(exclude_none=True)
+        errors, missing = [], []
+        reg_max, summer_max = snap.regulation("max_credits_regular"), snap.regulation("max_credits_summer")
+        if update.get("default_cap") == reg_max and base.default_cap is None:
+            del update["default_cap"]          # the regulation maximum is the default, not a change
+        if "horizon_end" in update:
+            h = update["horizon_end"]
+            try:
+                if T.is_summer(h) or T.key(h) < T.key(st.next_term) or T.study_year(h, st.entry_year) > 8:
+                    errors.append(f"horizon_end {h} must be a regular term from {st.next_term} on")
+            except ValueError as e:
+                errors.append(str(e))
+        # Caps above the regulation are never applied (R4): they are dropped and shown on the card, whatever the
+        # source of the number (a student's wish or an injected "approval").
+        ignored = []
+        if update.get("default_cap", 0) > reg_max:
+            ignored.append({"field": "default_cap", "value": update.pop("default_cap"), "max": reg_max})
+        if "default_cap" in update and update["default_cap"] < 1:
+            errors.append("default_cap must be at least 1")
+        caps = {}
+        for term, cap in (update.pop("caps", None) or {}).items():
+            try:
+                top = summer_max if T.is_summer(term) else reg_max
+            except ValueError as e:
+                errors.append(str(e))
+                continue
+            if cap > top:
+                ignored.append({"field": f"caps[{term}]", "value": cap, "max": top})
+            elif cap < 1:
+                errors.append(f"cap for {term} must be at least 1")
+            else:
+                caps[term] = cap
+        if caps:
+            update["caps"] = caps
+        done = {r.course_id for r in st.records if snap.earns_credit(r.grade)}
+        # Invariant 4: a course ID enters the goal only if the student typed it or retrieval returned it.
+        grounded = set(ID_RE.findall(" ".join(i.text for i in s.items if i.role == "student"))) | \
+            {sid.split(":", 1)[1] for sid in s.retrieved if sid.startswith("course:")}
+        for field in ("must_take", "avoid"):
+            for cid in update.get(field, []):
+                if cid not in snap.courses:
+                    missing.append(f"{field}: {cid!r} is not a course code in snapshot {snap.snapshot_id}")
+                elif cid not in grounded:
+                    errors.append(f"{cid} was neither typed by the student nor returned by retrieve_courses; search "
+                                  "for the course by name first and never guess a course ID")
+                elif field == "must_take" and cid in done:
+                    errors.append(f"{cid} is already passed")
+                elif field == "avoid" and snap.courses[cid]["kind"] == "required":
+                    errors.append(f"{cid} is a required course and cannot be avoided")
+        if missing:
+            ctx.need_info = True
+            return {"status": "NEED_INFO", "missing": missing,
+                    "hint": "do not guess a course ID; ask the student with ask_user kind need_info"}
+        if errors:
+            return {"status": "ERROR", "errors": errors}
+        new = base.model_copy(update=update)
+        changes = [{"field": f, "from": getattr(base, f), "to": getattr(new, f)}
+                   for f in GoalConstraints.HARD_FIELDS if getattr(base, f) != getattr(new, f)]
+        note = (f"not applied: caps above the regulation maximum need the dean's approval and are outside "
+                f"GradPath {ignored}") if ignored else None
+        if s.goal is not None and not changes:
+            s.goal = new
+            return {"status": "APPLIED", "goal_version": s.goal.goal_version, "note": note or "soft fields only"}
+        s.supersede("goal")
+        card = Card(card_id="G-" + uuid.uuid4().hex[:6], kind="goal",
+                    data={"goal": new.model_dump(exclude={"consent_refs", "goal_version", "confirmed"}),
+                          "initial": s.goal is None, "changes": changes, "ignored": ignored,
+                          "from_version": s.goal.goal_version if s.goal else None,
+                          "course_names": {c: snap.courses[c]["name_en"] for c in new.must_take + new.avoid}})
+        s.cards.append(card)
+        s.add("agent", "goal_card", "", card_id=card.card_id)
+        self._end(s, "WAIT_USER", ctx, reason="goal card")
+        return {"status": "WAITING_FOR_STUDENT", "card_id": card.card_id, **({"note": note} if note else {})}
+
+    def _t_ask_user(self, s, ctx, args):
+        bad = self._ungrounded(s, args.question)
+        if bad:
+            return {"status": "ERROR", "error": f"the question mentions unknown course IDs {bad}"}
+        s.asked.append({"turn": ctx.rec.turn, "kind": args.kind, "fields": list(args.fields)})
+        s.add("agent", "question", args.question, fields=list(args.fields), ask_kind=args.kind)
+        ctx.need_info = ctx.need_info or args.kind == "need_info"
+        self._end(s, "NEED_INFO" if ctx.need_info else "WAIT_USER", ctx, reason=f"ask_user {args.kind}")
+        return {"status": "ASKED"}
+
+    def _t_reply(self, s, ctx, args):
+        bad = self._ungrounded(s, args.message)
+        unknown_cites = [c for c in args.citations if c not in s.retrieved]
+        if bad or unknown_cites:
+            return {"status": "ERROR", "error": f"unknown course IDs {bad}; citations not retrieved in this session "
+                                                f"{unknown_cites}"}
+        self._finish_text(s, ctx, args.kind, args.message, args.citations)
+        return {"status": "SENT"}
+
+    def _t_solve_plan(self, s, ctx, args):
+        snap, _ = self.snap(s)
+        if s.goal is None:
+            return {"status": "ERROR", "error": "no confirmed goal; call propose_goal with the student's goal first"}
+        unknown = [c for c in args.preferred_course_ids if c not in snap.courses]
+        if unknown:
+            return {"status": "ERROR", "error": f"preferred course IDs not in the snapshot: {unknown}"}
+        if s.fault == "planner_timeout":
+            self.store.trace(s.session_id, "fault", fault="planner_timeout")
+            raise Stop("reason_solver", detail="fault injected: planner_timeout")
+        goal = s.goal.model_copy(update={"preferred_course_ids": list(dict.fromkeys(args.preferred_course_ids))})
+        r = planner.solve(snap, s.student, goal, self.solver_time_limit_s)
+        if r["status"] == "UNKNOWN":
+            raise Stop("reason_solver", detail=r.get("reason"))
+        if r["status"] == "NEED_INFO":
+            ctx.need_info = True
+            return {"status": "NEED_INFO", "missing": r["missing"]}
+        if r["status"] == "INFEASIBLE":
+            d = planner.diagnose(snap, s.student, s.goal, self.solver_time_limit_s)
+            bid = "B-" + uuid.uuid4().hex[:6]
+            alts = [{**a, "label_th": ALT_LABELS[a["kind"]][0], "label_en": ALT_LABELS[a["kind"]][1]}
+                    for a in d["alternatives"]]
+            s.blockers[bid] = {"blocker_id": bid, "alternatives": alts, "reason": r.get("reason"),
+                               "modeled_constraints": d["modeled_constraints"], "goal_version": s.goal.goal_version,
+                               "record_version": s.student.record_version, "snapshot_hash": snap.content_hash,
+                               "goal_summary": self._goal_summary(s, s.goal),
+                               "goal": s.goal.model_dump(exclude={"consent_refs", "preferred_course_ids"})}
+            return {"status": "INFEASIBLE", "blocker_id": bid, "reason": r.get("reason") or "no plan meets every "
+                    "hard rule under the current goal", "proven_alternatives": d["alternatives"]}
+        cand = r["candidate"]
+        s.candidates[cand.plan_id] = cand
+        return {"status": "PLAN", **self._plan_summary(s, cand, args.preferred_course_ids)}
+
+    def _t_validate_plan(self, s, ctx, args):
+        cand = s.candidates.get(args.plan_id)
+        if cand is None:
+            return {"status": "ERROR", "error": f"no stored plan {args.plan_id}"}
+        snap, _ = self.snap(s)
+        v = validator.validate(snap, s.student, s.goal, cand)
+        return {"valid": v.valid, "errors": v.errors[:6], "warnings": v.warnings[:4], "total_credits": v.total_credits}
+
+    def _t_submit_final(self, s, ctx, args):
+        snap, _ = self.snap(s)
+        if args.status == "blocker":
+            b = s.blockers.get(args.ref)
+            errors = []
+            if b is None:
+                errors.append(f"no stored blocker {args.ref}")
+            elif (b["goal_version"], b["record_version"], b["snapshot_hash"]) != \
+                    (s.goal.goal_version, s.student.record_version, snap.content_hash):
+                errors.append("the blocker was found under an older goal or record version; run solve_plan again")
+            errors += [f"explanation mentions unknown course IDs {bad}" for bad in [self._ungrounded(s, args.explanation)] if bad]
+            if errors:
+                return self._reject(s, ctx, errors)
+            card = Card(card_id="X-" + uuid.uuid4().hex[:6], kind="blocker",
+                        data={**b, "explanation": args.explanation})
+            s.supersede("blocker")
+            s.cards.append(card)
+            s.add("agent", "blocker_card", args.explanation, card_id=card.card_id)
+            self.store.trace(s.session_id, "final_gate", kind="blocker", ref=args.ref, passed=True)
+            self._end(s, "EVIDENCED_BLOCKER", ctx, reason="witnessed infeasibility")
+            return {"status": "SHOWN"}
+        cand = s.candidates.get(args.ref)
+        if cand is None:
+            return self._reject(s, ctx, [f"no stored plan {args.ref}; use the plan_id returned by solve_plan"])
+        v = validator.validate(snap, s.student, s.goal, cand)
+        plan_ids = {i.course_id for t in cand.terms for i in t.items if i.course_id}
+        errors = list(v.errors)
+        bad = self._ungrounded(s, args.explanation, plan_ids)
+        if bad:
+            errors.append(f"explanation mentions course IDs that are not in the plan or retrieved results: {bad}")
+        self.store.trace(s.session_id, "final_gate", kind="plan", plan_id=cand.plan_id, plan_hash=cand.plan_hash,
+                         valid=v.valid, errors=errors, record_version=s.student.record_version,
+                         goal_version=s.goal.goal_version, snapshot_hash=snap.content_hash)
+        if errors:
+            return self._reject(s, ctx, errors)
+        s.final_plan_id = cand.plan_id
+        s.add("agent", "plan", args.explanation, plan=self.plan_view(s, cand, v))
+        self._end(s, "DONE", ctx, reason="final gate passed")
+        return {"status": "ACCEPTED"}
+
+    def _reject(self, s, ctx, errors):
+        ctx.rec.revisions += 1
+        if ctx.rec.revisions > BUDGET["revisions"]:
+            raise Stop("reason_gate", detail="; ".join(errors)[:300])
+        return {"status": "REJECTED", "errors": errors[:6], "revisions_left": BUDGET["revisions"] - ctx.rec.revisions}
+
+    # ------------------------------------------------------------ views
+    def _goal_summary(self, s: Session, g: GoalConstraints | None) -> str:
+        if g is None:
+            return "none"
+        parts = [f"horizon {g.horizon_end}", f"cap {g.default_cap or 22} per regular term"]
+        if g.caps:
+            parts.append("term caps " + ", ".join(f"{t}: {c}" for t, c in sorted(g.caps.items())))
+        parts.append("summer allowed" if g.allow_summer else "no summer")
+        if g.must_take:
+            parts.append("must take " + ", ".join(g.must_take))
+        if g.avoid:
+            parts.append("avoid " + ", ".join(g.avoid))
+        if g.interests:
+            parts.append("interests " + ", ".join(g.interests))
+        return "; ".join(parts)
+
+    def _plan_summary(self, s: Session, cand, preferred: list[str]) -> dict:
+        terms, planned = {}, set()
+        for t in cand.terms:
+            if not t.items:
+                continue
+            names = [i.course_id if i.course_id else f"slot {i.slot}" for i in t.items]
+            planned |= {i.course_id for i in t.items if i.course_id}
+            terms[t.term] = f"{t.credits}/{t.cap} credits: " + ", ".join(names)
+        return {"plan_id": cand.plan_id, "terms": terms, "preferred_in_plan": [c for c in preferred if c in planned],
+                "solver": cand.solver.get("status"),
+                "next": "call validate_plan, then submit_final with this plan_id"}
+
+    def plan_view(self, s: Session, cand, v) -> dict:
+        snap, _ = self.snap(s)
+        terms = []
+        for t in cand.terms:
+            items = []
+            for i in t.items:
+                cat = snap.categories.get(i.category, {})
+                if i.course_id:
+                    c = snap.courses[i.course_id]
+                    items.append({"course_id": i.course_id, "name_th": c["name_th"], "name_en": c["name_en"],
+                                  "credits": i.credits, "category": i.category, "category_th": cat.get("name_th"),
+                                  "flags": i.flags, "kind": c["kind"]})
+                else:
+                    items.append({"slot": i.slot, "credits": i.credits, "category": i.category,
+                                  "category_th": cat.get("name_th"), "category_en": cat.get("name_en"), "flags": []})
+            terms.append({"term": t.term, "kind": t.kind, "cap": t.cap, "credits": t.credits, "items": items})
+        return {"plan_id": cand.plan_id, "plan_hash": cand.plan_hash, "goal_version": cand.goal_version,
+                "record_version": cand.record_version, "snapshot_id": cand.snapshot_id, "valid": v.valid,
+                "warnings": v.warnings, "total_credits": v.total_credits, "category_totals": v.category_totals,
+                "terms": terms}
+
+    def _unresolved_text(self, s: Session) -> str:
+        names = {"th": {"grade": "เกรด", "course_id": "รหัสวิชา", "credits": "หน่วยกิต", "category": "หมวด",
+                        "term": "ภาคการศึกษา"},
+                 "en": {"grade": "grade", "course_id": "course code", "credits": "credits", "category": "category",
+                        "term": "term"}}[s.lang]
+        out = []
+        for u in s.student.unresolved:
+            r = s.student.records[u.record_index]
+            what = r.evidence.text if r.evidence and r.evidence.text else r.course_id
+            hint = f" ({'อาจเป็น' if s.lang == 'th' else 'possibly'} {' / '.join(u.candidates)})" if u.candidates else ""
+            out.append(f"{names[u.field]} {'ของ' if s.lang == 'th' else 'of'} “{what}” {r.term}{hint}")
+        return "; ".join(out)
+
+    def view(self, s: Session, operator: bool = False) -> dict:
+        snap, _ = self.snap(s)
+        st = s.student
+        unresolved = {(u.record_index, u.field): u for u in st.unresolved}
+        records = []
+        for n, r in enumerate(st.records):
+            c = snap.courses.get(r.course_id)
+            flags = [{"field": f, "reason": u.reason, "candidates": u.candidates}
+                     for (i, f), u in unresolved.items() if i == n]
+            records.append({"index": n, "course_id": r.course_id, "term": r.term, "grade": r.grade,
+                            "name_th": c["name_th"] if c else r.title, "name_en": c["name_en"] if c else r.title,
+                            "credits": c["credits"] if c else r.credits, "evidence": r.evidence.text if r.evidence else None,
+                            "unresolved": flags})
+        summary = audit(snap, st, s.goal) if not st.unresolved else None
+        if summary:
+            summary["category_names"] = {k: snap.categories[k]["name_th"] for k in summary["category_deficits"]}
+        out = {
+            "session_id": s.session_id, "persona": s.persona, "persona_label": PERSONA_LABELS.get(s.persona, s.persona),
+            "task_id": s.task_id, "state": s.state, "outcome": s.outcome, "busy": s.busy, "lang": s.lang,
+            "progress": s.progress, "turn_started": s.turns[-1].started if s.busy and s.turns else None,
+            "student": {"student_ref": st.student_ref, "entry_year": st.entry_year, "next_term": st.next_term,
+                        "end_of_year4": T.end_of_year4(st.entry_year), "record_version": st.record_version,
+                        "confirmed": st.confirmed, "unresolved": len(st.unresolved)},
+            "records": records, "audit": summary,
+            "goal": ({**s.goal.model_dump(exclude={"consent_refs", "preferred_course_ids"}),
+                      "summary": self._goal_summary(s, s.goal)} if s.goal else None),
+            "cards": [c.model_dump() for c in s.cards], "items": [i.model_dump() for i in s.items],
+            "regulation": {"max_regular": snap.regulation("max_credits_regular"),
+                           "max_summer": snap.regulation("max_credits_summer")},
+        }
+        if operator:
+            out["operator"] = {"fault": s.fault, "overlay": bool(s.overlay), "run_record": s.run_record,
+                               "turns": [t.model_dump() for t in s.turns],
+                               "trace": str(self.store.trace_path(s.session_id))}
+        return out

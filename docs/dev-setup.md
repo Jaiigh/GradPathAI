@@ -23,6 +23,37 @@ corepack pnpm build
   `py -3 -m venv .venv` and `.venv\Scripts\python.exe -m pip install -r requirements.txt`.
   Run the tests with `.venv\Scripts\python.exe -m pytest -q`.
 
+## GradPath server
+
+- Start: `.venv\Scripts\python.exe -m gradpath.api` (127.0.0.1:8000). It serves the built UI
+  from `dist/` (run `corepack pnpm build` first; restart the server after a rebuild) and warms
+  up the model and the planner at startup. `/api/health` reports the warm-up, model digest,
+  GPU, git commit and test-set hash.
+- UI development: also run `corepack pnpm dev`; `vite.config.js` proxies `/api` to the
+  server.
+- Operator view: `http://127.0.0.1:8000/?operator` lists the UAT tasks by round; starting a
+  task binds its persona, fault and snapshot overlay. The operator panel (bottom right) shows
+  the run record and turn timings and links to the tester view of the same session.
+- Sessions and traces go to `local/sessions/` and `local/traces/` (gitignored); runner results
+  go to `local/eval/`.
+
+## UAT machine
+
+The UAT runs on a laptop whose GPU was not known on 2 Nov 2026. On that laptop:
+
+1. Install Python 3.13, Node 20+ and Ollama, then clone the repository at the `uat-v1.1` tag.
+2. Run `powershell -ExecutionPolicy Bypass -File scripts\uat_setup.ps1` (venv, dependencies,
+   UI build, `ollama pull qwen3:8b`, tests, quick check).
+3. `.venv\Scripts\python.exe scripts\uat_check.py` runs the ten human-round tasks end to end
+   and fails if any task fails or a turn exceeds 120 s. Record the GPU, VRAM and turn times
+   from its output; they set the Q3 limits.
+4. Before each round: Ollama running, server started (model warm), `?operator` open, one
+   task run once. If `qwen3:8b` is too slow on the laptop GPU, fall back to running the
+   server on the development machine; decide before the feature freeze (Wed 4 Nov, 10:00).
+
+On the development machine (RTX 5060 Ti 16 GB) on 2 Nov 2026 the check passed 18/18, and a
+warm agent turn took 1.4-4.7 s.
+
 ## Ollama
 
 - Installed per user (`winget install Ollama.Ollama`) under

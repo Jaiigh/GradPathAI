@@ -4,55 +4,58 @@ GradPath is a study-plan agent being built for Computer Engineering students. Th
 system reads a transcript PDF, asks for missing goals, plans with a constraint solver, and
 checks every plan at a mandatory final gate before showing it. Everything runs locally.
 
-The repository currently has two separate parts:
+The repository has three parts:
 
-- `src/` - a React prototype of the student interface. It shows synthetic data in the credit
-  summary, does not parse or transmit the selected file, and is not connected to the agent yet.
-- `baseline/` - a Python baseline agent (Ollama tool calling + OR-Tools CP-SAT) that runs one
-  synthetic case end to end. Its results are the evidence for pitch v9 slides 11, 16 and 17.
+- `gradpath/` - the backend: the CP 2566 rule snapshot, a multi-term CP-SAT planner, an
+  independent validator, retrieval, the interactive agent runtime (state machine, goal and
+  consent cards, final gate, budget, traces) and a FastAPI app bound to 127.0.0.1.
+- `src/` - the React student interface (Thai), connected to the agent through the API.
+- `baseline/` - the frozen pitch v9 baseline agent. Its results are the evidence for pitch v9
+  slides 11, 16 and 17.
 
-Neither part is academic advice or a production transcript parser.
+GradPath is not academic advice. The UAT build uses synthetic student personas, not real
+transcripts.
 
 Project documentation (requirements, architecture, decisions, plan, evaluation) is indexed
 in `docs/README.md`.
 
 ## Status (2 November 2026)
 
-- Working on synthetic data: agent state machine, `audit`, keyword retrieval, CP-SAT planner,
-  mandatory final gate, tool allowlist. Results and caveats: `baseline/results/slide_ready.md`.
-- Not built yet: transcript PDF ingestion, a verified CP 2566 rule snapshot, interactive
-  CLARIFY/consent, the connection between the React UI and the agent, the 20-task evaluation
-  set, automated tests.
-- Scope change after the v9 presentation: plans must run to the end of Year 4 (up to 8
-  regular terms) instead of covering only the next two terms.
+- Working: the `cp2566-v0` snapshot built from public sources, planning every term to the end
+  of Year 4, record review with NEED_INFO, goal and consent cards, evidenced blockers with
+  solver-proven alternatives, fault injection for the UAT, traces and run records, and test
+  set v1.1 (20 tasks) with an automatic runner.
+- Not built yet: transcript PDF ingestion, experiment arms A and B, embeddings.
 
-## Run the React prototype
+## Run GradPath
+
+Prepare the environments once (Python 3.13, Node 20+ with corepack, Ollama with `qwen3:8b`);
+`scripts\uat_setup.ps1` does the same on a fresh machine:
 
 ```powershell
-pnpm install
-pnpm dev
+py -3 -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+corepack pnpm install
+corepack pnpm build
+ollama pull qwen3:8b
 ```
 
-Then open the local URL printed by Vite (normally `http://localhost:5173`). If `pnpm` is not
-installed globally, `corepack pnpm install` and `corepack pnpm dev` use the version pinned in
-`package.json`.
-
-The equivalent commands also work if you prefer another package manager:
+Start the server. It serves the built UI at `http://127.0.0.1:8000` and warms up the model:
 
 ```powershell
-npm install
-npm run dev
+.venv\Scripts\python.exe -m gradpath.api
 ```
 
-```powershell
-yarn
-yarn dev
-```
+`http://127.0.0.1:8000/?operator` is the operator view, which starts a session from a
+test-set task. For UI development, also run `corepack pnpm dev`; Vite proxies `/api` to the
+server.
 
-## Build
+Tests, the test-set runner and the UAT machine check:
 
 ```powershell
-pnpm build
+.venv\Scripts\python.exe -m pytest -q
+.venv\Scripts\python.exe -m eval.run_tasks
+.venv\Scripts\python.exe scripts\uat_check.py
 ```
 
 ## Run the Python baseline

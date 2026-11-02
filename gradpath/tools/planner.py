@@ -148,7 +148,8 @@ def solve(snap: Snapshot, student: StudentState, goal: GoalConstraints, time_lim
     early = [v for (c, t), v in x.items() if snap.courses[c]["kind"] != "required" and T.key(t) < first_elective] + \
         [v for (k, t), v in s.items() if k in ELECTIVE_CATS and T.key(t) < first_elective]
     targeted = [v for (k, _), v in s.items() if k in TARGETED_SLOTS]
-    kept = [a[c, snap.courses[c]["categories"][0]] for c in done if (c, snap.courses[c]["categories"][0]) in a]
+    # Tie-break: completed and planned courses fill their most specific category before a slot does.
+    kept = [a[c, snap.courses[c]["categories"][0]] for c in list(done) + cand if (c, snap.courses[c]["categories"][0]) in a]
     m.Maximize(W_PREF * (zero + sum(counted_pref)) - W_PLAN * (zero + sum(plan_dev)) - W_BAL * peak - total
                - W_EARLY * (zero + sum(early)) - W_SLOT * (zero + sum(targeted)) + W_KEEP * (zero + sum(kept))
                - W_SLACK * (zero + sum(slack.values())))

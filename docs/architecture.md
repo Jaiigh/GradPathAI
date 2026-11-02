@@ -24,14 +24,14 @@ flowchart LR
   RT --> STORE[("Session store in local/")]
 ```
 
-| Component | Responsibility | Module (planned) |
+| Component | Responsibility | Module |
 |---|---|---|
-| React UI | record review, goal card, chat, plan view, consent and blocker cards | `src/` |
-| API | sessions, transcript upload and confirmation, messages, decisions; binds to 127.0.0.1 | `gradpath/api/` |
-| Agent runtime | state machine, per-turn budget, tool dispatch, final gate, traces, run record | `gradpath/runtime/` |
-| LLM client | Ollama chat with tools, `think: false`, per-call timeout equal to the remaining budget, model digest recorded | `gradpath/runtime/llm.py` |
+| React UI | record review with NEED_INFO pickers, goal and consent cards, chat, plan view, blocker and stop cards, progress; operator view (`?operator`) that starts a session from a test-set task | `src/` (built) |
+| API | sessions, messages, record, goal and blocker decisions; agent turns run in a background thread and the UI polls; serves `dist/`; binds to 127.0.0.1; transcript upload after UAT | `gradpath/api/app.py` (built) |
+| Agent runtime | state machine, per-turn budget, tool dispatch, final gate, fault injection, traces, run record | `gradpath/runtime/agent.py`, `tools.py`, `session.py`, `prompts.py` (built) |
+| LLM client | Ollama chat with tools, `think: false`, per-call timeout equal to the remaining budget, model digest recorded | `gradpath/runtime/llm.py` (built) |
 | Tools | audit, retrieval, planner and validator, all deterministic | `gradpath/tools/` |
-| Ingestion | PDF text extraction with coordinates, record normalizer, quality gate | `gradpath/ingest/` |
+| Ingestion | PDF text extraction with coordinates, record normalizer, quality gate | `gradpath/ingest/` (after UAT) |
 | Snapshot | load, hash and expose the rule snapshot with a status per item | `gradpath/snapshot.py` |
 
 ## State machine
@@ -76,16 +76,39 @@ Revises pitch v9 slide 8 according to D2 and D8.
 | Tool | Arguments | Output | Permission |
 |---|---|---|---|
 | `audit` | `{}` | credits per category, missing required courses, deficits, remaining terms | reads the bound StudentState and snapshot |
-| `retrieve_courses` | `{"query": str}` | passages with `source_id`, course ID, title, snippet, score | reads the text index |
-| `solve_plan` | `{"preferred_course_ids": [str], "avoid_course_ids": [str]}` | `PLAN` with `plan_id` and a summary; `INFEASIBLE` with `blocker_id`, conflicts and witnessed alternatives; or `UNKNOWN` | reads snapshot, state and goal; the runtime stores the candidate |
+| `retrieve_courses` | `{"query": str}` | passages with `source_id`, course ID, title, snippet, `may_count_toward_one_of` | reads the text index |
+| `solve_plan` | `{"preferred_course_ids": [str]}` (avoid is a hard goal field, set only through `propose_goal`) | `PLAN` with `plan_id` and a summary; `INFEASIBLE` with `blocker_id`, conflicts and witnessed alternatives; or `UNKNOWN` | reads snapshot, state and goal; the runtime stores the candidate |
 | `validate_plan` | `{"plan_id": str}` | ValidationResult (draft check) | pure check |
 | `propose_goal` | goal draft: horizon, caps, summer, must_take, avoid, interests | soft fields applied, or hard fields pending student approval | no write before approval |
-| `ask_user` | `{"kind": "clarify", "fields": [str], "question": str}` | ends the turn (WAIT_USER) | UI only |
+| `ask_user` | `{"kind": "clarify" or "need_info", "fields": [horizon, caps, allow_summer, must_take, avoid, interests, record], "question": str}` | ends the turn: WAIT_USER, or NEED_INFO for `need_info` or after a tool returned NEED_INFO in the turn | UI only |
 | `reply` | `{"kind": "info" or "decline", "message": str, "citations": [str]}` | ends the turn without a plan | UI only |
 | `submit_final` | `{"status": "plan" or "blocker", "ref": plan_id or blocker_id, "explanation": str}` | starts FINAL_GATE | runtime only |
 
 Unknown tools, extra arguments and wrong types are rejected and count toward the budget.
 The student, goal version and snapshot are bound outside model control.
+
+Retrieval (`gradpath/tools/retrieval.py`) is BM25 over course titles (English and Thai),
+course descriptions when a snapshot has them, categories, the unlisted course options whose
+codes are not published, and regulations. Thai text is indexed as character bigrams. Short
+topic queries ("AI", "systems") are expanded with a small topic table, and results below half
+of the best score are dropped, so a specific name such as "Software-Defined Systems I" returns
+only its unpublished-code passage.
+
+### Runtime guards
+
+These rules keep a small model inside the invariants. Each is enforced in code, not only in
+the prompt (`gradpath/runtime/agent.py`, decision D17):
+
+| Guard | Behaviour |
+|---|---|
+| Record gate | Until the student confirms the record, a message is queued and the runtime answers itself: NEED_INFO with the unresolved fields, or a request to confirm. Resolving a field creates `record_version` + 1; the queued message runs after confirmation. |
+| First goal | `solve_plan` needs a confirmed goal. The first `propose_goal` always becomes a goal card; approval creates goal v1. Later hard changes create a change card; approval increments `goal_version`. Soft fields (interests) apply directly. |
+| Course-ID grounding | A `must_take` or `avoid` ID must have been typed by the student or returned by `retrieve_courses`; an ID outside the snapshot is NEED_INFO. Texts from `ask_user`, `reply` and `submit_final` may mention only IDs from the plan, the record or retrieved passages; citations must be retrieved source IDs. |
+| Caps above the regulation | Never applied: the values are dropped from the proposal and listed on the goal card as not applied (dean's approval needed), whatever their source. |
+| Blocker alternatives | Only the solver-proven alternatives stored with the blocker can be chosen; choosing one is the approval of that hard change. Declining keeps the goal and the EVIDENCED_BLOCKER outcome. |
+| Faults and UNKNOWN | `planner_timeout`, solver `UNKNOWN`, `model_unavailable`, an exhausted budget or a third gate rejection end the turn in STOP_UNVERIFIED with a fixed message that does not claim impossibility. |
+| Plain text | A reply without a tool call is nudged once; JSON text that parses as a tool call is accepted; otherwise the text is kept as an info reply. |
+| Context | The system prompt carries the record summary (credits, required retakes), the goal state and the student's language, and is rebuilt for every call. UI decisions reach the model as `[UI event]` messages; consent is read only from the UI. |
 
 ## Planner (CP-SAT)
 

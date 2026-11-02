@@ -1,0 +1,1 @@
+run_id,round,participant_id,task_id,mode,assisted,build_id,model_digest,test_set_sha256,snapshot_hash,record_version,goal_version,final_state,plan_id,plan_hash,gate_valid,checks_failed,technical_result,q1_accepted,q1_reason,q4_completion,q5_clarity,q6_helpfulness,processing_s,wait_user_s,tool_calls,revisions,trace_path,notes

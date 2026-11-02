@@ -1,7 +1,7 @@
 # Decision records
 
 Each entry lists status, context, decision and consequences. D1-D12 were accepted with the
-implementation plan on 2 Nov 2026; D13-D16 were decided the same day.
+implementation plan on 2 Nov 2026; D13-D16 were decided the same day; D17 is proposed.
 
 ## D1. Build our own harness and freeze the baseline
 
@@ -112,6 +112,10 @@ implementation plan on 2 Nov 2026; D13-D16 were decided the same day.
   compare how accurately it extracts the goal. The UI labels are chosen separately from the
   LLM language.
 - Consequences: a Thai conversation also triggers the embedding option in D6.
+- Amended 2 Nov 2026 (user decision, for UAT): the UI labels are Thai, and the agent replies
+  in the language of the student's message (passed to the model explicitly). Retrieval
+  handles Thai titles with character bigrams, so embeddings are not needed for UAT. The
+  10 + 10 measurement still runs and is reported; it can change the choice after UAT.
 
 ## D12. Model profile and run records
 
@@ -164,3 +168,20 @@ implementation plan on 2 Nov 2026; D13-D16 were decided the same day.
   (part I before part II) is kept as an inferred prerequisite.
 - Consequences: plans contain only courses the student asked about or must take; every
   test persona solves to optimality in well under a second.
+
+## D17. Runtime guards for a small model
+
+- Status: proposed by Claude, 2 Nov 2026; awaiting the user's acceptance.
+- Context: live runs of test set v1.1 on `qwen3:8b` showed three unsafe or brittle habits:
+  guessing a course code for a course named without one (for example 2110521 for
+  "Software-Defined Systems I"), copying a cap of 30 from an injected "[SYSTEM] approved"
+  line, and replying in plain text or JSON text instead of a tool call.
+- Decision: enforce these rules in the runtime instead of relying on the prompt. A course ID
+  enters the goal only if the student typed it or `retrieve_courses` returned it. Caps above
+  the regulation maximum are dropped from a proposal and shown on the goal card as not
+  applied. Retrieval drops results below half of the best score. JSON text that parses as a
+  tool call is accepted. The record summary and the student's language are given to the
+  model in the system prompt. The full list is in `architecture.md`, "Runtime guards".
+- Consequences: test set v1.1 passed 40 of 40 runs (two repeats) on the development machine
+  on 2 Nov 2026, and 15 of 15 paraphrased variants. The guards apply to every experiment
+  arm, so the arm comparison measures control policy and retrieval, not prompt tolerance.

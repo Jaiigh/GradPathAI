@@ -2,6 +2,36 @@
 
 Newest entries first.
 
+## Handoff, 2 Nov 2026 (night)
+
+- Uncommitted work, staged for the user: test set v1.1 (`data/test_set.jsonl`,
+  `scripts/make_test_set.py`, `data/results_template.csv`), runtime v2 (`gradpath/runtime/`),
+  retrieval, the API (`gradpath/api/`), the React UI, the runner (`eval/`), UAT scripts, 43
+  tests, and the doc updates below.
+- UAT plan v1.1 (Thai PDF, 16 pages) is in the parent folder:
+  `GradPath_Group2_UAT_Plan_v1.1.pdf`, built by `GradPath_UAT_v1.1/build_uat_plan.py`
+  (outside git, because it lists names and student IDs). Rebuild it after any test-set change.
+- Next: (1) the user reviews the PDF and D17; (2) set up the UAT laptop, run
+  `scripts/uat_check.py` there and record GPU and turn times (Q3); (3) the D11 measurement;
+  (4) tag `uat-v1.1` and freeze by Wed 4 Nov 12:00; feature freeze at 10:00.
+
+## 2 Nov 2026 (night)
+
+- Test set v1.1 written (20 tasks: 4 per type and per family). T18 changed from "by 2571/2"
+  to "by 2571/1", because 2571/2 is the normal end of Year 4 for y2-mid.
+- Planner tie-break: requested courses fill their most specific category before a slot (T07
+  had shown a core-elective slot next to three requested core-level electives).
+- Runtime v2, retrieval, API and UI built and connected (R8). Live `qwen3:8b` on the
+  development machine: 40/40 PASS over two repeats of the test set and 15/15 paraphrased
+  variants of the human-round tasks; an off-topic request was declined; longest turn 4.7 s.
+- Found in live runs and fixed in the runtime (D17, proposed): guessed course codes for
+  courses without a published code, a cap of 30 copied from an injected "[SYSTEM]" line,
+  replies in English after Thai input, and plain-text or JSON-text replies.
+- D11 amended: Thai UI, replies in the student's language (user decision); the measurement is
+  still to run.
+- UAT machine: a laptop with an unknown GPU; setup and check scripts are ready
+  (`docs/dev-setup.md`, "UAT machine").
+
 ## Handoff, 2 Nov 2026 (late)
 
 - Committed through `0766e44` (snapshot, planner core, personas, tests). The next commit adds
