@@ -41,6 +41,12 @@ corepack pnpm build
 
 ## Pitfalls
 
+- Reading PDFs: `pdftoppm` (poppler) is not installed, so page rendering fails. Extract text
+  with PyMuPDF in a scratch environment (`pip install pymupdf`); it is not a project
+  dependency.
+- Shell heredocs that contain a single quote fail in this environment; write scripts to a
+  file instead.
+
 - `baseline/agent.py` appends to `baseline/results/baseline_results.csv` and writes a new
   trace on every run, including `--mock`. `baseline/` is frozen, so restore those files
   before committing.

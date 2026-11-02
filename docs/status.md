@@ -2,6 +2,18 @@
 
 Newest entries first.
 
+## Handoff, 2 Nov 2026 (late)
+
+- Committed through `0766e44` (snapshot, planner core, personas, tests). The next commit adds
+  the build scripts, the snapshot source rows and the UAT v1.1 design.
+- Next, in this recommended order (confirm with the user): (1) `data/test_set.jsonl` v1.1 and
+  the UAT plan v1.1 as a Thai PDF, from the design in `evaluation.md` and the team's v1.0
+  PDF; (2) runtime v2, API and React UI for the 4 Nov UAT; (3) language check (D11).
+- Source PDFs, outside the repo in the parent `Final_Project` folder: pitch v9, course
+  week-13 slides, team UAT plan v1.0 (`GradPath_Group2_UAT_Submission.pdf`).
+- Data rebuild: `scripts/build_snapshot_cp2566.py` and `scripts/make_personas.py` reproduce
+  the committed files byte for byte.
+
 ## 2 Nov 2026 (evening)
 
 - Built `data/snapshots/cp2566-v0.json` from public 2566 sources: 93 courses, study plan of

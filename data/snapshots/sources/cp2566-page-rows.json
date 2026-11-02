@@ -1,0 +1,794 @@
+[
+ {
+  "code": "2100111",
+  "name_th": "ท่องโลกวิศวกรรม",
+  "name_en": "Exploring Engineering World",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2100111 ท่องโลกวิศวกรรม (Exploring Engineering World) 3(3-0-9)"
+ },
+ {
+  "code": "2110221",
+  "name_th": "แก่นวิศวกรรมคอมพิวเตอร์",
+  "name_en": "Computer Engineering Essentials",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110221 แก่นวิศวกรรมคอมพิวเตอร์ (Computer Engineering Essentials) 3(3-0-9)"
+ },
+ {
+  "code": "5500111",
+  "name_th": "ภาษาอังกฤษเพื่อการเรียนรู้ในชีวิตจริง 1",
+  "name_en": "Experimential English I",
+  "credits": 3,
+  "credit_format": "3(2-2-5)",
+  "raw": "5500111 ภาษาอังกฤษเพื่อการเรียนรู้ในชีวิตจริง 1 (Experimential English I) 3(2-2-5)"
+ },
+ {
+  "code": "5500112",
+  "name_th": "ภาษาอังกฤษเพื่อการเรียนรู้ในชีวิตจริง 2",
+  "name_en": "Experimential English II",
+  "credits": 3,
+  "credit_format": "3(2-2-5)",
+  "raw": "5500112 ภาษาอังกฤษเพื่อการเรียนรู้ในชีวิตจริง 2 (Experimential English II) 3(2-2-5)"
+ },
+ {
+  "code": "5500208",
+  "name_th": "ทักษะการสื่อสารและการนำเสนอผลงาน",
+  "name_en": "Communication and Presentation Skills",
+  "credits": 3,
+  "credit_format": "3(2-2-5)",
+  "raw": "5500208 ทักษะการสื่อสารและการนำเสนอผลงาน (Communication and Presentation Skills) 3(2-2-5)"
+ },
+ {
+  "code": "5500308",
+  "name_th": "การเขียนภาษาอังกฤษเทคนิคสำหรับวิศวกรรมศาสตร์",
+  "name_en": "Technical Writing for Engineering",
+  "credits": 3,
+  "credit_format": "3(2-2-5)",
+  "raw": "5500308 การเขียนภาษาอังกฤษเทคนิคสำหรับวิศวกรรมศาสตร์ (Technical Writing for Engineering) 3(2-2-5)"
+ },
+ {
+  "code": "2304103",
+  "name_th": "ฟิสิกส์ทั่วไป 1",
+  "name_en": "General Physics I",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2304103 ฟิสิกส์ทั่วไป 1 (General Physics I) 3(3-0-6)"
+ },
+ {
+  "code": "2304104",
+  "name_th": "ฟิสิกส์ทั่วไป 2",
+  "name_en": "General Physics II",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2304104 ฟิสิกส์ทั่วไป 2 (General Physics II) 3(3-0-6)"
+ },
+ {
+  "code": "2304183",
+  "name_th": "ปฏิบัติการฟิสิกส์ทั่วไป 1",
+  "name_en": "General Physics Laboratory I",
+  "credits": 1,
+  "credit_format": "1(0-3-0)",
+  "raw": "2304183 ปฏิบัติการฟิสิกส์ทั่วไป 1 (General Physics Laboratory I) 1(0-3-0)"
+ },
+ {
+  "code": "2304184",
+  "name_th": "ปฏิบัติการฟิสิกส์ทั่วไป 2",
+  "name_en": "General Physics Laboratory II",
+  "credits": 1,
+  "credit_format": "1(0-3-0)",
+  "raw": "2304184 ปฏิบัติการฟิสิกส์ทั่วไป 2 (General Physics Laboratory II) 1(0-3-0)"
+ },
+ {
+  "code": "2301107",
+  "name_th": "แคลคูลัส 1",
+  "name_en": "Calculus I",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2301107 แคลคูลัส 1 (Calculus I) 3(3-0-6)"
+ },
+ {
+  "code": "2301108",
+  "name_th": "แคลคูลัส 2",
+  "name_en": "Calculus II",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2301108 แคลคูลัส 2 (Calculus II) 3(3-0-6)"
+ },
+ {
+  "code": "2302127",
+  "name_th": "เคมีทั่วไป",
+  "name_en": "General Chemistry",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2302127 เคมีทั่วไป (General Chemistry) 3(3-0-6)"
+ },
+ {
+  "code": "2302163",
+  "name_th": "ปฏิบัติการเคมีทั่วไป",
+  "name_en": "Engineering Chemistry Laboratory",
+  "credits": 1,
+  "credit_format": "1(0-3-0)",
+  "raw": "2302163 ปฏิบัติการเคมีทั่วไป (Engineering Chemistry Laboratory) 1(0-3-0)"
+ },
+ {
+  "code": "2603284",
+  "name_th": "สถิติสำหรับวิทยาศาสตร์กายภาพ",
+  "name_en": "Statistics for Physical Science",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2603284 สถิติสำหรับวิทยาศาสตร์กายภาพ (Statistics for Physical Science) 3(3-0-6)"
+ },
+ {
+  "code": "2100301",
+  "name_th": "การฝึกงานทางวิศวกรรม",
+  "name_en": "Engineering Practice",
+  "credits": 2,
+  "credit_format": "2(0-18-0)",
+  "raw": "2100301 การฝึกงานทางวิศวกรรม (Engineering Practice) 2(0-18-0) ประเมินผลเป็น S/U"
+ },
+ {
+  "code": "2110101",
+  "name_th": "การทำโปรแกรมคอมพิวเตอร์",
+  "name_en": "Computer Programming",
+  "credits": 3,
+  "credit_format": "3(2-2-5)",
+  "raw": "2110101 การทำโปรแกรมคอมพิวเตอร์ (Computer Programming) 3(2-2-5)"
+ },
+ {
+  "code": "2110201",
+  "name_th": "คณิตศาสตร์วิศวกรรมคอมพิวเตอร์",
+  "name_en": "Computer Engineering Mathematics",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110201 คณิตศาสตร์วิศวกรรมคอมพิวเตอร์ (Computer Engineering Mathematics) 3(3-0-6)"
+ },
+ {
+  "code": "2110203",
+  "name_th": "คณิตศาสตร์วิศวกรรมคอมพิวเตอร์ 2",
+  "name_en": "Computer Engineering Mathematics II",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110203 คณิตศาสตร์วิศวกรรมคอมพิวเตอร์ 2 (Computer Engineering Mathematics II) 3(3-0-6)"
+ },
+ {
+  "code": "2110233",
+  "name_th": "การปฏิบัติการทางคณิตศาสตร์วิศวกรรมคอมพิวเตอร์",
+  "name_en": "Computer Engineering Mathematics Laboratory",
+  "credits": 1,
+  "credit_format": "1(0-2-1)",
+  "raw": "2110233 การปฏิบัติการทางคณิตศาสตร์วิศวกรรมคอมพิวเตอร์ (Computer Engineering Mathematics Laboratory) 1(0-2-1)"
+ },
+ {
+  "code": "2110200",
+  "name_th": "โครงสร้างดิสครีตและภาวะคำนวณได้",
+  "name_en": "Discrete Structures and Computability",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110200 โครงสร้างดิสครีตและภาวะคำนวณได้ (Discrete Structures and Computability) 3(3-0-6)"
+ },
+ {
+  "code": "2110211",
+  "name_th": "ความรู้เบื้องต้นเกี่ยวกับโครงสร้างข้อมูล",
+  "name_en": "Introduction to Data Structures",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110211 ความรู้เบื้องต้นเกี่ยวกับโครงสร้างข้อมูล (Introduction to Data Structures) 3(3-0-6)"
+ },
+ {
+  "code": "2110215",
+  "name_th": "วิธีวิทยาการทำโปรแกรม 1",
+  "name_en": "Programming Methodology I",
+  "credits": 3,
+  "credit_format": "3(2-3-4)",
+  "raw": "2110215 วิธีวิทยาการทำโปรแกรม 1 (Programming Methodology I) 3(2-3-4)"
+ },
+ {
+  "code": "2110251",
+  "name_th": "ตรรกศาสตร์ของดิจิตอลคอมพิวเตอร์",
+  "name_en": "Digital Computer Logic",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110251 ตรรกศาสตร์ของดิจิตอลคอมพิวเตอร์ (Digital Computer Logic) 3(3-0-6)"
+ },
+ {
+  "code": "2110263",
+  "name_th": "การปฏิบัติการทางตรรกศาสตร์ของดิจิตอลคอมพิวเตอร์ 1",
+  "name_en": "Digital Computer Logic Laboratory I",
+  "credits": 1,
+  "credit_format": "1(0-2-1)",
+  "raw": "2110263 การปฏิบัติการทางตรรกศาสตร์ของดิจิตอลคอมพิวเตอร์ 1 (Digital Computer Logic Laboratory I) 1(0-2-1)"
+ },
+ {
+  "code": "2110313",
+  "name_th": "ระบบปฏิบัติการและโปรแกรมระบบ",
+  "name_en": "Operating Systems and System Programs",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110313 ระบบปฏิบัติการและโปรแกรมระบบ (Operating Systems and System Programs) 3(3-0-6)"
+ },
+ {
+  "code": "2110318",
+  "name_th": "หลักการของระบบกระจาย",
+  "name_en": "Distributed Systems Essentials",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110318 หลักการของระบบกระจาย (Distributed Systems Essentials) 3(3-0-6)"
+ },
+ {
+  "code": "2110322",
+  "name_th": "ระบบฐานข้อมูล",
+  "name_en": "Database Systems",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110322 ระบบฐานข้อมูล (Database Systems) 3(3-0-6)"
+ },
+ {
+  "code": "2110327",
+  "name_th": "การออกแบบอัลกอริทึม",
+  "name_en": "Algorithm Design",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110327 การออกแบบอัลกอริทึม (Algorithm Design) 3(3-0-6)"
+ },
+ {
+  "code": "2110352",
+  "name_th": "สถาปัตยกรรมระบบคอมพิวเตอร์",
+  "name_en": "Computer System Architectures",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110352 สถาปัตยกรรมระบบคอมพิวเตอร์ (Computer System Architectures) 3(3-0-6)"
+ },
+ {
+  "code": "2110363",
+  "name_th": "ปฏิบัติการสังเคราะห์ฮาร์ดแวร์ 1",
+  "name_en": "Hardware Synthesis Laboratory I",
+  "credits": 1,
+  "credit_format": "1(0-2-1)",
+  "raw": "2110363 ปฏิบัติการสังเคราะห์ฮาร์ดแวร์ 1 (Hardware Synthesis Laboratory I) 1(0-2-1)"
+ },
+ {
+  "code": "2110366",
+  "name_th": "การปฏิบัติการระบบฝังตัว",
+  "name_en": "Embedded System Laboratory",
+  "credits": 1,
+  "credit_format": "1(0-2-1)",
+  "raw": "2110366 การปฏิบัติการระบบฝังตัว (Embedded System Laboratory) 1(0-2-1)"
+ },
+ {
+  "code": "2110423",
+  "name_th": "วิศวกรรมซอฟต์แวร์",
+  "name_en": "Software Engineering",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110423 วิศวกรรมซอฟต์แวร์ (Software Engineering ) 3(3-0-6)"
+ },
+ {
+  "code": "2110426",
+  "name_th": "การปฏิบัติการทางวิศวกรรมซอฟต์แวร์",
+  "name_en": "SE Lab",
+  "credits": 1,
+  "credit_format": "1(0-2-1)",
+  "raw": "2110426 การปฏิบัติการทางวิศวกรรมซอฟต์แวร์ (SE Lab) 1(0-2-1)"
+ },
+ {
+  "code": "2110471",
+  "name_th": "ข่ายงานคอมพิวเตอร์ 1",
+  "name_en": "Computer Network I",
+  "credits": 3,
+  "credit_format": "3(2-3-4)",
+  "raw": "2110471 ข่ายงานคอมพิวเตอร์ 1 (Computer Network I) 3(2-3-4)"
+ },
+ {
+  "code": "2110488",
+  "name_th": "โครงงานรวบยอดวิศวกรรมคอมพิวเตอร์ 1",
+  "name_en": "Capstone Project I",
+  "credits": 2,
+  "credit_format": "2(0-4-2)",
+  "raw": "2110488 โครงงานรวบยอดวิศวกรรมคอมพิวเตอร์ 1 (Capstone Project I) 2(0-4-2)"
+ },
+ {
+  "code": "2110489",
+  "name_th": "โครงงานรวบยอดวิศวกรรมคอมพิวเตอร์ 2",
+  "name_en": "Capstone Project II",
+  "credits": 3,
+  "credit_format": "3(0-6-3)",
+  "raw": "2110489 โครงงานรวบยอดวิศวกรรมคอมพิวเตอร์ 2 (Capstone Project II) 3(0-6-3)"
+ },
+ {
+  "code": "2110404",
+  "name_th": "ทฤษฏีการคำนวณ",
+  "name_en": "Computational Theory",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110404 ทฤษฏีการคำนวณ (Computational Theory) 3(3-0-6)"
+ },
+ {
+  "code": "2110521",
+  "name_th": "สถาปัตยกรรมซอฟต์แวร์",
+  "name_en": "Software Architecture",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110521 สถาปัตยกรรมซอฟต์แวร์ (Software Architecture) 3(3-0-9)"
+ },
+ {
+  "code": "2110452",
+  "name_th": "สถาปัตยกรรมสมรรถนะสูง",
+  "name_en": "High Performance Architecture",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110452 สถาปัตยกรรมสมรรถนะสูง (High Performance Architecture) 3(3-0-6)"
+ },
+ {
+  "code": "2110531",
+  "name_th": "เครื่องมือสำหรับวิทยาศาสตร์ข้อมูลและวิศวกรรมข้อมูล",
+  "name_en": "Data Science and Data Engineering Tools",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110531 เครื่องมือสำหรับวิทยาศาสตร์ข้อมูลและวิศวกรรมข้อมูล (Data Science and Data Engineering Tools) 3(3-0-6)"
+ },
+ {
+  "code": "21105xx",
+  "name_th": "ระบบที่กำหนดโดยซอฟต์แวร์ 1",
+  "name_en": "Software-Defined Systems I",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "21105xx ระบบที่กำหนดโดยซอฟต์แวร์ 1 (Software-Defined Systems I) 3(3-0-6)"
+ },
+ {
+  "code": "210xxxx*",
+  "name_th": "ความเป็นผู้ประกอบการกับการสร้างธุรกิจใหม่",
+  "name_en": "Entrepreneurship and New Venture Creation",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "210xxxx* ความเป็นผู้ประกอบการกับการสร้างธุรกิจใหม่ (Entrepreneurship and New Venture Creation) 3(3-0-6)"
+ },
+ {
+  "code": "210xxxx*",
+  "name_th": "ความเป็นผู้ประกอบการธุรกิจเทคโนโลยี",
+  "name_en": "Technopreneurship",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "210xxxx* ความเป็นผู้ประกอบการธุรกิจเทคโนโลยี(Technopreneurship) 3(3-0-6)"
+ },
+ {
+  "code": "210xxxx*",
+  "name_th": "หลักการคิดเชิงออกแบบ",
+  "name_en": "Design Thinking Principle",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "210xxxx* หลักการคิดเชิงออกแบบ (Design Thinking Principle) 3(3-0-6)"
+ },
+ {
+  "code": "210xxxx*",
+  "name_th": "หลักการคิดแก้ไขปัญหา",
+  "name_en": "Problem Solving Principle",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "210xxxx* หลักการคิดแก้ไขปัญหา (Problem Solving Principle) 3(3-0-6)"
+ },
+ {
+  "code": "21xxxxx*",
+  "name_th": "การบริหารจัดการโครงการ",
+  "name_en": "Project Management",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "21xxxxx* การบริหารจัดการโครงการ (Project Management) 3(3-0-6)"
+ },
+ {
+  "code": "21xxxxx*",
+  "name_th": "การตลาด และการบริหารจัดการในงานวิศวกรรม",
+  "name_en": "Marketing and Management in Engineering",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "21xxxxx* การตลาด และการบริหารจัดการในงานวิศวกรรม (Marketing and Management in Engineering) 3(3-0-6)"
+ },
+ {
+  "code": "2110xxx*",
+  "name_th": "การศึกษาต่างประเทศด้านทักษะศตวรรษที่ 21 1",
+  "name_en": "Study Abroad for 21 Century Skill",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110xxx* การศึกษาต่างประเทศด้านทักษะศตวรรษที่ 21 1 (Study Abroad for 21 Century Skill) 3(3-0-6)"
+ },
+ {
+  "code": "2110xxx*",
+  "name_th": "การศึกษาต่างประเทศด้านทักษะศตวรรษที่ 21 2",
+  "name_en": "Study Abroad for 21 Century Skill",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110xxx* การศึกษาต่างประเทศด้านทักษะศตวรรษที่ 21 2 (Study Abroad for 21 Century Skill) 3(3-0-6)"
+ },
+ {
+  "code": "2110291",
+  "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 1",
+  "name_en": "Individual Study in Computer Engineering I",
+  "credits": 1,
+  "credit_format": "1(0 0 3)",
+  "raw": "2110291 เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 1 (Individual Study in Computer Engineering I) 1(0 0 3)"
+ },
+ {
+  "code": "2110292",
+  "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 2",
+  "name_en": "Individual Study in Computer Engineering II",
+  "credits": 1,
+  "credit_format": "1(0 0 3)",
+  "raw": "2110292 เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 2 (Individual Study in Computer Engineering II) 1(0 0 3)"
+ },
+ {
+  "code": "2110315",
+  "name_th": "ระบบเชิงขนานและระบบกระจาย",
+  "name_en": "Parallel and Distributed Systems",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110315 ระบบเชิงขนานและระบบกระจาย (Parallel and Distributed Systems) 3(3-0-6)"
+ },
+ {
+  "code": "2110391",
+  "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 3",
+  "name_en": "Individual Study in Computer Engineering III",
+  "credits": 1,
+  "credit_format": "1(0 0 3)",
+  "raw": "2110391 เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 3 (Individual Study in Computer Engineering III) 1(0 0 3)"
+ },
+ {
+  "code": "2110392",
+  "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 4",
+  "name_en": "Individual Study in Computer Engineering IV",
+  "credits": 1,
+  "credit_format": "1(0 0 3)",
+  "raw": "2110392 เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 4 (Individual Study in Computer Engineering IV) 1(0 0 3)"
+ },
+ {
+  "code": "2110413",
+  "name_th": "ความมั่นคงของคอมพิวเตอร์",
+  "name_en": "Computer Security",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110413 ความมั่นคงของคอมพิวเตอร์ (Computer Security) 3(3 0 6)"
+ },
+ {
+  "code": "2110412",
+  "name_th": "สถาปัตยกรรมคอมพิวเตอร์เชิงขนาน",
+  "name_en": "Parallel Computer Architecture",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110412 สถาปัตยกรรมคอมพิวเตอร์เชิงขนาน (Parallel Computer Architecture) 3(3 0 6)"
+ },
+ {
+  "code": "2110414",
+  "name_th": "ระบบการคำนวณขนาดใหญ่",
+  "name_en": "Large Scale Computing Systems",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110414 ระบบการคำนวณขนาดใหญ่ (Large Scale Computing Systems) 3(3 0 6)"
+ },
+ {
+  "code": "2110424",
+  "name_th": "การปรับปรุงกระบวนการซอฟต์แวร์",
+  "name_en": "Software Process Improvement",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110424 การปรับปรุงกระบวนการซอฟต์แวร์ (Software Process Improvement) 3(3 0 6)"
+ },
+ {
+  "code": "2110428",
+  "name_th": "ความรู้เบื้องต้นเกี่ยวกับการทำเหมืองข้อมูล",
+  "name_en": "Introduction to Data Mining",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110428 ความรู้เบื้องต้นเกี่ยวกับการทำเหมืองข้อมูล (Introduction to Data Mining) 3(3 0 6)"
+ },
+ {
+  "code": "2110430",
+  "name_th": "การทำเหมืองอนุกรมเวลาและการค้นหาความรู้",
+  "name_en": "Time Series Mining and Knowledge Discovery",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110430 การทำเหมืองอนุกรมเวลาและการค้นหาความรู้ (Time Series Mining and Knowledge Discovery) 3(3 0 6)"
+ },
+ {
+  "code": "2110431",
+  "name_th": "วิทยาการภาพดิจิทัลเบื้องต้น",
+  "name_en": "Introduction to Digital Imaging",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110431 วิทยาการภาพดิจิทัลเบื้องต้น (Introduction to Digital Imaging) 3(3 0 6)"
+ },
+ {
+  "code": "2110432",
+  "name_th": "การรู้จำเสียงพูดอัตโนมัติ",
+  "name_en": "Automatic Speech Recognition",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110432 การรู้จำเสียงพูดอัตโนมัติ (Automatic Speech Recognition) 3(3 0 6)"
+ },
+ {
+  "code": "2110433",
+  "name_th": "คอมพิวเตอร์วิชัน",
+  "name_en": "Computer Vision",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110433 คอมพิวเตอร์วิชัน (Computer Vision) 3(3 0 6)"
+ },
+ {
+  "code": "2110435",
+  "name_th": "วิทยาการหุ่นยนต์เบื้องต้น",
+  "name_en": "Introduction to Robotics",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110435 วิทยาการหุ่นยนต์เบื้องต้น (Introduction to Robotics) 3(3 0 6)"
+ },
+ {
+  "code": "2110442",
+  "name_th": "การวิเคราะห์และโปรแกรมเชิงวัตถุ",
+  "name_en": "Object-Oriented Analysis and Programming",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110442 การวิเคราะห์และโปรแกรมเชิงวัตถุ (Object-Oriented Analysis and Programming) 3(3 0 6)"
+ },
+ {
+  "code": "2110443",
+  "name_th": "ปฏิสัมพันธ์ของมนุษย์กับคอมพิวเตอร์",
+  "name_en": "Human-Computer Interaction",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110443 ปฏิสัมพันธ์ของมนุษย์กับคอมพิวเตอร์ (Human-Computer Interaction) 3(3 0 6)"
+ },
+ {
+  "code": "2110455",
+  "name_th": "การทดสอบวงจรดิจิตอล",
+  "name_en": "Testing Digital Circuits",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110455 การทดสอบวงจรดิจิตอล (Testing Digital Circuits) 3(3 0 6)"
+ },
+ {
+  "code": "2110473",
+  "name_th": "การคำนวณแบบทนต่อความผิดพร่อง",
+  "name_en": "Fault Tolerant Computing",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110473 การคำนวณแบบทนต่อความผิดพร่อง (Fault Tolerant Computing) 3(3 0 6)"
+ },
+ {
+  "code": "2110475",
+  "name_th": "การออกแบบวงจรรวมขนาดใหญ่มาก",
+  "name_en": "VLSI Design",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110475 การออกแบบวงจรรวมขนาดใหญ่มาก (VLSI Design) 3(3 0 6)"
+ },
+ {
+  "code": "2110476",
+  "name_th": "ปัญญาประดิษฐ์ 1",
+  "name_en": "Artificial Intelligence I",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110476 ปัญญาประดิษฐ์ 1 (Artificial Intelligence I) 3(3 0 6)"
+ },
+ {
+  "code": "2110477",
+  "name_th": "ปัญญาประดิษฐ์ 2",
+  "name_en": "Artificial Intelligence II",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110477 ปัญญาประดิษฐ์ 2 (Artificial Intelligence II) 3(3 0 6)"
+ },
+ {
+  "code": "2110478",
+  "name_th": "คอมพิวเตอร์และการสื่อสาร",
+  "name_en": "Computer and Communication",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110478 คอมพิวเตอร์และการสื่อสาร (Computer and Communication) 3(3 0 6)"
+ },
+ {
+  "code": "2110479",
+  "name_th": "คอมพิวเตอร์กราฟิก",
+  "name_en": "Computer Graphics",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110479 คอมพิวเตอร์กราฟิก (Computer Graphics) 3(3 0 6)"
+ },
+ {
+  "code": "2110481",
+  "name_th": "เครือข่ายคอมพิวเตอร์ไร้สาย",
+  "name_en": "Wireless Computer Networks",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110481 เครือข่ายคอมพิวเตอร์ไร้สาย (Wireless Computer Networks) 3(3 0 6)"
+ },
+ {
+  "code": "2110495",
+  "name_th": "หัวข้อชั้นสูงในวิศวกรรมคอมพิวเตอร์ 1",
+  "name_en": "Advanced Topics in Computer Engineering I",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110495 หัวข้อชั้นสูงในวิศวกรรมคอมพิวเตอร์ 1 (Advanced Topics in Computer Engineering I) 3(3 0 6)"
+ },
+ {
+  "code": "2110496",
+  "name_th": "หัวข้อชั้นสูงในวิศวกรรมคอมพิวเตอร์ 2",
+  "name_en": "Advanced Topics in Computer Engineering II",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110496 หัวข้อชั้นสูงในวิศวกรรมคอมพิวเตอร์ 2 (Advanced Topics in Computer Engineering II) 3(3 0 6)"
+ },
+ {
+  "code": "2110497",
+  "name_th": "ปัญหาพิเศษทางวิศวกรรมคอมพิวเตอร์ 1",
+  "name_en": "Special Problems in Computer Engineering I",
+  "credits": 3,
+  "credit_format": "3(2 3 4)",
+  "raw": "2110497 ปัญหาพิเศษทางวิศวกรรมคอมพิวเตอร์ 1 (Special Problems in Computer Engineering I) 3(2 3 4)"
+ },
+ {
+  "code": "2110498",
+  "name_th": "ปัญหาพิเศษทางวิศวกรรมคอมพิวเตอร์ 2",
+  "name_en": "Special Problems in Computer Engineering II",
+  "credits": 3,
+  "credit_format": "3(2 3 4)",
+  "raw": "2110498 ปัญหาพิเศษทางวิศวกรรมคอมพิวเตอร์ 2 (Special Problems in Computer Engineering II) 3(2 3 4)"
+ },
+ {
+  "code": "2110446",
+  "name_th": "วิทยาศาสตร์ข้อมูลและการวิเคราะห์",
+  "name_en": "Data Science and Analytics",
+  "credits": 3,
+  "credit_format": "3(3 0 6)",
+  "raw": "2110446 วิทยาศาสตร์ข้อมูลและการวิเคราะห์ (Data Science and Analytics) 3(3 0 6)"
+ },
+ {
+  "code": "2110490",
+  "name_th": "โครงการวิศวกรรมคอมพิวเตอร์พื้นฐาน",
+  "name_en": "Computer Engineering Pre-Project",
+  "credits": 1,
+  "credit_format": "1(0-2-1)",
+  "raw": "2110490 โครงการวิศวกรรมคอมพิวเตอร์พื้นฐาน (Computer Engineering Pre-Project) 1(0-2-1)"
+ },
+ {
+  "code": "2110499",
+  "name_th": "โครงการวิศวกรรมคอมพิวเตอร์",
+  "name_en": "Computer Engineering Projects",
+  "credits": 3,
+  "credit_format": "3(0-6-3)",
+  "raw": "2110499 โครงการวิศวกรรมคอมพิวเตอร์ (Computer Engineering Projects) 3(0-6-3)"
+ },
+ {
+  "code": "2110499",
+  "name_th": "โครงงานทางวิศวกรรม",
+  "name_en": "Senior Project in Engineering",
+  "credits": 3,
+  "credit_format": "3(0-6-3)",
+  "raw": "2110499 โครงงานทางวิศวกรรม (Senior Project in Engineering) 3(0-6-3)"
+ },
+ {
+  "code": "2110503",
+  "name_th": "โการฝึกพัฒนาซอฟต์แวร์",
+  "name_en": "Software Development Practice",
+  "credits": 3,
+  "credit_format": "3(3-0-6)",
+  "raw": "2110503 โการฝึกพัฒนาซอฟต์แวร์ (Software Development Practice) 3(3-0-6)"
+ },
+ {
+  "code": "2110511",
+  "name_th": "การเขียนโปรแกรมเกม",
+  "name_en": "Game Programming",
+  "credits": 3,
+  "credit_format": "3(3 0 9)",
+  "raw": "2110511 การเขียนโปรแกรมเกม (Game Programming) 3(3 0 9)"
+ },
+ {
+  "code": "2110512",
+  "name_th": "คอมพิวเตอร์แอนิเมชัน",
+  "name_en": "Computer Animation",
+  "credits": 3,
+  "credit_format": "3(3 0 9)",
+  "raw": "2110512 คอมพิวเตอร์แอนิเมชัน (Computer Animation) 3(3 0 9)"
+ },
+ {
+  "code": "2110513",
+  "name_th": "เทคโนโลยีช่วยเหลือ",
+  "name_en": "Assistive Technology",
+  "credits": 3,
+  "credit_format": "3(3 0 9)",
+  "raw": "2110513 เทคโนโลยีช่วยเหลือ (Assistive Technology) 3(3 0 9)"
+ },
+ {
+  "code": "2110514",
+  "name_th": "คอมพิวเตอร์กราฟิกส์และการจำลองทางฟิสิกส์แบบเรียลไทม์",
+  "name_en": "Realtime Computer Graphics and Physics Simulation",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110514 คอมพิวเตอร์กราฟิกส์และการจำลองทางฟิสิกส์แบบเรียลไทม์ (Realtime Computer Graphics and Physics Simulation) 3 (3-0-9)"
+ },
+ {
+  "code": "2110522",
+  "name_th": "ยูนิกซ์/ลีนุกซ์สำหรับองค์กร",
+  "name_en": "UNIX/Linux for Enterprise Environment",
+  "credits": 3,
+  "credit_format": "3(3 0 9)",
+  "raw": "2110522 ยูนิกซ์/ลีนุกซ์สำหรับองค์กร (UNIX/Linux for Enterprise Environment) 3(3 0 9)"
+ },
+ {
+  "code": "2110524",
+  "name_th": "เทคโนโลยีคลาวด์คอมพิวติง",
+  "name_en": "Cloud Computing Technology",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110524 เทคโนโลยีคลาวด์คอมพิวติง (Cloud Computing Technology) 3(3-0-9)"
+ },
+ {
+  "code": "2110542",
+  "name_th": "ระบบคลังข้อมูล",
+  "name_en": "Data Warehouse System",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110542 ระบบคลังข้อมูล (Data Warehouse System) 3(3-0-9)"
+ },
+ {
+  "code": "2110561",
+  "name_th": "การผลิตเชิงคำนวณ",
+  "name_en": "Computational Fabrication",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110561 การผลิตเชิงคำนวณ (Computational Fabrication) 3(3-0-9)"
+ },
+ {
+  "code": "2110562",
+  "name_th": "เทคโนโลยีตัวรับรู้",
+  "name_en": "Sensor Technology",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110562 เทคโนโลยีตัวรับรู้ (Sensor Technology) 3(3-0-9)"
+ },
+ {
+  "code": "2110571",
+  "name_th": "โครงข่ายประสาท",
+  "name_en": "Neural Network",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110571 โครงข่ายประสาท (Neural Network) 3(3-0-9)"
+ },
+ {
+  "code": "2110572",
+  "name_th": "ระบบการประมวลผลธรรมชาติ",
+  "name_en": "Natural Language Processing System",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110572 ระบบการประมวลผลธรรมชาติ (Natural Language Processing System) 3(3-0-9)"
+ },
+ {
+  "code": "2110573",
+  "name_th": "การรู้จำแบบ",
+  "name_en": "Pattern Recognition",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110573 การรู้จำแบบ (Pattern Recognition) 3(3-0-9)"
+ },
+ {
+  "code": "2110574",
+  "name_th": "ปัญญาประดิษฐ์สำหรับวิศวกร",
+  "name_en": "Artificial Intelligence for Engineers",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110574 ปัญญาประดิษฐ์สำหรับวิศวกร (Artificial Intelligence for Engineers) 3(3-0-9)"
+ },
+ {
+  "code": "2110581",
+  "name_th": "ชีวสารสนเทศ 1",
+  "name_en": "Bioinformatics I",
+  "credits": 3,
+  "credit_format": "3(3-0-9)",
+  "raw": "2110581 ชีวสารสนเทศ 1 (Bioinformatics I) 3 (3-0-9)2110431 วิทยาการภาพดิจิทัลเบื้องต้น (Introduction to Digital Imaging) 3(3 0 6)"
+ },
+ {
+  "code": "2100499",
+  "name_th": "โครงงานทางวิศวกรรม",
+  "name_en": "Senior Project in Engineering",
+  "credits": 3,
+  "credit_format": "3(0-6-3)",
+  "raw": "2100499 โครงงานทางวิศวกรรม (Senior Project in Engineering) 3(0-6-3)"
+ }
+]
