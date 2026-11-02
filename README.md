@@ -13,6 +13,9 @@ The repository currently has two separate parts:
 
 Neither part is academic advice or a production transcript parser.
 
+Project documentation (requirements, architecture, decisions, plan, evaluation) is indexed
+in `docs/README.md`.
+
 ## Status (2 November 2026)
 
 - Working on synthetic data: agent state machine, `audit`, keyword retrieval, CP-SAT planner,

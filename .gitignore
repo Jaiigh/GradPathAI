@@ -4,3 +4,5 @@ dist/
 tmp/
 baseline/.venv/
 baseline/__pycache__/
+# Personal data and real-run artefacts (transcripts, sessions, traces)
+local/
