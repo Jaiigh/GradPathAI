@@ -2,18 +2,30 @@
 
 Newest entries first.
 
-## Handoff, 2 Nov 2026 (night)
+## Handoff, 3 Nov 2026 (early)
 
-- Uncommitted work, staged for the user: test set v1.1 (`data/test_set.jsonl`,
-  `scripts/make_test_set.py`, `data/results_template.csv`), runtime v2 (`gradpath/runtime/`),
-  retrieval, the API (`gradpath/api/`), the React UI, the runner (`eval/`), UAT scripts, 43
-  tests, and the doc updates below.
-- UAT plan v1.1 (Thai PDF, 16 pages) is in the parent folder:
-  `GradPath_Group2_UAT_Plan_v1.1.pdf`, built by `GradPath_UAT_v1.1/build_uat_plan.py`
-  (outside git, because it lists names and student IDs). Rebuild it after any test-set change.
-- Next: (1) the user reviews the PDF and D17; (2) set up the UAT laptop, run
-  `scripts/uat_check.py` there and record GPU and turn times (Q3); (3) the D11 measurement;
-  (4) tag `uat-v1.1` and freeze by Wed 4 Nov 12:00; feature freeze at 10:00.
+- Committed through `2462970` (runtime v2, API, UI, test set v1.1). After it:
+  `eval/run_paraphrases.py` (the 15 reworded human-round tasks and two probes; 15/15 on
+  2 Nov) and this entry.
+- Files outside git, in the parent `Final_Project` folder: the UAT plan v1.1 PDF, now named
+  `GradPath_Group2_UAT.pdf` (15 pages; Appendix C removed at the user's request, the list of
+  changes from v1.0 is a comment at the top of the build script and in `evaluation.md`);
+  `GradPath_UAT_v1.1/build_uat_plan.py` (writes that file; close the PDF viewer first, or it
+  writes `*_new.pdf`); `GradPath_UAT_v1.1/line_message_uat.th.txt` (the team's UAT-day
+  instructions, roles still to be filled with names).
+- Waiting for the user: accept or change D17 (status proposed); confirm the T18 change to
+  2571/1.
+- Before the UAT: (1) set up the UAT laptop (`scripts\uat_setup.ps1`), run
+  `scripts\uat_check.py` and `python -m eval.run_paraphrases` there, record GPU, VRAM and turn
+  times (they set the Q3 limits in `requirements.md`); if the laptop is too slow, decide the
+  fallback before the feature freeze, Wed 4 Nov 10:00; (2) ask the TA whether the
+  configuration comparison (arms A/B/C) is expected on 4 Nov (`plan.md`, open questions;
+  arms A and B are not built); (3) the D11 measurement (10 Thai + 10 English goal
+  statements); (4) tag `uat-v1.1` by Wed 12:00 (the user tags); rebuild the PDF if the test
+  set changes so its hashes match; (5) print pages 11-15 of the PDF.
+- After the UAT: run T15 in the technical round, fill `data/results_template.csv` from the
+  forms and `local/traces/`, fix and retest by 6 Nov, UAT report on Discord by 7 Nov 23:59;
+  then follow `plan.md` (PDF ingestion, experiment arms, final report).
 
 ## 2 Nov 2026 (night)
 
