@@ -1,0 +1,44 @@
+{
+ "student_ref": "P-Y1",
+ "record_version": 1,
+ "source_kind": "persona",
+ "source_sha256": null,
+ "snapshot_id": "cp2566-v0",
+ "entry_year": 2569,
+ "next_term": "2569/2",
+ "records": [
+  {
+   "course_id": "2304103",
+   "term": "2569/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "2304183",
+   "term": "2569/1",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2301107",
+   "term": "2569/1",
+   "grade": "B"
+  },
+  {
+   "course_id": "2110101",
+   "term": "2569/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "2100111",
+   "term": "2569/1",
+   "grade": "C+"
+  },
+  {
+   "course_id": "5500111",
+   "term": "2569/1",
+   "grade": "B"
+  }
+ ],
+ "unresolved": [],
+ "confirmed": false,
+ "_note": "Year 1 after semester 1/2569; plans 2569/2 to 2572/2"
+}

@@ -2,7 +2,9 @@ node_modules/
 dist/
 .vite/
 tmp/
+.venv/
 baseline/.venv/
-baseline/__pycache__/
+__pycache__/
+.pytest_cache/
 # Personal data and real-run artefacts (transcripts, sessions, traces)
 local/

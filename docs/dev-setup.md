@@ -19,9 +19,9 @@ corepack pnpm build
 - Baseline: `baseline\.venv` (Python 3.13.5 + OR-Tools 9.15.6755), created with
   `py -3 -m venv baseline\.venv` and
   `baseline\.venv\Scripts\python.exe -m pip install -r baseline\requirements.txt`.
-- New backend (`gradpath/`): a root `.venv` with its own requirements will be added with the
-  first backend code. Planned dependencies: ortools, fastapi, uvicorn, pydantic, pymupdf,
-  pytest.
+- Backend (`gradpath/`): root `.venv` (Python 3.13.5) with `requirements.txt`, created with
+  `py -3 -m venv .venv` and `.venv\Scripts\python.exe -m pip install -r requirements.txt`.
+  Run the tests with `.venv\Scripts\python.exe -m pytest -q`.
 
 ## Ollama
 

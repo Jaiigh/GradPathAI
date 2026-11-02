@@ -102,8 +102,11 @@ category `k` in term `t`; `a[c,k]` is 1 when course `c` counts toward category `
 | Graduation | all required courses and the total-credit requirement are met by the horizon |
 | Goal | `must_take` courses are scheduled and `avoid` courses are excluded |
 
-Objective, weighted in this order: preferred courses, closeness to the official study-plan
-term, balanced load, fewest surplus credits.
+Elective courses enter the model only when preferred or must-take; every other elective
+requirement is a 3-credit category slot (D16). Objective, weighted in this order: preferred
+courses that count toward a category, closeness to the official study-plan term, no
+electives before Year 3, balanced load, fewest credits. Implementation:
+`gradpath/tools/planner.py`; snapshot `data/snapshots/cp2566-v0.json`.
 
 Infeasibility: an assumption literal guards each constraint group. When the model is
 infeasible, CP-SAT returns a subset of the assumptions that explains it. The runtime then
@@ -111,9 +114,10 @@ re-solves with one group relaxed at a time (for example a higher cap, an added s
 a later horizon) and offers only relaxations that the solver proves feasible. Every
 relaxation is a hard change and needs student approval.
 
-The validator re-checks every rule in plain Python and shares no constraint code with the
-planner. Tests require every planner output to pass the validator and every mutated plan to
-fail it.
+The validator (`gradpath/tools/validator.py`) re-checks every rule in plain Python and
+shares no constraint code with the planner; it and `audit` share only `gradpath/rules.py`.
+Tests (`tests/`) require every planner output to pass the validator and every mutated plan
+to fail it.
 
 ## Failure semantics
 

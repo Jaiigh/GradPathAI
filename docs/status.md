@@ -2,6 +2,20 @@
 
 Newest entries first.
 
+## 2 Nov 2026 (evening)
+
+- Built `data/snapshots/cp2566-v0.json` from public 2566 sources: 93 courses, study plan of
+  138 credits, regulation limits (22 per regular term, 9 per summer), 13 recorded conflicts
+  (9 resolved, open ones labelled).
+- Backend core in `gradpath/`: contracts, snapshot loader, multi-term CP-SAT planner with
+  witnessed relaxations, independent validator, audit. Eight synthetic personas in
+  `data/fixtures/personas/`. 26 tests pass; every persona solves to optimality in under
+  0.2 s.
+- Decisions: D4 amended (two-level missing-data policy), D13 amended (UAT on `cp2566-v0`;
+  team UAT plan v1.0 re-based as v1.1), D15 accepted, D16 added (electives as slots unless
+  preferred).
+- Next: UAT plan v1.1 PDF and test set; runtime v2, API and UI for the 4 Nov UAT.
+
 ## 2 Nov 2026
 
 - Re-documented the pitch v9 baseline evidence, with the caveats found in the traces

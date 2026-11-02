@@ -59,9 +59,14 @@ Any draft, including the team draft, must meet all of these before it is frozen:
   injected in student text, unapproved hard change, solver timeout, missing data, tool error.
 - The file is versioned in git and frozen with a tag before the experiment (D15).
 
-### Proposed coverage (draft, to reconcile with the team draft)
+### UAT plan v1.1 coverage
 
-Course IDs are filled in from the frozen snapshot.
+The team's UAT plan v1.0 (2 Nov 2026) met this quality bar but used a two-term synthetic
+slice. v1.1 keeps its ten scenarios (two tasks each), acceptance criteria, round
+assignments and forms, and re-bases every task on `cp2566-v0` and the personas in
+`data/fixtures/personas/`. Expected outcomes use the checks above, because a multi-term
+plan has more than one correct answer. The table below is the earlier draft that v1.1
+replaces; it is kept for reference until `data/test_set.jsonl` is frozen.
 
 | ID | Type | Family | Scenario | Expected |
 |---|---|---|---|---|

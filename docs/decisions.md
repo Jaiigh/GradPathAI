@@ -1,7 +1,7 @@
 # Decision records
 
 Each entry lists status, context, decision and consequences. D1-D12 were accepted with the
-implementation plan on 2 Nov 2026; D13-D15 were decided the same day.
+implementation plan on 2 Nov 2026; D13-D16 were decided the same day.
 
 ## D1. Build our own harness and freeze the baseline
 
@@ -42,8 +42,13 @@ implementation plan on 2 Nov 2026; D13-D15 were decided the same day.
 - Context: offerings and some prerequisites may not be verifiable in time (pitch v9 slide 18).
 - Decision: every snapshot item has a status: `verified`, `inferred`, `unknown` or
   `conflict`. Offerings may be inferred from the official study plan and are labelled in the
-  output. Missing data leads to `NEED_INFO`. The fallback scope is a verified subset of
-  2110xxx courses.
+  output. The fallback scope is a verified subset of 2110xxx courses.
+- Amended 2 Nov 2026 (user decision): missing data is handled at two levels. Missing
+  identity data (course code, credits, grade, category of a completed course) leads to
+  `NEED_INFO`. Missing supplementary data (prerequisites, offerings, which vary by year)
+  does not block planning; each affected item is labelled unverified. Conflicting sources
+  are resolved in favour of the newest, 2566-specific source and recorded in the
+  snapshot's `conflicts` list.
 - Consequences: plans can be produced with incomplete data without presenting guesses as
   facts.
 
@@ -123,9 +128,12 @@ implementation plan on 2 Nov 2026; D13-D15 were decided the same day.
   cannot be ready by then.
 - Decision: UAT uses the React UI wired to the real agent, with interactive clarification and
   consent, multi-term planning on the best snapshot available on 3 Nov, and prepared
-  personas. Testers do not use their own transcripts. If real curriculum data is not ready,
-  the snapshot is a clearly labelled simulated CP-like snapshot (`cp-sim-v0`).
-- Consequences: PDF ingestion and the real snapshot follow after UAT (see `plan.md`).
+  personas. Testers do not use their own transcripts.
+- Amended 2 Nov 2026: the snapshot is `cp2566-v0`, built from public 2566 sources, so the
+  simulated fallback is not needed. The team's UAT plan v1.0 (two-term synthetic slice) is
+  re-based on this curriculum as v1.1, keeping its structure, acceptance criteria and forms
+  (user decision).
+- Consequences: transcript PDF ingestion follows after UAT (see `plan.md`).
 
 ## D14. Documentation language
 
@@ -143,3 +151,16 @@ implementation plan on 2 Nov 2026; D13-D15 were decided the same day.
   newer snapshot is used for the final demo.
 - Consequences: the arm comparison stays valid; data accuracy improvements are reported
   separately.
+
+## D16. Elective requirements are slots unless the student prefers a course
+
+- Status: accepted, 2 Nov 2026 (implements R3).
+- Context: with 48 interchangeable department electives, a planner that must pick real
+  courses picks arbitrary ones and takes seconds to prove optimality.
+- Decision: elective courses enter the planner only when they are preferred (from
+  retrieval) or must-take. Every other elective requirement (core-level, department,
+  21st-century, Gen-Ed, free) is a 3-credit category slot. Two soft rules follow the
+  official study plan: no electives before Year 3 semester 1, and a numbered sequence
+  (part I before part II) is kept as an inferred prerequisite.
+- Consequences: plans contain only courses the student asked about or must take; every
+  test persona solves to optimality in well under a second.

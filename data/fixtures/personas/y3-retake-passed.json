@@ -1,0 +1,200 @@
+{
+ "student_ref": "P-Y3-FB",
+ "record_version": 1,
+ "source_kind": "persona",
+ "source_sha256": null,
+ "snapshot_id": "cp2566-v0",
+ "entry_year": 2567,
+ "next_term": "2569/2",
+ "records": [
+  {
+   "course_id": "2304103",
+   "term": "2567/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "2304183",
+   "term": "2567/1",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2301107",
+   "term": "2567/1",
+   "grade": "B"
+  },
+  {
+   "course_id": "2110101",
+   "term": "2567/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "2100111",
+   "term": "2567/1",
+   "grade": "C+"
+  },
+  {
+   "course_id": "5500111",
+   "term": "2567/1",
+   "grade": "B"
+  },
+  {
+   "course_id": "2110215",
+   "term": "2567/2",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2110221",
+   "term": "2567/2",
+   "grade": "A"
+  },
+  {
+   "course_id": "2301108",
+   "term": "2567/2",
+   "grade": "C"
+  },
+  {
+   "course_id": "2302127",
+   "term": "2567/2",
+   "grade": "B"
+  },
+  {
+   "course_id": "2302163",
+   "term": "2567/2",
+   "grade": "A"
+  },
+  {
+   "course_id": "2304104",
+   "term": "2567/2",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2304184",
+   "term": "2567/2",
+   "grade": "B"
+  },
+  {
+   "course_id": "5500112",
+   "term": "2567/2",
+   "grade": "A"
+  },
+  {
+   "course_id": "2110200",
+   "term": "2568/1",
+   "grade": "C+"
+  },
+  {
+   "course_id": "2110211",
+   "term": "2568/1",
+   "grade": "B"
+  },
+  {
+   "course_id": "2110251",
+   "term": "2568/1",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2110263",
+   "term": "2568/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "2603284",
+   "term": "2568/1",
+   "grade": "F"
+  },
+  {
+   "course_id": "GEN-SOC-01",
+   "term": "2568/1",
+   "grade": "B",
+   "title": "Synthetic GE_SOC course",
+   "credits": 3,
+   "category": "GE_SOC"
+  },
+  {
+   "course_id": "2110201",
+   "term": "2568/2",
+   "grade": "A"
+  },
+  {
+   "course_id": "2110313",
+   "term": "2568/2",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2110322",
+   "term": "2568/2",
+   "grade": "B"
+  },
+  {
+   "course_id": "2110327",
+   "term": "2568/2",
+   "grade": "A"
+  },
+  {
+   "course_id": "2110352",
+   "term": "2568/2",
+   "grade": "C+"
+  },
+  {
+   "course_id": "2110363",
+   "term": "2568/2",
+   "grade": "B"
+  },
+  {
+   "course_id": "5500208",
+   "term": "2568/2",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2110203",
+   "term": "2569/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "2110426",
+   "term": "2569/1",
+   "grade": "C"
+  },
+  {
+   "course_id": "2110318",
+   "term": "2569/1",
+   "grade": "B"
+  },
+  {
+   "course_id": "2110366",
+   "term": "2569/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "2110423",
+   "term": "2569/1",
+   "grade": "B+"
+  },
+  {
+   "course_id": "2110471",
+   "term": "2569/1",
+   "grade": "B"
+  },
+  {
+   "course_id": "2110443",
+   "term": "2569/1",
+   "grade": "A"
+  },
+  {
+   "course_id": "GEN-HUM-01",
+   "term": "2569/1",
+   "grade": "C+",
+   "title": "Synthetic GE_HUM course",
+   "credits": 3,
+   "category": "GE_HUM"
+  },
+  {
+   "course_id": "2603284",
+   "term": "2569/1",
+   "grade": "B"
+  }
+ ],
+ "unresolved": [],
+ "confirmed": false,
+ "_note": "2603284 Statistics: F in 2568/1, B on retake in 2569/1"
+}

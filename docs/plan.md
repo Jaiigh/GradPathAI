@@ -22,7 +22,7 @@ week 13). Decisions D1-D15 are in `decisions.md`.
 | Included | Deferred until after UAT |
 |---|---|
 | 4-5 prepared personas, each with a record review and confirmation step | transcript PDF upload and ingestion |
-| Goal card, clarifying questions, consent card for hard changes | real CP 2566 snapshot, if P0 data is not in by Tue 12:00 |
+| Goal card, clarifying questions, consent card for hard changes | official prerequisites and offerings (not published) |
 | Multi-term planning to the end of Year 4, with category slots | summer terms, if time runs out on Tuesday |
 | Evidenced blocker with witnessed alternatives | embeddings and OCR |
 | Out-of-scope declines; injected text treated as data | `qwen3:4b` arm |
@@ -30,15 +30,14 @@ week 13). Decisions D1-D15 are in `decisions.md`.
 
 ## Tuesday 3 Nov
 
-1. UAT plan: review the team draft against the quality bar in `evaluation.md`, then keep it
-   or rewrite it. Deliver the UAT plan table, test set v1 (`data/test_set.jsonl`) and the
-   feedback-form questions. Freeze v1 with its snapshot version (D15) by Wed 12:00.
+1. UAT plan v1.1 as a Thai PDF: the team's v1.0 structure re-based on `cp2566-v0` (D13).
+   Deliver test set v1.1 (`data/test_set.jsonl`) with it and freeze both with the snapshot
+   version (D15) by Wed 12:00.
 2. Language check (D11): 10 Thai and 10 English goal statements on `qwen3:8b`; choose the
    conversation language for UAT.
 3. MVP build:
-   - contracts and snapshot loader: real P0 data if it arrives by 12:00, otherwise
-     `cp-sim-v0`;
-   - multi-term planner and independent validator, with differential tests;
+   - done on 2 Nov: contracts, `cp2566-v0` snapshot, personas, multi-term planner,
+     independent validator, audit, 26 tests;
    - runtime v2: interactive state machine, sessions, `propose_goal` / `ask_user` /
      `reply`, `plan_id`, budget, traces, run record;
    - FastAPI app and React wiring: persona picker, record review, chat, goal card, plan,
@@ -56,10 +55,9 @@ A data collector is gathering the CP 2566 data from this priority list:
 | P1 | actual offerings over the last 2-3 years; Gen-Ed groups; co-requisites; remaining regulations; conflicting values (for example 45 vs 40 credits) |
 | P2 | descriptions of electives outside the department |
 
-Completeness is not guaranteed. GradPath uses whatever data arrives, labels each item's
-status (D4), and falls back to `cp-sim-v0` or the verified 2110xxx subset where data is
-missing. Integration cut-off for the UAT MVP: Tue 3 Nov 12:00; later data goes into the
-post-UAT snapshot.
+Update 2 Nov 2026: the public sources below were enough to build `cp2566-v0`, so the user
+dropped the separate data collection. Unknown items stay labelled (D4); conflicts are
+resolved in favour of the newest 2566-specific source and recorded in the snapshot.
 
 Public sources checked on 2 Nov 2026:
 
