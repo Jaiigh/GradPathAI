@@ -8,8 +8,9 @@ Newest entries first.
   `eval/run_paraphrases.py` (the 15 reworded human-round tasks and two probes; 15/15 on
   2 Nov) and this entry.
 - Files outside git, in the parent `Final_Project` folder: the UAT plan v1.1 PDF, now named
-  `GradPath_Group2_UAT.pdf` (15 pages; Appendix C removed at the user's request, the list of
-  changes from v1.0 is a comment at the top of the build script and in `evaluation.md`);
+  `GradPath_Group2_UAT.pdf` (15 pages; at the user's request, Appendix C is removed, and so
+  are the footer date and the other dates of the plan's own revision; the list of changes
+  from v1.0 is a comment at the top of the build script and in `evaluation.md`);
   `GradPath_UAT_v1.1/build_uat_plan.py` (writes that file; close the PDF viewer first, or it
   writes `*_new.pdf`); `GradPath_UAT_v1.1/line_message_uat.th.txt` (the team's UAT-day
   instructions, roles still to be filled with names).
