@@ -1,52 +1,56 @@
-# GradPath baseline + benchmark (สำหรับสไลด์ 11 และ 16)
+# GradPath baseline + benchmark
 
-ใช้เวลารันรวมประมาณ 15–20 นาทีบนเครื่องที่มี GPU และ Ollama
+โค้ดชุดนี้คือ baseline ที่ใช้เป็นหลักฐานในสไลด์ 11, 16 และ 17 ของ pitch v9 (รันเมื่อ 28 ต.ค. 2026 บน RTX 5070 12 GB)
+ตัวเลขที่วัดได้และข้อควรระวังในการตีความอยู่ใน [`results/slide_ready.md`](results/slide_ready.md)
 
 ## 0. เตรียมเครื่อง
 ```bash
+pip install -r requirements.txt   # ortools เป็น dependency เดียว ที่เหลือเป็น standard library
+python agent.py --mock            # ทดสอบแบบ offline ต้องจบที่ "final_state": "DONE"
+ollama pull qwen3:8b              # ใช้เมื่อจะรันกับโมเดลจริง
 ollama pull qwen3:4b
-ollama pull qwen3:8b
-pip install ortools          # dependency เดียว ส่วนที่เหลือเป็น standard library
-python agent.py --mock       # ทดสอบแบบ offline ต้องจบที่ "final_state": "DONE"
 ```
+- ทดสอบ `--mock` ซ้ำบน Python 3.13.5 + OR-Tools 9.15.6755 แล้วผ่าน และได้ plan hash เดิม (2 พ.ย. 2026)
+- `agent.py` (รวมถึง `--mock`) จะต่อท้ายผลใน `results/baseline_results.csv` และสร้าง trace ใหม่ใน `traces/` ทุกครั้ง ถ้าไม่ต้องการให้ไฟล์ที่ commit แล้วเปลี่ยน ให้ restore ก่อน commit
 
-## 1. Benchmark → สไลด์ 11 (Chayaphon)
+## 1. Benchmark (สไลด์ 11)
 ```bash
 python bench.py
 ```
-- ใช้ protocol ของ W9: warm-up 1 รอบ แล้ววัด 3 รอบ, temperature 0, num_ctx 8192, num_predict 256 และ unload model ระหว่างแต่ละ model
+- ใช้ protocol ของ W9: warm-up 1 รอบ แล้ววัด 3 รอบ, temperature 0, seed 42, num_ctx 8192, num_predict 256 และ unload model ระหว่างแต่ละ model
 - ผลอยู่ใน `results/bench_summary.md` (ตาราง) และ `results/bench_runs.csv` (ค่าดิบ)
-- ช่อง **GPU fit** ให้ใช้บรรทัดท้ายสุดของ `bench_summary.md` เช่น `100% GPU, 5.9 GB @ ctx 8192, 72 tok/s`
-  ถ้าค่าต่ำกว่า 100% แปลว่า model ล้นไปใช้ CPU (offload cliff) ต้องพูดถึงตอน pitch
+- ถ้า GPU fit ต่ำกว่า 100% แปลว่า model ล้นไปใช้ CPU (offload cliff)
 
-## 2. Baseline end-to-end → สไลด์ 16 และ Progress update (Techit)
+## 2. Baseline end-to-end (สไลด์ 16–17)
 ```bash
 python agent.py --model qwen3:8b
 python agent.py --model qwen3:4b
+python show_trace.py              # ดู trace ล่าสุดแบบอ่านง่าย
 ```
 ลำดับการทำงานของ agent:
 `VERIFY_INPUT → CLARIFY → ACT (LLM เรียก audit → retrieve_courses → solve_plan [CP-SAT]) → submit_final → FINAL_GATE (validate_plan) → DONE`
-- case ที่ใช้คือ `data/case_ai_cap3.json` ซึ่งเป็นตัวอย่างเดียวกับสไลด์ 10 (C101 และ G101 ผ่านแล้ว, cap 3 หน่วยกิตต่อเทอม, เน้น AI) คำตอบที่คาดไว้คือ T1: C102, T2: E202
-- ผลสรุปแต่ละรันจะต่อท้ายไว้ใน `results/baseline_results.csv` ส่วน trace ทุกขั้นอยู่ใน `traces/*.jsonl` ใช้โชว์ตอน progress update ได้เลย
-- ใช้ `python show_trace.py` เพื่อดู trace ล่าสุดแบบอ่านง่าย
-- budget เป็นค่าเดียวกับสไลด์ 6: tool calls ≤ 8, revisions ≤ 2, เวลา ≤ 120 s
+- case คือ `data/case_ai_cap3.json` ซึ่งเป็นตัวอย่างเดียวกับสไลด์ 10 (C101 และ G101 ผ่านแล้ว, cap 3 หน่วยกิตต่อเทอม, เน้น AI) คำตอบที่คาดไว้คือ T1: C102, T2: E202
+- ผลสรุปของแต่ละรันต่อท้ายใน `results/baseline_results.csv` ส่วน trace ทุกขั้นอยู่ใน `traces/*.jsonl`
+- budget เท่ากับสไลด์ 6: tool calls ≤ 8, revisions ≤ 2, เวลา ≤ 120 s
 
-## 3. เอาตัวเลขไปใส่สไลด์ 11
-| ช่อง | เอามาจาก |
-|---|---|
-| Task accuracy | ยังไม่มี task set 20 ข้อ ให้เขียน `Smoke 1/1 DONE (20-task set pending)` หรือ 0/1 ตามผลจริง |
-| Case latency | ค่า `e2e_s` ใน `baseline_results.csv` ของแต่ละ model |
-| GPU fit | บรรทัด "Slide 11" ใน `bench_summary.md` |
+## 3. ผลที่ใช้ใน pitch v9
+| Profile | ผล | End-to-end | LLM / tool calls | GPU fit |
+|---|---|---|---|---|
+| qwen3:8b | DONE ตรงคำตอบ | 19.9 s | 4 / 3 | 100% GPU, 6.31 GB, 100.6 tok/s |
+| qwen3:4b | DONE ตรงคำตอบ | 32.2 s | 4 / 2 (ข้าม audit) | 100% GPU, 3.88 GB, 154.0 tok/s |
+| mock | DONE ตรงคำตอบ | 1.69 s | 5 / 3, revision 1 | - |
 
-## 4. ข้อความสำหรับสไลด์ 16 (หลังรันผ่านแล้ว)
-- **Existing evidence:** `Baseline runs end to end on qwen3:8b and qwen3:4b: audit → retrieval → CP-SAT → final gate → DONE (trace + timings logged); 25 earlier code/protocol tests`
-- **Next implementation:** `Verify PDF data, add CLARIFY/consent dialogue, move loop into Harness M8/M9, build the 20-task set`
+ข้อควรระวัง (รายละเอียดอยู่ใน `results/slide_ready.md`):
+- qwen3:4b ยังคิดแบบ reasoning อยู่ แม้จะส่ง `think: false` ไปแล้ว turn แรกจึงใช้ token จนครบ 1200 โดยไม่ได้เรียก tool ทำให้เทียบเวลากับ 8B ภายใต้ setting เดียวกันไม่ได้
+- เวลา 19.9 s ของ 8B รวมเวลาโหลดโมเดลครั้งแรก 6.4 s และการเรียก LLM แต่ละครั้งยังมีเวลาราว 2 s ที่เกิดนอก Ollama สาเหตุที่น่าจะเป็นคือ `localhost` บน Windows resolve เป็น `::1` ก่อน แล้วรอราว 2 s จึง fallback ไป `127.0.0.1` (ทดลองซ้ำบนเครื่อง dev แล้ว แต่ยังไม่ได้ทดสอบบนเครื่อง benchmark และโค้ดยังใช้ `localhost` อยู่)
 
-ให้ลบคำว่า "obtain Harness" ออก เพราะ Harness.zip มีอยู่ใน Discord แล้ว
-
-## สิ่งที่ baseline นี้ยังไม่มี (บอกตรง ๆ ตอนถูกถาม)
+## สิ่งที่ baseline นี้ยังไม่มี
 - ข้อมูลเป็นแบบสังเคราะห์ (`data/rules_snapshot.json`) ยังไม่ใช่หลักสูตร CP 2566 จริง
-- รับ transcript เป็น CSV ส่วน PDF ingestion เป็นงานถัดไปของ Tanaphan
-- retrieval เป็นแบบ keyword ยังไม่ใช่ M15 embeddings
-- ยังไม่โต้ตอบกับผู้ใช้ (WAIT_USER จะคืนค่าเป็น NEED_INFO)
-- ลูปของ agent ยังเขียนเอง ไม่ได้ใช้ agent loop ของ Harness.zip โดยตรง ส่วน tools (`tools.py`) เป็นฟังก์ชันธรรมดาพร้อม JSON schema ใน `TOOL_SCHEMAS` จึงย้ายไปลงทะเบียนใน M6 tool registry ได้ตรง ๆ
+- รับ transcript เป็น CSV ยังไม่มี PDF ingestion
+- วางแผนได้แค่ 2 เทอม และบังคับให้วิชา required ทุกตัวลงครบภายใน horizon ขณะที่ขอบเขตใหม่หลัง pitch v9 ต้องวางแผนไปจนจบปี 4 (สูงสุด 8 เทอม)
+- retrieval เป็นแบบ keyword ยังไม่มี embeddings
+- ยังโต้ตอบกับผู้ใช้ไม่ได้ (WAIT_USER จะคืนค่าเป็น NEED_INFO)
+- ลูปของ agent เขียนขึ้นเอง (Harness.zip เป็นเพียงตัวอย่าง ไม่จำเป็นต้องใช้) ส่วน tools (`tools.py`) เป็นฟังก์ชันธรรมดาพร้อม JSON schema ใน `TOOL_SCHEMAS`
+- ไม่ได้บันทึก model digest และ Ollama version ไว้ในแต่ละรันของ `agent.py`
+- ยังไม่มี automated tests (ลบข้อความ "25 earlier code/protocol tests" ออกจาก README ฉบับก่อนแล้ว เพราะใน repo ไม่มีไฟล์ test จริง)
+- React UI ยังไม่ได้เชื่อมกับ agent
