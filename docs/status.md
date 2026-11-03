@@ -2,6 +2,28 @@
 
 Newest entries first.
 
+## 3 Nov 2026 (evening)
+
+- User decisions: D17 accepted; T18 change to 2571/1 confirmed; the UAT machine is the user's
+  MacBook Air 15" M4 (24 GB). The UAT PDF is with the team (Discord); pages 11-15 will be
+  filled on an iPad instead of printed.
+- Mac setup: Ollama 0.40.14 through Homebrew (`brew services`), `qwen3:8b` `500a1f067a9f`,
+  `scripts/uat_setup.sh`, Apple-silicon GPU line in the run record. `uat_check.py` 18/18.
+- Speed: plan turns took 26-29 s because every turn re-read the whole prompt (about 10 s on
+  the M4). The per-session state moved to a block at the start of each turn's first message,
+  so the system prompt and tools are cached; plan turns now 13-29 s, goal turns 2-3 s.
+- Two more runtime guards (D17 amended): caps must be numbers the student typed; after an
+  INFEASIBLE solve the turn must end with the blocker. Prompt examples added for per-term caps
+  and "leave out <code>". 45 tests.
+- Final UAT build on the M4: test set v1.1 40/40 (two repeats), paraphrases 15/15, D11 Thai
+  10/10 and English 9/10 (`eval/run_language.py`). Q3 limits set in `requirements.md`.
+  `data/test_set.jsonl` and the snapshot did not change, so the PDF hashes still match.
+- Found: the display turning off paused a run for 61 s; start the server under `caffeinate`.
+- Next: commit, then the user tags `uat-v1.1` (by Wed 12:00). After the tag, on a separate
+  branch: arms A and B and their runner, a script that fills `data/results_template.csv` from
+  traces, transcript ingestion (waiting for the user's sample format). Still open: ask the TA
+  about the arm comparison on 4 Nov; fill names into the LINE message.
+
 ## Handoff, 3 Nov 2026 (early)
 
 - Committed through `2462970` (runtime v2, API, UI, test set v1.1). After it:

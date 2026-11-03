@@ -114,6 +114,7 @@ Check sets: AI = 2110476, 2110477, 2110571, 2110572, 2110573, 2110574; systems =
 
 T18 changed while writing the file: the design said "by 2571/2", but 2571/2 is the normal end
 of Year 4 for y2-mid (entry 2568), so it is not early. 2571/1 is feasible; 2570/2 is not.
+The user confirmed the change on 3 Nov 2026.
 T08 accepts WAIT_USER or DONE, with a manual check that the answer says a course counts toward
 one category only.
 
@@ -164,6 +165,27 @@ Metrics:
 
 Run record for every run: git commit, test-set tag and hash, snapshot content hash, model tag
 and digest, Ollama version, GPU and VRAM, options, start and end time.
+
+## Measurements on the UAT machine, 3 Nov 2026
+
+MacBook Air 15" (Apple M4, 10-core GPU, 24 GB), macOS 15.7, Ollama 0.40.14, `qwen3:8b`
+`500a1f067a9f`, on mains power. Final UAT build (state block, cap grounding, blocker-first
+guards; see D17).
+
+| Run | Result | Turn times |
+|---|---|---|
+| Test set v1.1, two repeats (`eval.run_tasks --repeat 2`) | 40/40 PASS | tasks without a plan (T08-T12): longest turn 6.6-12.3 s; tasks with a plan or blocker: longest turn 13.7-29.1 s, one outlier of 68.4 s |
+| Paraphrased human-round tasks (`eval.run_paraphrases`) | 15/15 PASS; off-topic probe declined | - |
+| Language check D11 (`eval.run_language`) | Thai 10/10, English 9/10, reply language 20/20 | goal-card turns 1.7-3.2 s |
+
+- Before the state block moved out of the system prompt, the first model call of every turn
+  re-read about 1,900 prompt tokens (about 10 s on the M4) and plan turns took 26-29 s.
+- The 68.4 s outlier (T15, repeat 2) is a 61 s pause that began when the display turned off;
+  the model calls themselves took 22 s. Keep the display awake during UAT (`dev-setup.md`).
+- Most of a plan turn is generation in `solve_plan` (the preferred course list) and
+  `submit_final` (the explanation), about 18 tokens per second on the M4.
+- D11 miss: L09 in English ("no 2110432") dropped the avoid field; the goal card shows the
+  goal before approval, so a tester would see it. Q3 limits in `requirements.md`.
 
 ## UAT, in class on Wed 4 Nov 2026
 

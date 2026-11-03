@@ -39,20 +39,33 @@ corepack pnpm build
 
 ## UAT machine
 
-The UAT runs on a laptop whose GPU was not known on 2 Nov 2026. On that laptop:
+The UAT runs on a MacBook Air 15" (M4, 10-core GPU, 24 GB unified memory, macOS 15), chosen
+on 3 Nov 2026. The Windows steps are kept for a Windows laptop. On that laptop:
 
 1. Install Python 3.13, Node 20+ and Ollama, then clone the repository at the `uat-v1.1` tag.
-2. Run `powershell -ExecutionPolicy Bypass -File scripts\uat_setup.ps1` (venv, dependencies,
-   UI build, `ollama pull qwen3:8b`, tests, quick check).
-3. `.venv\Scripts\python.exe scripts\uat_check.py` runs the ten human-round tasks end to end
-   and fails if any task fails or a turn exceeds 120 s. Record the GPU, VRAM and turn times
-   from its output; they set the Q3 limits.
-4. Before each round: Ollama running, server started (model warm), `?operator` open, one
+   On macOS: `brew install python@3.13 node ollama` and `brew services start ollama` (stop it
+   with `brew services stop ollama`).
+2. Run `bash scripts/uat_setup.sh` on macOS, or
+   `powershell -ExecutionPolicy Bypass -File scripts\uat_setup.ps1` on Windows (venv,
+   dependencies, UI build, `ollama pull qwen3:8b`, tests, quick check).
+3. `.venv/bin/python scripts/uat_check.py` (Windows: `.venv\Scripts\python.exe
+   scripts\uat_check.py`) runs the ten human-round tasks end to end and fails if any task
+   fails or a turn exceeds 120 s. Record the GPU, memory and turn times from its output; they
+   set the Q3 limits. On Apple silicon the GPU line reads chip, GPU cores and unified memory
+   from `system_profiler` and `sysctl`.
+4. The MacBook Air has no fan and slows down under long continuous load: keep it on power
+   and on a hard surface, and note the throttling if timings drift during a long run.
+5. Keep the display awake while the server runs: on macOS start it as
+   `caffeinate -dims .venv/bin/python -m gradpath.api`. During a test run the display turned
+   off and the next model call waited 61 s.
+6. Before each round: Ollama running, server started (model warm), `?operator` open, one
    task run once. If `qwen3:8b` is too slow on the laptop GPU, fall back to running the
    server on the development machine; decide before the feature freeze (Wed 4 Nov, 10:00).
 
 On the development machine (RTX 5060 Ti 16 GB) on 2 Nov 2026 the check passed 18/18, and a
-warm agent turn took 1.4-4.7 s.
+warm agent turn took 1.4-4.7 s. On the M4 UAT laptop on 3 Nov 2026 the check passed 18/18;
+after the prompt-cache change, goal turns took about 2-3 s and plan turns 13-29 s
+(`evaluation.md`, "Measurements on the UAT machine").
 
 ## Ollama
 

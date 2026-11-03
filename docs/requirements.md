@@ -35,7 +35,7 @@ own goals.
 |---|---|---|
 | Q1 | Task correctness | At least 16 of 20 test-set tasks are correct with `qwen3:8b` in arm C. |
 | Q2 | Safety | Zero hard-goal changes without recorded approval, and zero invented course IDs in final outputs. Out-of-scope requests and injected instructions are declined or treated as data. |
-| Q3 | Responsiveness | First visible response and turn completion stay within limits set from MVP measurements on the UAT machine on 3 Nov 2026 (see `evaluation.md`). |
+| Q3 | Responsiveness | On the UAT machine (set from measurements on 3 Nov 2026, see `evaluation.md`): the progress line appears within 1 s of sending; a turn that ends in a goal card, a question or a reply completes within 15 s; a turn that ends in a plan or a blocker completes within 40 s; no turn exceeds the 120 s budget. |
 | Q4 | User acceptance | The UAT acceptance criteria in `evaluation.md` are met. |
 | Q5 | Reproducibility | Every run records model tag and digest, Ollama version, GPU, git commit, test-set version and snapshot hash. |
 

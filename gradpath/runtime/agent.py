@@ -10,6 +10,7 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -23,13 +24,15 @@ from ..tools import planner, validator
 from ..tools.audit import audit
 from ..tools.retrieval import Index, retrieve
 from . import llm as llm_mod
-from .prompts import SYSTEM, lang_of, text
+from .prompts import STATE, SYSTEM, lang_of, text
 from .session import Card, Session, Store, TurnRecord, new_id
 from .tools import ProposeGoalArgs, parse, schemas
 
 BUDGET = {"tool_calls": 8, "revisions": 2, "seconds": 120.0}
 SOLVER_TIME_LIMIT_S = 10.0
 ID_RE = re.compile(r"\b\d{5}[0-9xX?]{2}\b")
+NUM_RE = re.compile(r"\d+")
+THAI_DIGITS = str.maketrans("๐๑๒๓๔๕๖๗๘๙", "0123456789")
 THINK_RE = re.compile(r"<think>.*?</think>", re.S)
 TEST_SET = ROOT / "data" / "test_set.jsonl"
 PERSONA_LABELS = {
@@ -70,12 +73,34 @@ def _git_commit() -> str:
 
 
 def _gpu() -> str:
+    if sys.platform == "darwin":
+        return _apple_gpu()
     try:
         out = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"],
                              capture_output=True, text=True, timeout=5).stdout.strip()
         return out or "none"
     except (OSError, subprocess.SubprocessError):
         return "none"
+
+
+def _apple_gpu() -> str:
+    """Apple silicon: chip, GPU cores and unified memory, e.g. "Apple M4, 10-core GPU, 24 GB unified"."""
+    try:
+        disp = subprocess.run(["system_profiler", "SPDisplaysDataType"], capture_output=True, text=True,
+                              timeout=10).stdout
+        mem = subprocess.run(["sysctl", "-n", "hw.memsize"], capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.SubprocessError):
+        return "none"
+    chip = re.search(r"Chipset Model:\s*(.+)", disp)
+    cores = re.search(r"Total Number of Cores:\s*(\d+)", disp)
+    if not chip or "Apple" not in chip.group(1):
+        return "none"
+    parts = [chip.group(1).strip()]
+    if cores:
+        parts.append(f"{cores.group(1)}-core GPU")
+    if mem.strip().isdigit():
+        parts.append(f"{int(mem) // 2**30} GB unified")
+    return ", ".join(parts)
 
 
 def _now() -> str:
@@ -87,6 +112,7 @@ class Ctx:
 
     def __init__(self, rec: TurnRecord):
         self.rec, self.t0, self.need_info, self.end = rec, time.monotonic(), False, None
+        self.blocker = None      # blocker_id from an INFEASIBLE solve in this turn, until a plan is found
 
     def remaining(self) -> float:
         return BUDGET["seconds"] - (time.monotonic() - self.t0)
@@ -298,17 +324,17 @@ class Runtime:
         self.store.trace(s.session_id, "goal_changed", goal=s.goal.model_dump(), consent=ref.model_dump())
 
     # ------------------------------------------------------------ the agent loop
-    def _system(self, s: Session) -> str:
+    def _state(self, s: Session) -> str:
         st = s.student
         pending = s.pending("goal")
         goal_status = (f"v{s.goal.goal_version} confirmed: {self._goal_summary(s, s.goal)}" if s.goal
                        else "none confirmed yet")
         if pending:
             goal_status += "; a goal card is waiting for the student's approval"
-        return SYSTEM.format(snapshot_id=s.snapshot_id, entry_year=st.entry_year, next_term=st.next_term,
+        return STATE.format(snapshot_id=s.snapshot_id, entry_year=st.entry_year, next_term=st.next_term,
                              end_y4=T.end_of_year4(st.entry_year),
-                             record_status=self._record_summary(s), goal_status=goal_status,
-                             language="Thai" if s.lang == "th" else "English")
+                            record_status=self._record_summary(s), goal_status=goal_status,
+                            language="Thai" if s.lang == "th" else "English")
 
     def _record_summary(self, s: Session) -> str:
         snap, _ = self.snap(s)
@@ -323,7 +349,7 @@ class Runtime:
         s.progress.append({"step": step, "at": time.time()})
 
     def _run_agent(self, s: Session, content: str):
-        s.llm_messages.append({"role": "user", "content": content})
+        s.llm_messages.append({"role": "user", "content": self._state(s) + "\n\n" + content})
         rec = TurnRecord(turn=len(s.turns) + 1, trigger=content[:300], started=time.time())
         s.turns.append(rec)
         s.progress = []
@@ -340,7 +366,7 @@ class Runtime:
                 self._progress(s, "think")
                 t0 = time.monotonic()
                 try:
-                    msg, stats = llm.chat([{"role": "system", "content": self._system(s)}] + s.llm_messages,
+                    msg, stats = llm.chat([{"role": "system", "content": SYSTEM}] + s.llm_messages,
                                           self.tool_schemas, ctx.remaining())
                 except llm_mod.ModelUnavailable as e:
                     raise Stop("reason_model", detail=str(e)) from e
@@ -487,6 +513,13 @@ class Runtime:
                 caps[term] = cap
         if caps:
             update["caps"] = caps
+        # A cap the student did not type is a number the model chose: vague wording needs a clarifying question.
+        typed = set(NUM_RE.findall(" ".join(i.text for i in s.items if i.role == "student").translate(THAI_DIGITS)))
+        chosen = sorted({v for v in [update.get("default_cap"), *update.get("caps", {}).values()]
+                         if v is not None and str(v) not in typed})
+        if chosen:
+            errors.append(f"the student never typed the cap {chosen}; never choose a number for them: call ask_user "
+                          "with kind \"clarify\" and fields [\"caps\"]")
         done = {r.course_id for r in st.records if snap.earns_credit(r.grade)}
         # Invariant 4: a course ID enters the goal only if the student typed it or retrieval returned it.
         grounded = set(ID_RE.findall(" ".join(i.text for i in s.items if i.role == "student"))) | \
@@ -527,7 +560,16 @@ class Runtime:
         self._end(s, "WAIT_USER", ctx, reason="goal card")
         return {"status": "WAITING_FOR_STUDENT", "card_id": card.card_id, **({"note": note} if note else {})}
 
+    def _blocker_waiting(self, ctx) -> dict | None:
+        if ctx.blocker:
+            return {"status": "ERROR", "error": f"solve_plan returned INFEASIBLE in this turn: call submit_final with "
+                    f"status \"blocker\" and ref \"{ctx.blocker}\". Do not ask the student about goal changes; the UI "
+                    "shows the alternatives that the solver proved."}
+        return None
+
     def _t_ask_user(self, s, ctx, args):
+        if err := self._blocker_waiting(ctx):
+            return err
         bad = self._ungrounded(s, args.question)
         if bad:
             return {"status": "ERROR", "error": f"the question mentions unknown course IDs {bad}"}
@@ -538,6 +580,8 @@ class Runtime:
         return {"status": "ASKED"}
 
     def _t_reply(self, s, ctx, args):
+        if err := self._blocker_waiting(ctx):
+            return err
         bad = self._ungrounded(s, args.message)
         unknown_cites = [c for c in args.citations if c not in s.retrieved]
         if bad or unknown_cites:
@@ -573,9 +617,11 @@ class Runtime:
                                "record_version": s.student.record_version, "snapshot_hash": snap.content_hash,
                                "goal_summary": self._goal_summary(s, s.goal),
                                "goal": s.goal.model_dump(exclude={"consent_refs", "preferred_course_ids"})}
+            ctx.blocker = bid
             return {"status": "INFEASIBLE", "blocker_id": bid, "reason": r.get("reason") or "no plan meets every "
                     "hard rule under the current goal", "proven_alternatives": d["alternatives"]}
         cand = r["candidate"]
+        ctx.blocker = None
         s.candidates[cand.plan_id] = cand
         return {"status": "PLAN", **self._plan_summary(s, cand, args.preferred_course_ids)}
 

@@ -104,11 +104,13 @@ the prompt (`gradpath/runtime/agent.py`, decision D17):
 | Record gate | Until the student confirms the record, a message is queued and the runtime answers itself: NEED_INFO with the unresolved fields, or a request to confirm. Resolving a field creates `record_version` + 1; the queued message runs after confirmation. |
 | First goal | `solve_plan` needs a confirmed goal. The first `propose_goal` always becomes a goal card; approval creates goal v1. Later hard changes create a change card; approval increments `goal_version`. Soft fields (interests) apply directly. |
 | Course-ID grounding | A `must_take` or `avoid` ID must have been typed by the student or returned by `retrieve_courses`; an ID outside the snapshot is NEED_INFO. Texts from `ask_user`, `reply` and `submit_final` may mention only IDs from the plan, the record or retrieved passages; citations must be retrieved source IDs. |
+| Cap grounding | A `default_cap` or per-term cap must be a number the student typed (Thai digits count); otherwise `propose_goal` returns an error telling the model to ask with `ask_user` clarify `["caps"]`. |
 | Caps above the regulation | Never applied: the values are dropped from the proposal and listed on the goal card as not applied (dean's approval needed), whatever their source. |
 | Blocker alternatives | Only the solver-proven alternatives stored with the blocker can be chosen; choosing one is the approval of that hard change. Declining keeps the goal and the EVIDENCED_BLOCKER outcome. |
+| Blocker first | After an INFEASIBLE `solve_plan` in a turn, `ask_user` and `reply` are rejected until `submit_final` sends the blocker (or a later solve finds a plan), so the model cannot ask about goal changes on its own. |
 | Faults and UNKNOWN | `planner_timeout`, solver `UNKNOWN`, `model_unavailable`, an exhausted budget or a third gate rejection end the turn in STOP_UNVERIFIED with a fixed message that does not claim impossibility. |
 | Plain text | A reply without a tool call is nudged once; JSON text that parses as a tool call is accepted; otherwise the text is kept as an info reply. |
-| Context | The system prompt carries the record summary (credits, required retakes), the goal state and the student's language, and is rebuilt for every call. UI decisions reach the model as `[UI event]` messages; consent is read only from the UI. |
+| Context | The system prompt is fixed and the message history is append-only, so Ollama reuses its prompt cache. Each turn's first message opens with a `[State, written by GradPath]` block: record summary (credits, required retakes), goal state and the student's language at the start of that turn. UI decisions reach the model as `[UI event]` messages; consent is read only from the UI. |
 
 ## Planner (CP-SAT)
 

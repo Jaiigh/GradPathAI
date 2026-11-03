@@ -1,6 +1,7 @@
 """UAT machine check (docs/dev-setup.md, "UAT machine"): run on the UAT laptop before each round.
 
 Usage (from the repository root): .venv\\Scripts\\python.exe scripts\\uat_check.py [--tasks T01,T09,T17] [--quick]
+(on macOS: .venv/bin/python scripts/uat_check.py ...)
 Checks Ollama on 127.0.0.1, the qwen3:8b digest, GPU, model warm-up, the built UI, the frozen test set and
 snapshot hashes, then runs the given tasks end to end and reports the turn times against the 120 s budget.
 Exit code 0 only when every check passes.

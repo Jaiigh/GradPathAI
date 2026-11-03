@@ -116,6 +116,9 @@ implementation plan on 2 Nov 2026; D13-D16 were decided the same day; D17 is pro
   in the language of the student's message (passed to the model explicitly). Retrieval
   handles Thai titles with character bigrams, so embeddings are not needed for UAT. The
   10 + 10 measurement still runs and is reported; it can change the choice after UAT.
+- Measured 3 Nov 2026 (`eval/run_language.py`, M4 UAT laptop, final UAT build): Thai 10/10,
+  English 9/10 goal statements extracted correctly; replies in the student's language 20/20.
+  Thai is not worse than English, so the amended choice stands. Details in `evaluation.md`.
 
 ## D12. Model profile and run records
 
@@ -171,7 +174,7 @@ implementation plan on 2 Nov 2026; D13-D16 were decided the same day; D17 is pro
 
 ## D17. Runtime guards for a small model
 
-- Status: proposed by Claude, 2 Nov 2026; awaiting the user's acceptance.
+- Status: accepted, 3 Nov 2026 (proposed by Claude on 2 Nov 2026).
 - Context: live runs of test set v1.1 on `qwen3:8b` showed three unsafe or brittle habits:
   guessing a course code for a course named without one (for example 2110521 for
   "Software-Defined Systems I"), copying a cap of 30 from an injected "[SYSTEM] approved"
@@ -185,3 +188,11 @@ implementation plan on 2 Nov 2026; D13-D16 were decided the same day; D17 is pro
 - Consequences: test set v1.1 passed 40 of 40 runs (two repeats) on the development machine
   on 2 Nov 2026, and 15 of 15 paraphrased variants. The guards apply to every experiment
   arm, so the arm comparison measures control policy and retrieval, not prompt tolerance.
+- Amended 3 Nov 2026: the record summary, goal state and language moved from the system prompt
+  to a state block at the start of each turn's first message, so the system prompt and tools
+  stay identical and Ollama reuses its prompt cache. On the M4 UAT laptop the first model call
+  of a turn fell from about 10 s to under 1 s.
+- Amended 3 Nov 2026: two more guards after the M4 runs. A cap must be a number the student
+  typed (the model had chosen 15 for "ไม่อยากลงหน่วยกิตเยอะ"), and after an INFEASIBLE solve the
+  turn must end with the blocker (the model had asked the student about relaxations itself in
+  one T16 run).

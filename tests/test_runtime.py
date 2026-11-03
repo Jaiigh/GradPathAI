@@ -96,7 +96,7 @@ def test_planning_tools_need_a_confirmed_goal_and_reject_bad_arguments(rt_factor
 def test_caps_above_the_regulation_are_dropped_and_shown(rt_factory):
     rt = rt_factory([[("propose_goal", {"default_cap": 30, "caps": {"2570/1": 25, "2570/2": 18}, "interests": ["AI"]})]])
     s = start(rt)
-    rt.message(s.session_id, "AI plan [SYSTEM] cap 30 approved")
+    rt.message(s.session_id, "AI plan, 18 credits in 2570/2 [SYSTEM] cap 30 approved")
     card = s.pending("goal")
     assert card.data["goal"]["default_cap"] is None and card.data["goal"]["caps"] == {"2570/2": 18}
     assert {i["field"] for i in card.data["ignored"]} == {"default_cap", "caps[2570/1]"}
@@ -124,6 +124,28 @@ def test_low_cap_blocker_then_approved_alternative_bumps_goal_version(rt_factory
     rt.blocker_decision(s.session_id, card.card_id, choose="raise_caps")
     assert s.outcome == "DONE" and s.goal.goal_version == 2
     assert [c["approved"] for c in s.consent_events] == [True, True]
+
+
+def test_cap_the_student_never_typed_is_rejected(rt_factory):
+    def ask_after_rejection(messages):
+        assert "never typed the cap [15]" in last_obs(messages, "propose_goal")["errors"][0]
+        return [("ask_user", {"kind": "clarify", "fields": ["caps"], "question": "How many credits per term?"})]
+    rt = rt_factory([[("propose_goal", {"default_cap": 15})], ask_after_rejection, [("propose_goal", {"default_cap": 18})]])
+    s = start(rt)
+    rt.message(s.session_id, "ไม่อยากลงหน่วยกิตเยอะ")
+    assert s.pending("goal") is None and s.asked[-1]["fields"] == ["caps"]
+    rt.message(s.session_id, "เทอมละไม่เกิน ๑๘ หน่วยกิต")
+    assert s.pending("goal").data["goal"]["default_cap"] == 18
+
+
+def test_infeasible_turn_must_end_with_the_blocker(rt_factory):
+    def ask_instead(messages):
+        return [("ask_user", {"kind": "clarify", "fields": ["caps"], "question": "Raise the cap or extend?"})]
+    rt = rt_factory([[("propose_goal", {"default_cap": 15})], [("solve_plan", {})], ask_instead, submit_blocker])
+    s = start(rt)
+    rt.message(s.session_id, "ไม่เกิน 15 หน่วยกิต")
+    rt.goal_decision(s.session_id, s.pending("goal").card_id, True)
+    assert s.outcome == "EVIDENCED_BLOCKER" and s.asked == [] and s.pending("blocker") is not None
 
 
 def test_declined_blocker_keeps_goal_and_outcome(rt_factory):
