@@ -19,6 +19,7 @@ class Evidence(Strict):
     page: int | None = None
     row: int | None = None
     text: str | None = None
+    line: int | None = None
 
 
 class Record(Strict):
@@ -49,6 +50,8 @@ class StudentState(Strict):
     records: list[Record]
     unresolved: list[UnresolvedField] = []
     confirmed: bool = False
+    internship_completed: bool = False  # explicit student attestation, separate from PDF
+    report: dict | None = None  # non-identifying extraction metadata and reconciliation
 
 
 # ---------------------------------------------------------------- goal

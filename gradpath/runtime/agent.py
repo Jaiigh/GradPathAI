@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from .. import snapshot as snapshot_mod, terms as T
 from ..contracts import ConsentRef, GoalConstraints, StudentState
 from ..fixtures import load_persona
+from ..ingest.cr60 import reconciliation, refresh_categories
+from ..rules import internship_info
 from ..snapshot import ROOT, Snapshot
 from ..tools import planner, validator
 from ..tools.audit import audit
@@ -139,8 +141,8 @@ class Runtime:
         return self._snaps[key]
 
     def create_session(self, persona: str | None = None, task_id: str | None = None, fault: str | None = None,
-                       overlay: dict | None = None) -> Session:
-        snapshot_id = "cp2566-v0"
+                       overlay: dict | None = None, student: StudentState | None = None) -> Session:
+        snapshot_id = student.snapshot_id if student else snapshot_mod.DEFAULT_SNAPSHOT
         if task_id:
             task = load_tasks()[task_id]
             persona, snapshot_id = task["persona"], task["snapshot_id"]
@@ -148,7 +150,9 @@ class Runtime:
             fault, overlay = inject.get("fault", fault), inject.get("snapshot_overlay", overlay)
         if fault not in (None, "planner_timeout", "model_unavailable"):
             raise ValueError(f"unknown fault {fault!r}")
-        student: StudentState = load_persona(persona)
+        student = student or load_persona(persona)
+        student.snapshot_id = snapshot_id
+        persona = persona or "uploaded-report"
         s = Session(session_id=new_id(), created_at=time.time(), persona=persona, task_id=task_id, fault=fault,
                     overlay=overlay, snapshot_id=snapshot_id, snapshot_hash="", student=student)
         snap, _ = self.snap(s)
@@ -164,11 +168,86 @@ class Runtime:
         self.store.save(s)
         return s
 
+    def replace_report(self, session_id: str, student: StudentState) -> Session:
+        s = self.get(session_id)
+        student.student_ref = s.student.student_ref
+        student.record_version = s.student.record_version + 1
+        s.student = student
+        s.persona, s.task_id, s.fault = "uploaded-report", None, None
+        s.overlay = None
+        s.snapshot_id = student.snapshot_id
+        s.snapshot_hash = self.snap(s)[0].content_hash
+        s.run_record.update({"persona": s.persona, "task_id": None, "fault": None, "overlay": False,
+                             "snapshot_id": s.snapshot_id, "snapshot_hash": s.snapshot_hash})
+        s.goal = None
+        s.goal_history = []
+        s.final_plan_id = None
+        s.candidates.clear()
+        s.blockers.clear()
+        s.llm_messages.clear()
+        s.retrieved.clear()
+        s.queued = None
+        for card in s.cards:
+            if card.status == "pending":
+                card.status = "superseded"
+        for item in s.items:
+            if item.kind == "plan":
+                item.data["stale"] = True
+        s.state, s.outcome = "VERIFY_INPUT", None
+        s.add("system", "event", "อัปโหลดรายงานใหม่แล้ว กรุณาตรวจและยืนยันระเบียนอีกครั้ง แผนเดิมไม่ใช่แผนปัจจุบัน")
+        self.store.trace(session_id, "report_replaced", record_version=student.record_version,
+                         source_sha256=student.source_sha256)
+        self._save(s)
+        return s
+
     def get(self, session_id: str) -> Session:
         if session_id not in self.sessions:
             self.sessions[session_id] = self.store.load(session_id)
             self.locks[session_id] = threading.Lock()
+            restored = self.sessions[session_id]
+            if restored.busy:
+                restored.busy = False
+                restored.progress = []
+                restored.state = restored.outcome = "STOP_UNVERIFIED"
+                restored.add("system", "stop", "เซิร์ฟเวอร์หยุดระหว่างทำงาน กรุณาส่งคำขออีกครั้ง / The server stopped during a turn. Please retry.")
+                self._save(restored)
+            if restored.student.source_kind == "pdf" and restored.snapshot_id in {"cp2566-v0", "cp2566-gened-v1"}:
+                self._upgrade_gened(restored)
         return self.sessions[session_id]
+
+    def _upgrade_gened(self, s: Session):
+        """Carry uploaded records into D18; old UAT sessions stay bound to their snapshot."""
+        previous = {"snapshot_id": s.snapshot_id, "snapshot_hash": s.snapshot_hash}
+        s.snapshot_id = s.student.snapshot_id = snapshot_mod.DEFAULT_SNAPSHOT
+        s.overlay = None
+        snap, _ = self.snap(s)
+        s.snapshot_hash = snap.content_hash
+        for record in s.student.records:
+            record.category = snap.category_id(record.category)
+        for unresolved in s.student.unresolved:
+            if unresolved.field == "category":
+                unresolved.candidates = snap.slot_categories()
+        s.student.record_version += 1
+        s.final_plan_id = None
+        s.candidates.clear()
+        s.blockers.clear()
+        s.llm_messages.clear()
+        s.retrieved.clear()
+        s.queued = None
+        for card in s.cards:
+            if card.status == "pending":
+                card.status = "superseded"
+        for item in s.items:
+            if item.kind == "plan":
+                item.data["stale"] = True
+        s.state = "CLARIFY" if s.student.confirmed else "VERIFY_INPUT"
+        s.outcome = None
+        s.run_record.update(snapshot_id=s.snapshot_id, snapshot_hash=s.snapshot_hash)
+        s.add("system", "event", "ปรับกฎเป็น GenEd รวม 12 หน่วยกิตแล้ว หน่วยกิตใน 4 หมวดเดิมนับรวมกัน เพิ่มกฎฝึกงาน 2100301 เฉพาะซัมเมอร์ปี 3 แผนเดิมต้องจัดใหม่ตามกฎนี้")
+        self.store.trace(s.session_id, "curriculum_updated", previous=previous,
+                         snapshot_id=s.snapshot_id, snapshot_hash=s.snapshot_hash,
+                         record_version=s.student.record_version)
+        self._save(s)
 
     def lock(self, session_id: str) -> threading.Lock:
         self.get(session_id)
@@ -207,10 +286,10 @@ class Runtime:
         self._run_agent(s, msg)
         return s
 
-    def record(self, session_id: str, resolve: list[dict], confirm: bool) -> Session:
+    def record(self, session_id: str, resolve: list[dict], confirm: bool, profile: dict | None = None) -> Session:
         s = self.get(session_id)
         snap, _ = self.snap(s)
-        st = s.student
+        st = s.student.model_copy(deep=True)  # failed decisions must not partially mutate trusted state
         if st.confirmed:
             raise ValueError("records are already confirmed")
         changed = []
@@ -223,16 +302,45 @@ class Runtime:
                 raise ValueError(f"{value!r} is not a grade in the snapshot")
             if field == "course_id" and value not in snap.courses:
                 raise ValueError(f"{value!r} is not a course ID in the snapshot")
+            if field == "category" and value not in snap.slot_categories():
+                raise ValueError("Choose a supported elective category.")
+            if field == "credits":
+                if not value.isdigit() or (u.candidates and value not in u.candidates):
+                    raise ValueError("Confirm the credit value printed in the report.")
+                value = int(value)
+            if field == "term":
+                T.parse(value)
             st.records[idx] = st.records[idx].model_copy(update={field: value})
             st.unresolved = [x for x in st.unresolved if x is not u]
             changed.append({"record_index": idx, "field": field, "value": value})
+        if st.report:
+            if profile:
+                entry = profile["entry_year"]
+                next_term = profile["next_term"]
+                T.parse(next_term)
+                if not 2566 <= entry <= T.parse(st.report["last_term"])[0]:
+                    raise ValueError("Check the admission year (B.E.); this build supports CP 2566 onward.")
+                if not T.key(st.report["last_term"]) < T.key(next_term) <= T.key(T.label(entry + 7, "2")):
+                    raise ValueError("Planning must start after the last reported semester, within eight academic years of admission.")
+                if not profile["confirmed"]:
+                    raise ValueError("Confirm CP 2566 and the academic history before planning.")
+                if (st.entry_year, st.next_term) != (entry, next_term):
+                    st.internship_completed = False  # changed timeline needs a fresh attestation
+                st.entry_year, st.next_term = entry, next_term
+                st.report["profile_confirmed"] = True
+                changed.append({"profile": profile})
+            refresh_categories(st, snap)
+            st.report["reconciliation_errors"] = reconciliation(st, snap)
+            if confirm and (not st.report["profile_confirmed"] or st.report["reconciliation_errors"]):
+                raise ValueError("Confirm the planning details and resolve report credit mismatches before continuing.")
+        if confirm and st.unresolved:
+            raise ValueError("some record fields are still unresolved")
         if changed:
             st.record_version += 1
             self.store.trace(s.session_id, "record_resolved", changes=changed, record_version=st.record_version)
         if confirm:
-            if st.unresolved:
-                raise ValueError("some record fields are still unresolved")
             st.confirmed = True
+            s.student = st
             s.state = "CLARIFY"
             s.add("system", "event", text("record_confirmed", s.lang, v=st.record_version))
             self.store.trace(s.session_id, "record_confirmed", record_version=st.record_version)
@@ -240,6 +348,37 @@ class Runtime:
                 queued, s.queued = s.queued, None
                 self._run_agent(s, queued)
                 return s
+        s.student = st
+        self._save(s)
+        return s
+
+    def internship_decision(self, session_id: str, completed: bool) -> Session:
+        s = self.get(session_id)
+        info = internship_info(self.snap(s)[0], s.student)
+        if not info:
+            raise ValueError("This snapshot does not support supplemental internship confirmation")
+        if completed and T.key(s.student.next_term) <= T.key(info["term"]):
+            raise ValueError("ยืนยันผ่านได้หลังซัมเมอร์ปี 3 เท่านั้น กรุณาตรวจเทอมเริ่มวางแผน")
+        if s.student.internship_completed == completed:
+            return s
+        s.student.internship_completed = completed
+        s.student.record_version += 1
+        s.final_plan_id = None
+        s.candidates.clear()
+        s.blockers.clear()
+        s.llm_messages.clear()
+        s.queued = None
+        for card in s.cards:
+            if card.status == "pending":
+                card.status = "superseded"
+        for item in s.items:
+            if item.kind == "plan":
+                item.data["stale"] = True
+        s.state = "CLARIFY" if s.student.confirmed else "VERIFY_INPUT"
+        s.outcome = None
+        s.add("system", "event", "บันทึกสถานะฝึกงาน 2100301 จากการยืนยันของผู้ใช้แล้ว กรุณาส่งคำขอจัดแผนใหม่")
+        self.store.trace(s.session_id, "internship_confirmation", completed=completed,
+                         term=info["term"], record_version=s.student.record_version, source="student_attestation")
         self._save(s)
         return s
 
@@ -349,6 +488,12 @@ class Runtime:
         s.progress.append({"step": step, "at": time.time()})
 
     def _run_agent(self, s: Session, content: str):
+        info = internship_info(self.snap(s)[0], s.student)
+        if info and info["needs_review"]:
+            s.add("system", "need_info", info["message"])
+            self._end(s, "NEED_INFO", reason="internship completion needs confirmation")
+            self._save(s)
+            return
         s.llm_messages.append({"role": "user", "content": self._state(s) + "\n\n" + content})
         rec = TurnRecord(turn=len(s.turns) + 1, trigger=content[:300], started=time.time())
         s.turns.append(rec)
@@ -748,22 +893,31 @@ class Runtime:
         records = []
         for n, r in enumerate(st.records):
             c = snap.courses.get(r.course_id)
+            category_ids = c["categories"] if c else ([snap.category_id(r.category)] if r.category else [])
             flags = [{"field": f, "reason": u.reason, "candidates": u.candidates}
                      for (i, f), u in unresolved.items() if i == n]
             records.append({"index": n, "course_id": r.course_id, "term": r.term, "grade": r.grade,
                             "name_th": c["name_th"] if c else r.title, "name_en": c["name_en"] if c else r.title,
-                            "credits": c["credits"] if c else r.credits, "evidence": r.evidence.text if r.evidence else None,
+                            "credits": r.credits if r.credits is not None else c["credits"] if c else None,
+                            "title": r.title, "category": snap.category_id(r.category),
+                            "category_names": [snap.categories[k]["name_th"] for k in category_ids],
+                            "evidence": r.evidence.text if r.evidence else None,
+                            "page": r.evidence.page if r.evidence else None,
                             "unresolved": flags})
         summary = audit(snap, st, s.goal) if not st.unresolved else None
         if summary:
             summary["category_names"] = {k: snap.categories[k]["name_th"] for k in summary["category_deficits"]}
         out = {
-            "session_id": s.session_id, "persona": s.persona, "persona_label": PERSONA_LABELS.get(s.persona, s.persona),
+            "session_id": s.session_id, "persona": s.persona,
+            "persona_label": "รายงานผลการเรียนของคุณ" if st.source_kind == "pdf" else PERSONA_LABELS.get(s.persona, s.persona),
             "task_id": s.task_id, "state": s.state, "outcome": s.outcome, "busy": s.busy, "lang": s.lang,
             "progress": s.progress, "turn_started": s.turns[-1].started if s.busy and s.turns else None,
             "student": {"student_ref": st.student_ref, "entry_year": st.entry_year, "next_term": st.next_term,
                         "end_of_year4": T.end_of_year4(st.entry_year), "record_version": st.record_version,
-                        "confirmed": st.confirmed, "unresolved": len(st.unresolved)},
+                        "confirmed": st.confirmed, "unresolved": len(st.unresolved), "source_kind": st.source_kind},
+            "report": st.report,
+            "internship": internship_info(snap, st),
+            "categories": [{"id": k, "name": snap.categories[k]["name_th"]} for k in snap.slot_categories()],
             "records": records, "audit": summary,
             "goal": ({**s.goal.model_dump(exclude={"consent_refs", "preferred_course_ids"}),
                       "summary": self._goal_summary(s, s.goal)} if s.goal else None),

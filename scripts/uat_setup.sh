@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Set up a fresh macOS (Apple silicon) machine for the UAT (docs/dev-setup.md, "UAT machine").
-# Needs: Python 3.13, Node 20+ with corepack, Ollama running (brew install python@3.13 node ollama;
+# Needs: Python 3.13, Node 22.13+ with corepack, Ollama running (brew install python@3.13 node ollama;
 # brew services start ollama). Run from the repository root:
 #   bash scripts/uat_setup.sh
 set -euo pipefail

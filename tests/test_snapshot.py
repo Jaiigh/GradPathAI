@@ -14,7 +14,7 @@ def test_totals_agree():
 def test_study_plan_terms_sum_to_their_stated_credits():
     for t in SNAP.data["study_plan"]:
         credits = sum(SNAP.courses[i["course"]]["credits"] if "course" in i else SNAP.categories[
-            "GE_SOC" if i["slot"] == "GE" else i["slot"]]["slot_credits"] for i in t["items"])
+            i["slot"]]["slot_credits"] for i in t["items"])
         assert credits == t["credits"], (t["year"], t["semester"])
 
 

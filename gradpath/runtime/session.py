@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import threading
 import time
 import uuid
@@ -115,6 +116,8 @@ class Store:
         tmp.replace(path)
 
     def load(self, session_id: str) -> Session:
+        if not re.fullmatch(r"[A-Za-z0-9-]+", session_id):
+            raise FileNotFoundError("no such session")
         return Session.model_validate_json((self.sessions_dir / f"{session_id}.json").read_text(encoding="utf-8"))
 
     def trace_path(self, session_id: str) -> Path:

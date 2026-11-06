@@ -196,3 +196,42 @@ implementation plan on 2 Nov 2026; D13-D16 were decided the same day; D17 is pro
   typed (the model had chosen 15 for "ไม่อยากลงหน่วยกิตเยอะ"), and after an INFEASIBLE solve the
   turn must end with the blocker (the model had asked the student about relaxations itself in
   one T16 run).
+
+## D18. Pooled general education credits
+
+- Status: accepted, 7 Nov 2026, from the project owner's instruction in this session.
+- Decision: replace the four 3-credit GenEd subject-group minimums (social sciences,
+  humanities, interdisciplinary, science/mathematics) with one 12-credit category `GE`,
+  displayed as “กลุ่มวิชาศึกษาทั่วไป GenEd” / “General Education (GenEd)”. Any combination
+  of eligible GenEd coursework satisfies the pool; there are no subject-group minimums.
+- Scope: special-group courses (`GE_SPECIAL`, 6 credits), languages (`LANG`, 12 credits),
+  and the 138-credit program total retain their separate requirements. Unknown courses
+  still require confirmation as GenEd or another eligible category; their identities alone
+  do not establish that they are GenEd.
+- Versioning: `cp2566-gened-v1` is the default for new uploads and ordinary sessions. Its
+  source `U1` records this project decision without attributing it to an official webpage.
+  Build it with `scripts/build_snapshot_cp2566_gened.py`. Keep `cp2566-v0` unchanged for
+  the frozen UAT tasks, as required by D15.
+- Compatibility: legacy `GE_SOC`, `GE_HUM`, `GE_INTER`, and `GE_SCI` records count toward
+  `GE` under the new snapshot. Existing uploaded-report sessions migrate on reopening;
+  previous plans are marked stale and cannot be reused under the changed snapshot.
+  Confirmed student goals are retained; conversation context containing old rules is cleared.
+
+## D19: Internship confirmation and fixed Year 3 summer
+
+Per project owner instruction (7 November 2026), current snapshot `cp2566-internship-v2`
+requires 2100301 in `entry_year + 2 / S` only. This compulsory summer does not require
+consent for optional summer courses. Both solver and independent validator enforce
+this term; horizon extensions cannot move the internship. Older snapshots are preserved.
+Uploaded sessions migrate with old plans invalidated.
+
+A student may explicitly attest that they registered for and passed 2100301, separately
+from CR60 records. The editable checkbox is saved through a dedicated record decision,
+increments the record version, invalidates prior plans, and records provenance in the
+trace. It does not invoke the LLM. A passing PDF entry takes precedence and prevents
+double counting. Reported credits and GPAX are unchanged. The existing curriculum
+policy counts its 2 credits toward the plan total (C12 remains documented); the UI
+labels supplemental credits separately. Changing the academic timeline clears attestation.
+After Year 3 summer, absent completion yields NEED_INFO before calling the model;
+the student must check their status with the department if they have not passed.
+The system never assumes completion based only on study year.

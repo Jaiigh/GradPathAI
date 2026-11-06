@@ -1,0 +1,3444 @@
+{
+ "snapshot_id": "cp2566-gened-v1",
+ "schema_version": 1,
+ "built_on": "2026-11-07",
+ "program": {
+  "name_th": "หลักสูตรวิศวกรรมศาสตรบัณฑิต สาขาวิชาวิศวกรรมคอมพิวเตอร์ (หลักสูตรปรับปรุง พ.ศ. 2566)",
+  "name_en": "Bachelor of Engineering Program in Computer Engineering (revised B.E. 2566)",
+  "university": "Chulalongkorn University",
+  "curriculum_year": 2566,
+  "total_credits": 138,
+  "regular_terms": 8,
+  "status": "verified",
+  "sources": [
+   "S1",
+   "S2"
+  ]
+ },
+ "policy": {
+  "identity_data_missing": "NEED_INFO",
+  "supplementary_data_missing": "plan, and label the item as unverified (prerequisites, offerings)",
+  "gened": {
+   "category": "GE",
+   "min_credits": 12,
+   "legacy_categories": [
+    "GE_HUM",
+    "GE_INTER",
+    "GE_SCI",
+    "GE_SOC"
+   ],
+   "source": "U1"
+  }
+ },
+ "regulations": {
+  "max_credits_regular": {
+   "value": 22,
+   "status": "verified",
+   "source": "S3",
+   "location": "clause 59(2)(a)"
+  },
+  "max_credits_summer": {
+   "value": 9,
+   "status": "verified",
+   "source": "S3",
+   "location": "clause 59(2)(a)"
+  },
+  "overload": {
+   "value": "more than the limits only with a reason and the dean's approval",
+   "status": "verified",
+   "source": "S3",
+   "location": "clause 59, last paragraph"
+  },
+  "min_credits_regular": {
+   "value": null,
+   "status": "unknown",
+   "source": "S3",
+   "location": "clause 59",
+   "note": "no minimum is stated for bachelor's students"
+  },
+  "graduation_min_gpax": {
+   "value": 2.0,
+   "status": "verified",
+   "source": "S3",
+   "location": "graduation requirements for bachelor's degrees"
+  },
+  "earned_credit_grades": {
+   "value": [
+    "A",
+    "B+",
+    "B",
+    "C+",
+    "C",
+    "D+",
+    "D",
+    "S"
+   ],
+   "status": "verified",
+   "source": "S3",
+   "location": "definitions"
+  },
+  "gpa_grades": {
+   "value": [
+    "A",
+    "B+",
+    "B",
+    "C+",
+    "C",
+    "D+",
+    "D",
+    "F"
+   ],
+   "status": "verified",
+   "source": "S3",
+   "location": "definitions"
+  },
+  "required_course_retake_grades": {
+   "value": [
+    "F",
+    "U",
+    "W"
+   ],
+   "status": "verified",
+   "source": "S3",
+   "location": "clause 67(1)"
+  },
+  "elective_retake_rule": {
+   "value": "F, U or W in an elective: retake it or take another course instead",
+   "status": "verified",
+   "source": "S3",
+   "location": "clause 67(2)"
+  },
+  "prereq_satisfied_by": {
+   "value": [
+    "A",
+    "B+",
+    "B",
+    "C+",
+    "C",
+    "D+",
+    "D",
+    "S"
+   ],
+   "status": "inferred",
+   "source": "S3",
+   "location": "definitions",
+   "note": "assumed: a prerequisite is satisfied by a course with earned credit"
+  }
+ },
+ "grades": {
+  "A": {
+   "earns_credit": true,
+   "in_gpa": true
+  },
+  "B+": {
+   "earns_credit": true,
+   "in_gpa": true
+  },
+  "B": {
+   "earns_credit": true,
+   "in_gpa": true
+  },
+  "C+": {
+   "earns_credit": true,
+   "in_gpa": true
+  },
+  "C": {
+   "earns_credit": true,
+   "in_gpa": true
+  },
+  "D+": {
+   "earns_credit": true,
+   "in_gpa": true
+  },
+  "D": {
+   "earns_credit": true,
+   "in_gpa": true
+  },
+  "F": {
+   "earns_credit": false,
+   "in_gpa": true
+  },
+  "S": {
+   "earns_credit": true,
+   "in_gpa": false
+  },
+  "U": {
+   "earns_credit": false,
+   "in_gpa": false
+  },
+  "W": {
+   "earns_credit": false,
+   "in_gpa": false
+  }
+ },
+ "categories": [
+  {
+   "id": "GE",
+   "name_th": "กลุ่มวิชาศึกษาทั่วไป GenEd",
+   "name_en": "General Education (GenEd)",
+   "min_credits": 12,
+   "fill": "slot",
+   "slot_credits": 3,
+   "sources": [
+    "U1"
+   ],
+   "note": "Pooled requirement; no minimum for individual subject groups (D18)."
+  },
+  {
+   "id": "GE_SPECIAL",
+   "name_th": "ศึกษาทั่วไป กลุ่มพิเศษ",
+   "name_en": "General Education: Special Group",
+   "min_credits": 6,
+   "fill": "listed"
+  },
+  {
+   "id": "LANG",
+   "name_th": "ศึกษาทั่วไป กลุ่มวิชาภาษาต่างประเทศ",
+   "name_en": "General Education: Foreign Language",
+   "min_credits": 12,
+   "fill": "listed"
+  },
+  {
+   "id": "MATH_SCI",
+   "name_th": "หมวดวิชาพื้นฐานทางวิทยาศาสตร์และคณิตศาสตร์",
+   "name_en": "Basic Science and Mathematics",
+   "min_credits": 21,
+   "fill": "listed"
+  },
+  {
+   "id": "ENG_BASIC",
+   "name_th": "หมวดวิชาพื้นฐานทางวิศวกรรม",
+   "name_en": "Basic Engineering",
+   "min_credits": 11,
+   "fill": "listed",
+   "status": "conflict",
+   "note": "C2"
+  },
+  {
+   "id": "CORE",
+   "name_th": "หมวดวิชาแกนระดับสาขาวิชา",
+   "name_en": "Core Courses",
+   "min_credits": 40,
+   "fill": "listed",
+   "status": "conflict",
+   "note": "C3"
+  },
+  {
+   "id": "CORE_ELECTIVE",
+   "name_th": "วิชาเลือกกลุ่มวิชาแกนระดับสาขาวิชา",
+   "name_en": "Core-Level Electives",
+   "min_credits": 6,
+   "fill": "slot_or_listed",
+   "slot_credits": 3,
+   "unlisted_options": [
+    {
+     "code": null,
+     "name_en": "Software-Defined Systems I",
+     "name_th": "ระบบที่กำหนดโดยซอฟต์แวร์ 1",
+     "status": "unknown",
+     "note": "C10: code not published (21105xx)"
+    }
+   ]
+  },
+  {
+   "id": "MULTI_21C",
+   "name_th": "วิชาเลือกกลุ่มสหสาขาวิชาหรือทักษะสำหรับศตวรรษที่ 21",
+   "name_en": "Multidisciplinary or 21st-Century Skills Electives",
+   "min_credits": 6,
+   "fill": "slot_or_listed",
+   "slot_credits": 3,
+   "unlisted_options": [
+    {
+     "code": null,
+     "name_en": "Project Management",
+     "status": "unknown",
+     "note": "C11: code not published"
+    },
+    {
+     "code": null,
+     "name_en": "Marketing and Management in Engineering",
+     "status": "unknown",
+     "note": "C11: code not published"
+    },
+    {
+     "code": null,
+     "name_en": "Study Abroad for 21 Century Skill I",
+     "status": "unknown",
+     "note": "C11: code not published"
+    },
+    {
+     "code": null,
+     "name_en": "Study Abroad for 21 Century Skill II",
+     "status": "unknown",
+     "note": "C11: code not published"
+    }
+   ]
+  },
+  {
+   "id": "DEPT_ELECTIVE",
+   "name_th": "วิชาเลือกระดับสาขาวิชา",
+   "name_en": "Department Electives",
+   "min_credits": 18,
+   "fill": "slot_or_listed",
+   "slot_credits": 3
+  },
+  {
+   "id": "FREE",
+   "name_th": "หมวดวิชาเลือกเสรี",
+   "name_en": "Free Electives",
+   "min_credits": 6,
+   "fill": "slot_or_any",
+   "slot_credits": 3
+  }
+ ],
+ "courses": {
+  "2100111": {
+   "name_th": "ท่องโลกวิศวกรรม",
+   "name_en": "Exploring Engineering World",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "required",
+   "categories": [
+    "GE_SPECIAL"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "conflict",
+   "sources": [
+    "S1",
+    "S2",
+    "S4"
+   ],
+   "notes": [
+    "C5: the diagram shows code 2110111; the study-plan table shows 1 credit"
+   ]
+  },
+  "2100223": {
+   "name_th": "ความเป็นผู้ประกอบการกับการสร้างธุรกิจใหม่",
+   "name_en": "Entrepreneurship and New Venture Creation",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "multi_21c",
+   "categories": [
+    "MULTI_21C",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "inferred",
+   "sources": [
+    "S1",
+    "S4"
+   ],
+   "notes": [
+    "code from the 2566 EE curriculum; the CP page shows a placeholder code"
+   ]
+  },
+  "2100224": {
+   "name_th": "ความเป็นผู้ประกอบการธุรกิจเทคโนโลยี",
+   "name_en": "Technopreneurship",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "multi_21c",
+   "categories": [
+    "MULTI_21C",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "inferred",
+   "sources": [
+    "S1",
+    "S4"
+   ],
+   "notes": [
+    "code from the 2566 EE curriculum; the CP page shows a placeholder code"
+   ]
+  },
+  "2100225": {
+   "name_th": "หลักการคิดเชิงออกแบบ",
+   "name_en": "Design Thinking Principle",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "multi_21c",
+   "categories": [
+    "MULTI_21C",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "inferred",
+   "sources": [
+    "S1",
+    "S4"
+   ],
+   "notes": [
+    "code from the 2566 EE curriculum; the CP page shows a placeholder code"
+   ]
+  },
+  "2100226": {
+   "name_th": "หลักการคิดแก้ไขปัญหา",
+   "name_en": "Problem Solving Principle",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "multi_21c",
+   "categories": [
+    "MULTI_21C",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "inferred",
+   "sources": [
+    "S1",
+    "S4"
+   ],
+   "notes": [
+    "code from the 2566 EE curriculum; the CP page shows a placeholder code"
+   ]
+  },
+  "2100301": {
+   "name_th": "การฝึกงานทางวิศวกรรม",
+   "name_en": "Engineering Practice",
+   "credits": 2,
+   "credit_format": "2(0-18-0)",
+   "kind": "required",
+   "categories": [
+    "ENG_BASIC"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "S"
+   },
+   "offered": {
+    "semesters": [
+     "S"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2100499": {
+   "name_th": "โครงงานทางวิศวกรรม",
+   "name_en": "Senior Project in Engineering",
+   "credits": 3,
+   "credit_format": "3(0-6-3)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": [
+    "C9: listed under 2110499 in the first listing"
+   ]
+  },
+  "2110101": {
+   "name_th": "การทำโปรแกรมคอมพิวเตอร์",
+   "name_en": "Computer Programming",
+   "credits": 3,
+   "credit_format": "3(2-2-5)",
+   "kind": "required",
+   "categories": [
+    "ENG_BASIC"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110200": {
+   "name_th": "โครงสร้างดิสครีตและภาวะคำนวณได้",
+   "name_en": "Discrete Structures and Computability",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110201": {
+   "name_th": "คณิตศาสตร์วิศวกรรมคอมพิวเตอร์",
+   "name_en": "Computer Engineering Mathematics",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "ENG_BASIC"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110203": {
+   "name_th": "คณิตศาสตร์วิศวกรรมคอมพิวเตอร์ 2",
+   "name_en": "Computer Engineering Mathematics II",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "ENG_BASIC"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110211": {
+   "name_th": "ความรู้เบื้องต้นเกี่ยวกับโครงสร้างข้อมูล",
+   "name_en": "Introduction to Data Structures",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110101"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110215": {
+   "name_th": "วิธีวิทยาการทำโปรแกรม 1",
+   "name_en": "Programming Methodology I",
+   "credits": 3,
+   "credit_format": "3(2-3-4)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110101"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110221": {
+   "name_th": "แก่นวิศวกรรมคอมพิวเตอร์",
+   "name_en": "Computer Engineering Essentials",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "required",
+   "categories": [
+    "GE_SPECIAL"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110233": {
+   "name_th": "การปฏิบัติการทางคณิตศาสตร์วิศวกรรมคอมพิวเตอร์",
+   "name_en": "Computer Engineering Mathematics Laboratory",
+   "credits": 1,
+   "credit_format": "1(0-2-1)",
+   "kind": "other",
+   "categories": [
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "conflict",
+   "sources": [
+    "S1"
+   ],
+   "notes": [
+    "C6: in the basic-engineering list but not in the study plan or the 11-credit total"
+   ]
+  },
+  "2110251": {
+   "name_th": "ตรรกศาสตร์ของดิจิตอลคอมพิวเตอร์",
+   "name_en": "Digital Computer Logic",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110263": {
+   "name_th": "การปฏิบัติการทางตรรกศาสตร์ของดิจิตอลคอมพิวเตอร์ 1",
+   "name_en": "Digital Computer Logic Laboratory I",
+   "credits": 1,
+   "credit_format": "1(0-2-1)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110291": {
+   "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 1",
+   "name_en": "Individual Study in Computer Engineering I",
+   "credits": 1,
+   "credit_format": "1(0 0 3)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110292": {
+   "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 2",
+   "name_en": "Individual Study in Computer Engineering II",
+   "credits": 1,
+   "credit_format": "1(0 0 3)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110313": {
+   "name_th": "ระบบปฏิบัติการและโปรแกรมระบบ",
+   "name_en": "Operating Systems and System Programs",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110211"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110315": {
+   "name_th": "ระบบเชิงขนานและระบบกระจาย",
+   "name_en": "Parallel and Distributed Systems",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110318": {
+   "name_th": "หลักการของระบบกระจาย",
+   "name_en": "Distributed Systems Essentials",
+   "credits": 1,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "conflict",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": [
+    "C4: listed as 3(3-0-6); the study plan and the core total of 40 use 1 credit"
+   ]
+  },
+  "2110322": {
+   "name_th": "ระบบฐานข้อมูล",
+   "name_en": "Database Systems",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110327": {
+   "name_th": "การออกแบบอัลกอริทึม",
+   "name_en": "Algorithm Design",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110200",
+     "2110211"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110352": {
+   "name_th": "สถาปัตยกรรมระบบคอมพิวเตอร์",
+   "name_en": "Computer System Architectures",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110363": {
+   "name_th": "ปฏิบัติการสังเคราะห์ฮาร์ดแวร์ 1",
+   "name_en": "Hardware Synthesis Laboratory I",
+   "credits": 1,
+   "credit_format": "1(0-2-1)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110366": {
+   "name_th": "การปฏิบัติการระบบฝังตัว",
+   "name_en": "Embedded System Laboratory",
+   "credits": 1,
+   "credit_format": "1(0-2-1)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110263"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110391": {
+   "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 3",
+   "name_en": "Individual Study in Computer Engineering III",
+   "credits": 1,
+   "credit_format": "1(0 0 3)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110392": {
+   "name_th": "เอกัตศึกษาทางวิศวกรรมคอมพิวเตอร์ 4",
+   "name_en": "Individual Study in Computer Engineering IV",
+   "credits": 1,
+   "credit_format": "1(0 0 3)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110404": {
+   "name_th": "ทฤษฏีการคำนวณ",
+   "name_en": "Computational Theory",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "core_elective",
+   "categories": [
+    "CORE_ELECTIVE",
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110412": {
+   "name_th": "สถาปัตยกรรมคอมพิวเตอร์เชิงขนาน",
+   "name_en": "Parallel Computer Architecture",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110413": {
+   "name_th": "ความมั่นคงของคอมพิวเตอร์",
+   "name_en": "Computer Security",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110414": {
+   "name_th": "ระบบการคำนวณขนาดใหญ่",
+   "name_en": "Large Scale Computing Systems",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110423": {
+   "name_th": "วิศวกรรมซอฟต์แวร์",
+   "name_en": "Software Engineering",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110424": {
+   "name_th": "การปรับปรุงกระบวนการซอฟต์แวร์",
+   "name_en": "Software Process Improvement",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110426": {
+   "name_th": "การปฏิบัติการทางวิศวกรรมซอฟต์แวร์",
+   "name_en": "SE Lab",
+   "credits": 1,
+   "credit_format": "1(0-2-1)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110428": {
+   "name_th": "ความรู้เบื้องต้นเกี่ยวกับการทำเหมืองข้อมูล",
+   "name_en": "Introduction to Data Mining",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110430": {
+   "name_th": "การทำเหมืองอนุกรมเวลาและการค้นหาความรู้",
+   "name_en": "Time Series Mining and Knowledge Discovery",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110431": {
+   "name_th": "วิทยาการภาพดิจิทัลเบื้องต้น",
+   "name_en": "Introduction to Digital Imaging",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110432": {
+   "name_th": "การรู้จำเสียงพูดอัตโนมัติ",
+   "name_en": "Automatic Speech Recognition",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110433": {
+   "name_th": "คอมพิวเตอร์วิชัน",
+   "name_en": "Computer Vision",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110435": {
+   "name_th": "วิทยาการหุ่นยนต์เบื้องต้น",
+   "name_en": "Introduction to Robotics",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110442": {
+   "name_th": "การวิเคราะห์และโปรแกรมเชิงวัตถุ",
+   "name_en": "Object-Oriented Analysis and Programming",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110443": {
+   "name_th": "ปฏิสัมพันธ์ของมนุษย์กับคอมพิวเตอร์",
+   "name_en": "Human-Computer Interaction",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110446": {
+   "name_th": "วิทยาศาสตร์ข้อมูลและการวิเคราะห์",
+   "name_en": "Data Science and Analytics",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110452": {
+   "name_th": "สถาปัตยกรรมสมรรถนะสูง",
+   "name_en": "High Performance Architecture",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "core_elective",
+   "categories": [
+    "CORE_ELECTIVE",
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110455": {
+   "name_th": "การทดสอบวงจรดิจิตอล",
+   "name_en": "Testing Digital Circuits",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110471": {
+   "name_th": "ข่ายงานคอมพิวเตอร์ 1",
+   "name_en": "Computer Network I",
+   "credits": 3,
+   "credit_format": "3(2-3-4)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110473": {
+   "name_th": "การคำนวณแบบทนต่อความผิดพร่อง",
+   "name_en": "Fault Tolerant Computing",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110475": {
+   "name_th": "การออกแบบวงจรรวมขนาดใหญ่มาก",
+   "name_en": "VLSI Design",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110476": {
+   "name_th": "ปัญญาประดิษฐ์ 1",
+   "name_en": "Artificial Intelligence I",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110477": {
+   "name_th": "ปัญญาประดิษฐ์ 2",
+   "name_en": "Artificial Intelligence II",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110476"
+    ],
+    "status": "inferred",
+    "basis": "numbered course sequence (part I before part II)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110478": {
+   "name_th": "คอมพิวเตอร์และการสื่อสาร",
+   "name_en": "Computer and Communication",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110479": {
+   "name_th": "คอมพิวเตอร์กราฟิก",
+   "name_en": "Computer Graphics",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110481": {
+   "name_th": "เครือข่ายคอมพิวเตอร์ไร้สาย",
+   "name_en": "Wireless Computer Networks",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110488": {
+   "name_th": "โครงงานรวบยอดวิศวกรรมคอมพิวเตอร์ 1",
+   "name_en": "Capstone Project I",
+   "credits": 2,
+   "credit_format": "2(0-4-2)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 4,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110489": {
+   "name_th": "โครงงานรวบยอดวิศวกรรมคอมพิวเตอร์ 2",
+   "name_en": "Capstone Project II",
+   "credits": 3,
+   "credit_format": "3(0-6-3)",
+   "kind": "required",
+   "categories": [
+    "CORE"
+   ],
+   "plan_term": {
+    "year": 4,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110488"
+    ],
+    "status": "inferred",
+    "basis": "numbered course sequence (part I before part II)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2110490": {
+   "name_th": "โครงการวิศวกรรมคอมพิวเตอร์พื้นฐาน",
+   "name_en": "Computer Engineering Pre-Project",
+   "credits": 1,
+   "credit_format": "1(0-2-1)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110495": {
+   "name_th": "หัวข้อชั้นสูงในวิศวกรรมคอมพิวเตอร์ 1",
+   "name_en": "Advanced Topics in Computer Engineering I",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110496": {
+   "name_th": "หัวข้อชั้นสูงในวิศวกรรมคอมพิวเตอร์ 2",
+   "name_en": "Advanced Topics in Computer Engineering II",
+   "credits": 3,
+   "credit_format": "3(3 0 6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110495"
+    ],
+    "status": "inferred",
+    "basis": "numbered course sequence (part I before part II)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110497": {
+   "name_th": "ปัญหาพิเศษทางวิศวกรรมคอมพิวเตอร์ 1",
+   "name_en": "Special Problems in Computer Engineering I",
+   "credits": 3,
+   "credit_format": "3(2 3 4)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110498": {
+   "name_th": "ปัญหาพิเศษทางวิศวกรรมคอมพิวเตอร์ 2",
+   "name_en": "Special Problems in Computer Engineering II",
+   "credits": 3,
+   "credit_format": "3(2 3 4)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [
+     "2110497"
+    ],
+    "status": "inferred",
+    "basis": "numbered course sequence (part I before part II)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110499": {
+   "name_th": "โครงการวิศวกรรมคอมพิวเตอร์",
+   "name_en": "Computer Engineering Projects",
+   "credits": 3,
+   "credit_format": "3(0-6-3)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110503": {
+   "name_th": "โการฝึกพัฒนาซอฟต์แวร์",
+   "name_en": "Software Development Practice",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110511": {
+   "name_th": "การเขียนโปรแกรมเกม",
+   "name_en": "Game Programming",
+   "credits": 3,
+   "credit_format": "3(3 0 9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110512": {
+   "name_th": "คอมพิวเตอร์แอนิเมชัน",
+   "name_en": "Computer Animation",
+   "credits": 3,
+   "credit_format": "3(3 0 9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110513": {
+   "name_th": "เทคโนโลยีช่วยเหลือ",
+   "name_en": "Assistive Technology",
+   "credits": 3,
+   "credit_format": "3(3 0 9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110514": {
+   "name_th": "คอมพิวเตอร์กราฟิกส์และการจำลองทางฟิสิกส์แบบเรียลไทม์",
+   "name_en": "Realtime Computer Graphics and Physics Simulation",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110521": {
+   "name_th": "สถาปัตยกรรมซอฟต์แวร์",
+   "name_en": "Software Architecture",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "core_elective",
+   "categories": [
+    "CORE_ELECTIVE",
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110522": {
+   "name_th": "ยูนิกซ์/ลีนุกซ์สำหรับองค์กร",
+   "name_en": "UNIX/Linux for Enterprise Environment",
+   "credits": 3,
+   "credit_format": "3(3 0 9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110524": {
+   "name_th": "เทคโนโลยีคลาวด์คอมพิวติง",
+   "name_en": "Cloud Computing Technology",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110531": {
+   "name_th": "เครื่องมือสำหรับวิทยาศาสตร์ข้อมูลและวิศวกรรมข้อมูล",
+   "name_en": "Data Science and Data Engineering Tools",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "core_elective",
+   "categories": [
+    "CORE_ELECTIVE",
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110542": {
+   "name_th": "ระบบคลังข้อมูล",
+   "name_en": "Data Warehouse System",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110561": {
+   "name_th": "การผลิตเชิงคำนวณ",
+   "name_en": "Computational Fabrication",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110562": {
+   "name_th": "เทคโนโลยีตัวรับรู้",
+   "name_en": "Sensor Technology",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110571": {
+   "name_th": "โครงข่ายประสาท",
+   "name_en": "Neural Network",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110572": {
+   "name_th": "ระบบการประมวลผลธรรมชาติ",
+   "name_en": "Natural Language Processing System",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110573": {
+   "name_th": "การรู้จำแบบ",
+   "name_en": "Pattern Recognition",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110574": {
+   "name_th": "ปัญญาประดิษฐ์สำหรับวิศวกร",
+   "name_en": "Artificial Intelligence for Engineers",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2110581": {
+   "name_th": "ชีวสารสนเทศ 1",
+   "name_en": "Bioinformatics I",
+   "credits": 3,
+   "credit_format": "3(3-0-9)",
+   "kind": "dept_elective",
+   "categories": [
+    "DEPT_ELECTIVE",
+    "FREE"
+   ],
+   "plan_term": null,
+   "offered": {
+    "semesters": null,
+    "status": "unknown",
+    "basis": "not published; varies by year"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1"
+   ],
+   "notes": []
+  },
+  "2301107": {
+   "name_th": "แคลคูลัส 1",
+   "name_en": "Calculus I",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2301108": {
+   "name_th": "แคลคูลัส 2",
+   "name_en": "Calculus II",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2302127": {
+   "name_th": "เคมีทั่วไป",
+   "name_en": "General Chemistry",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2302163": {
+   "name_th": "ปฏิบัติการเคมีทั่วไป",
+   "name_en": "Engineering Chemistry Laboratory",
+   "credits": 1,
+   "credit_format": "1(0-3-0)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2304103": {
+   "name_th": "ฟิสิกส์ทั่วไป 1",
+   "name_en": "General Physics I",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2304104": {
+   "name_th": "ฟิสิกส์ทั่วไป 2",
+   "name_en": "General Physics II",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2304183": {
+   "name_th": "ปฏิบัติการฟิสิกส์ทั่วไป 1",
+   "name_en": "General Physics Laboratory I",
+   "credits": 1,
+   "credit_format": "1(0-3-0)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2304184": {
+   "name_th": "ปฏิบัติการฟิสิกส์ทั่วไป 2",
+   "name_en": "General Physics Laboratory II",
+   "credits": 1,
+   "credit_format": "1(0-3-0)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "2603284": {
+   "name_th": "สถิติสำหรับวิทยาศาสตร์กายภาพ",
+   "name_en": "Statistics for Physical Science",
+   "credits": 3,
+   "credit_format": "3(3-0-6)",
+   "kind": "required",
+   "categories": [
+    "MATH_SCI"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "5500111": {
+   "name_th": "ภาษาอังกฤษเพื่อการเรียนรู้ในชีวิตจริง 1",
+   "name_en": "Experimential English I",
+   "credits": 3,
+   "credit_format": "3(2-2-5)",
+   "kind": "required",
+   "categories": [
+    "LANG"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "1"
+   },
+   "offered": {
+    "semesters": [
+     "1"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [],
+    "status": "unknown",
+    "basis": "not published"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "5500112": {
+   "name_th": "ภาษาอังกฤษเพื่อการเรียนรู้ในชีวิตจริง 2",
+   "name_en": "Experimential English II",
+   "credits": 3,
+   "credit_format": "3(2-2-5)",
+   "kind": "required",
+   "categories": [
+    "LANG"
+   ],
+   "plan_term": {
+    "year": 1,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "5500111"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "5500208": {
+   "name_th": "ทักษะการสื่อสารและการนำเสนอผลงาน",
+   "name_en": "Communication and Presentation Skills",
+   "credits": 3,
+   "credit_format": "3(2-2-5)",
+   "kind": "required",
+   "categories": [
+    "LANG"
+   ],
+   "plan_term": {
+    "year": 2,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "5500112"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  },
+  "5500308": {
+   "name_th": "การเขียนภาษาอังกฤษเทคนิคสำหรับวิศวกรรมศาสตร์",
+   "name_en": "Technical Writing for Engineering",
+   "credits": 3,
+   "credit_format": "3(2-2-5)",
+   "kind": "required",
+   "categories": [
+    "LANG"
+   ],
+   "plan_term": {
+    "year": 3,
+    "semester": "2"
+   },
+   "offered": {
+    "semesters": [
+     "2"
+    ],
+    "status": "inferred",
+    "basis": "study-plan semester (S1, S2)"
+   },
+   "prereqs": {
+    "all_of": [
+     "5500208"
+    ],
+    "status": "inferred",
+    "basis": "study-plan diagram arrows (S2)"
+   },
+   "status": "verified",
+   "sources": [
+    "S1",
+    "S2"
+   ],
+   "notes": []
+  }
+ },
+ "study_plan": [
+  {
+   "year": 1,
+   "semester": "1",
+   "credits": 16,
+   "items": [
+    {
+     "course": "2304103"
+    },
+    {
+     "course": "2304183"
+    },
+    {
+     "course": "2301107"
+    },
+    {
+     "course": "2110101"
+    },
+    {
+     "course": "2100111"
+    },
+    {
+     "course": "5500111"
+    }
+   ]
+  },
+  {
+   "year": 1,
+   "semester": "2",
+   "credits": 20,
+   "items": [
+    {
+     "course": "2110215"
+    },
+    {
+     "course": "2110221"
+    },
+    {
+     "course": "2301108"
+    },
+    {
+     "course": "2302127"
+    },
+    {
+     "course": "2302163"
+    },
+    {
+     "course": "2304104"
+    },
+    {
+     "course": "2304184"
+    },
+    {
+     "course": "5500112"
+    }
+   ]
+  },
+  {
+   "year": 2,
+   "semester": "1",
+   "credits": 16,
+   "items": [
+    {
+     "course": "2110200"
+    },
+    {
+     "course": "2110211"
+    },
+    {
+     "course": "2110251"
+    },
+    {
+     "course": "2110263"
+    },
+    {
+     "course": "2603284"
+    },
+    {
+     "slot": "GE"
+    }
+   ]
+  },
+  {
+   "year": 2,
+   "semester": "2",
+   "credits": 19,
+   "items": [
+    {
+     "course": "2110201"
+    },
+    {
+     "course": "2110313"
+    },
+    {
+     "course": "2110322"
+    },
+    {
+     "course": "2110327"
+    },
+    {
+     "course": "2110352"
+    },
+    {
+     "course": "2110363"
+    },
+    {
+     "course": "5500208"
+    }
+   ]
+  },
+  {
+   "year": 3,
+   "semester": "1",
+   "credits": 18,
+   "items": [
+    {
+     "course": "2110203"
+    },
+    {
+     "course": "2110426"
+    },
+    {
+     "course": "2110318"
+    },
+    {
+     "course": "2110366"
+    },
+    {
+     "course": "2110423"
+    },
+    {
+     "course": "2110471"
+    },
+    {
+     "slot": "DEPT_ELECTIVE"
+    },
+    {
+     "slot": "GE"
+    }
+   ]
+  },
+  {
+   "year": 3,
+   "semester": "2",
+   "credits": 15,
+   "items": [
+    {
+     "slot": "MULTI_21C"
+    },
+    {
+     "slot": "CORE_ELECTIVE"
+    },
+    {
+     "slot": "DEPT_ELECTIVE"
+    },
+    {
+     "slot": "FREE"
+    },
+    {
+     "course": "5500308"
+    }
+   ]
+  },
+  {
+   "year": 3,
+   "semester": "S",
+   "credits": 2,
+   "items": [
+    {
+     "course": "2100301"
+    }
+   ]
+  },
+  {
+   "year": 4,
+   "semester": "1",
+   "credits": 17,
+   "items": [
+    {
+     "course": "2110488"
+    },
+    {
+     "slot": "CORE_ELECTIVE"
+    },
+    {
+     "slot": "DEPT_ELECTIVE"
+    },
+    {
+     "slot": "DEPT_ELECTIVE"
+    },
+    {
+     "slot": "GE"
+    },
+    {
+     "slot": "GE"
+    }
+   ]
+  },
+  {
+   "year": 4,
+   "semester": "2",
+   "credits": 15,
+   "items": [
+    {
+     "course": "2110489"
+    },
+    {
+     "slot": "MULTI_21C"
+    },
+    {
+     "slot": "DEPT_ELECTIVE"
+    },
+    {
+     "slot": "DEPT_ELECTIVE"
+    },
+    {
+     "slot": "FREE"
+    }
+   ]
+  }
+ ],
+ "conflicts": [
+  {
+   "id": "C1",
+   "topic": "total credits",
+   "values": {
+    "S1 structure table": 141,
+    "S1 stated total and study plan": 138
+   },
+   "resolution": 138,
+   "reason": "the structure table repeats the 2561 values (S5); 2566-specific lists and the plan give 138",
+   "status": "resolved"
+  },
+  {
+   "id": "C2",
+   "topic": "basic engineering credits",
+   "values": {
+    "S1 structure table": 15,
+    "S1 heading": 11,
+    "S1 list incl. 2110233": 12
+   },
+   "resolution": 11,
+   "reason": "the 2566 heading and the study plan exclude 2110233",
+   "status": "resolved"
+  },
+  {
+   "id": "C3",
+   "topic": "core credits",
+   "values": {
+    "S1 structure table": 45,
+    "S1 heading": 40,
+    "S1 list with 2110318 at 3": 42,
+    "S2 legend": 39
+   },
+   "resolution": 40,
+   "reason": "heading 40 matches the list with 2110318 at 1 credit, as in the study plan",
+   "status": "resolved"
+  },
+  {
+   "id": "C4",
+   "topic": "2110318 credits",
+   "values": {
+    "S1 course list": 3,
+    "S1 study plan": 1,
+    "S2 diagram": 1
+   },
+   "resolution": 1,
+   "status": "open"
+  },
+  {
+   "id": "C5",
+   "topic": "Exploring Engineering World",
+   "values": {
+    "S2 code": "2110111",
+    "S1/S4 code": "2100111",
+    "S1 plan table credits": 1,
+    "S1 GE list, S2, S4 credits": 3
+   },
+   "resolution": {
+    "code": "2100111",
+    "credits": 3
+   },
+   "reason": "semester 1/1 totals 16 only with 3 credits",
+   "status": "resolved"
+  },
+  {
+   "id": "C6",
+   "topic": "2110233 Computer Engineering Mathematics Laboratory",
+   "values": {
+    "S1 basic-engineering list": "listed",
+    "S1 study plan": "absent"
+   },
+   "resolution": "not required; may count as a free elective",
+   "status": "open"
+  },
+  {
+   "id": "C7",
+   "topic": "semester 4/1 credits",
+   "values": {
+    "S2 header": 16,
+    "S1 table and S2 items": 17
+   },
+   "resolution": 17,
+   "status": "resolved"
+  },
+  {
+   "id": "C8",
+   "topic": "S2 approved-elective code in 4/1",
+   "values": {
+    "S2": "2110101"
+   },
+   "resolution": "core-level elective slot (2110101 is Computer Programming)",
+   "status": "resolved"
+  },
+  {
+   "id": "C9",
+   "topic": "Senior Project in Engineering code",
+   "values": {
+    "S1 first listing": "2110499",
+    "S1 second listing, S5": "2100499"
+   },
+   "resolution": "2100499",
+   "status": "resolved"
+  },
+  {
+   "id": "C10",
+   "topic": "Software-Defined Systems I code",
+   "values": {
+    "S1": "21105xx"
+   },
+   "resolution": "unknown; NEED_INFO if requested",
+   "status": "open"
+  },
+  {
+   "id": "C11",
+   "topic": "21st-century skills course codes",
+   "values": {
+    "S1": "placeholders",
+    "S4": "2100223-2100226 for four of eight"
+   },
+   "resolution": "four codes inferred from S4; four unknown",
+   "status": "open"
+  },
+  {
+   "id": "C12",
+   "topic": "2100301 credit counting",
+   "values": {
+    "S1 footnote": "S/U, not counted",
+    "S1 plan total": "2 credits included in 138"
+   },
+   "resolution": "counted as in the plan total",
+   "status": "open"
+  },
+  {
+   "id": "C13",
+   "topic": "Gen-Ed rule for students entering in 2566",
+   "values": {
+    "S1": "3 credits per group",
+    "Gen-Ed centre material (unverified)": "12 credits from any group"
+   },
+   "resolution": "Use a pooled 12-credit GenEd requirement per U1 / D18.",
+   "status": "resolved"
+  }
+ ],
+ "sources": [
+  {
+   "id": "S1",
+   "title": "CP bachelor curriculum page, revised curriculum B.E. 2566 (Thai)",
+   "type": "official_web",
+   "url": "https://www.cp.eng.chula.ac.th/prospective/bachelor/",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "S2",
+   "title": "Study-plan diagram: Bachelor of Engineering: Computer Engineering (2022) Final (138)",
+   "type": "official_web",
+   "url": "https://www.cp.eng.chula.ac.th/wp-content/uploads/2024/06/outline.png",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "S3",
+   "title": "Chulalongkorn University regulation on higher-education study B.E. 2566 (Thai text, bilingual copy)",
+   "type": "official_pdf",
+   "url": "https://math.sc.chula.ac.th/wordpress/wp-content/uploads/2024/09/regulations_highereducationstudy_2023-CH.pdf",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "S4",
+   "title": "Electrical Engineering B.Eng. curriculum B.E. 2566 (faculty-wide 2100xxx courses)",
+   "type": "official_pdf",
+   "url": "https://ee.eng.chula.ac.th/wp-content/uploads/2024/06/EEBEng2566.pdf",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "S5",
+   "title": "CP bachelor curriculum page, B.E. 2561 (previous curriculum)",
+   "type": "official_web",
+   "url": "https://www.cp.eng.chula.ac.th/future/bachelor2018",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "U1",
+   "type": "project_decision",
+   "date": "2026-11-07",
+   "title": "Project owner instruction: combine the four GenEd groups into 12 credits",
+   "reference": "docs/decisions.md#d18-pooled-general-education-credits"
+  }
+ ]
+}

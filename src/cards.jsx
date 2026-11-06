@@ -1,6 +1,7 @@
 // Conversation cards: goal (first goal or a change), plan, blocker, stop. Every plan shown is the stored
 // candidate that passed the final gate; the UI only renders it.
 const FLAG_TH = {
+  fixed_year3_summer: 'บังคับซัมเมอร์ปี 3 เท่านั้น · เปลี่ยนเทอมไม่ได้',
   offering_unverified: 'ภาคที่เปิดสอนยังไม่ยืนยัน',
   prereqs_unverified: 'วิชาบังคับก่อนยังไม่ยืนยัน'
 };
@@ -90,7 +91,7 @@ export function PlanCard({ item }) {
   const p = item.data.plan;
   return <section className="card plan-card">
     <header>
-      <div><p className="eyebrow">แผนการเรียนจนจบปี 4</p><strong><span className="tick">✓</span> ผ่านการตรวจขั้นสุดท้าย (final gate)</strong></div>
+      <div><p className="eyebrow">แผนการเรียนตามเป้าหมาย</p><strong>{item.data.stale ? 'แผนเก่า · ระเบียนหรือกฎหลักสูตรเปลี่ยนแล้ว' : <><span className="tick">✓</span> ผ่านการตรวจขั้นสุดท้าย (final gate)</>}</strong></div>
       <span className="meta">plan {p.plan_id} · goal v{p.goal_version} · record v{p.record_version}</span>
     </header>
     {item.text && <p className="explain">{item.text}</p>}

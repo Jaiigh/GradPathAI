@@ -8,6 +8,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SNAPSHOT_DIR = ROOT / "data" / "snapshots"
+DEFAULT_SNAPSHOT = "cp2566-internship-v2"
+LEGACY_GENED = {"GE_SOC", "GE_HUM", "GE_INTER", "GE_SCI"}
 
 
 @dataclass
@@ -38,6 +40,10 @@ class Snapshot:
     def slot_categories(self) -> list[str]:
         return [k for k, c in self.categories.items() if "slot_credits" in c]
 
+    def category_id(self, category: str | None) -> str | None:
+        """Old subject-group credits retain their meaning under the pooled revision."""
+        return "GE" if "GE" in self.categories and category in LEGACY_GENED else category
+
     def earns_credit(self, grade: str | None) -> bool:
         return grade in self.regulation("earned_credit_grades")
 
@@ -64,7 +70,7 @@ def content_hash(data: dict) -> str:
     return hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:16]
 
 
-def load(snapshot_id: str = "cp2566-v0", overlay: dict | None = None) -> Snapshot:
+def load(snapshot_id: str = DEFAULT_SNAPSHOT, overlay: dict | None = None) -> Snapshot:
     """Load a snapshot; an overlay (used by test variants) is deep-merged into courses before hashing."""
     data = json.loads((SNAPSHOT_DIR / f"{snapshot_id}.json").read_text(encoding="utf-8"))
     if overlay:

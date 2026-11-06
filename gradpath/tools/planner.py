@@ -16,7 +16,7 @@ from ortools.sat.python import cp_model
 
 from .. import terms as T
 from ..contracts import GoalConstraints, PlanCandidate, PlanItem, PlanTerm, StudentState
-from ..rules import standing
+from ..rules import standing, internship_info
 from ..snapshot import Snapshot
 
 W_PREF, W_PLAN, W_BAL, W_EARLY, W_SLOT, W_KEEP, W_SLACK = 1000, 10, 5, 20, 1, 2, 100_000
@@ -59,6 +59,9 @@ def solve(snap: Snapshot, student: StudentState, goal: GoalConstraints, time_lim
     to find the smallest cap increase that makes the goal feasible.
     """
     st = standing(snap, student)
+    internship = internship_info(snap, student)
+    if internship and internship["needs_review"]:
+        return {"status": "NEED_INFO", "missing": [internship["message"]]}
     if st.unknown_courses:
         return {"status": "NEED_INFO", "missing": [f"category of completed course {c}" for c in st.unknown_courses]}
     unknown_ids = [c for c in goal.must_take + goal.preferred_course_ids if c not in snap.courses]
@@ -79,7 +82,8 @@ def solve(snap: Snapshot, student: StudentState, goal: GoalConstraints, time_lim
 
     m = cp_model.CpModel()
     zero = m.NewConstant(0)
-    x = {(c, t): m.NewBoolVar(f"x_{c}_{t}") for c in cand for t in labels if _allowed(snap, goal, c, t)}
+    x = {(c, t): m.NewBoolVar(f"x_{c}_{t}") for c in cand for t in labels if _allowed(snap, goal, c, t)
+         and (not internship or c != "2100301" or t == internship["term"])}
     s = {(k, t): m.NewIntVar(0, caps[t] // snap.categories[k]["slot_credits"], f"s_{k}_{t}")
          for k in slot_cats for t in labels if not T.is_summer(t) or goal.allow_summer}
 
@@ -116,7 +120,8 @@ def solve(snap: Snapshot, student: StudentState, goal: GoalConstraints, time_lim
     for c in list(done) + cand:
         if c not in done and not any((c, t) in x for t in labels):
             continue
-        cats, credits = snap.courses[c]["categories"], snap.courses[c]["credits"]
+        cats = snap.courses[c]["categories"]
+        credits = st.completed[c] if c in done else snap.courses[c]["credits"]
         active = 1 if c in done else taken(c)
         if len(cats) == 1:
             cat_credit[cats[0]].append(credits * active)
@@ -172,7 +177,7 @@ def solve(snap: Snapshot, student: StudentState, goal: GoalConstraints, time_lim
                 cats = snap.courses[c]["categories"]
                 cat = cats[0] if len(cats) == 1 else next((k for k in cats if solver.Value(a[c, k])), "UNALLOCATED")
                 items.append(PlanItem(course_id=c, credits=snap.courses[c]["credits"], category=cat,
-                                      flags=snap.unverified_flags(c)))
+                                      flags=snap.unverified_flags(c) + (["fixed_year3_summer"] if internship and c == "2100301" else [])))
         for k in slot_cats:
             for _ in range(solver.Value(s[k, t]) if (k, t) in s else 0):
                 items.append(PlanItem(slot=k, credits=snap.categories[k]["slot_credits"], category=k))
@@ -194,6 +199,9 @@ def _next_regular(term: str) -> str:
 
 def diagnose(snap: Snapshot, student: StudentState, goal: GoalConstraints, time_limit_s: float = 10.0) -> dict:
     """Explain an infeasible goal with relaxations that the solver proves feasible (EVIDENCED_BLOCKER)."""
+    info = internship_info(snap, student)
+    if info and info["needs_review"]:
+        return {"status": "NEED_INFO", "missing": [info["message"]], "alternatives": []}
     alternatives = []
     r = solve(snap, student, goal, time_limit_s, extra_cap=True)
     if r["status"] == "PLAN" and r["candidate"].solver["raised_caps"]:

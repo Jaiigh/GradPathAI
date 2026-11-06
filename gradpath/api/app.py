@@ -8,12 +8,14 @@ import threading
 import time
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..fixtures import load_persona, persona_names
+from ..ingest.cr60 import read_pdf, ReportError, MAX_BYTES
+from ..snapshot import load as load_snapshot
 from ..runtime import llm as llm_mod
 from ..runtime.agent import PERSONA_LABELS, Runtime, load_tasks
 from ..snapshot import ROOT
@@ -45,9 +47,20 @@ class Resolve(Body):
     value: str
 
 
+class ProfileDecision(Body):
+    entry_year: int = Field(ge=2566, le=2700)
+    next_term: str = Field(pattern=r"^\d{4}/[12S]$")
+    confirmed: bool
+
+
 class RecordDecision(Body):
     resolve: list[Resolve] = []
     confirm: bool = True
+    profile: ProfileDecision | None = None
+
+
+class InternshipDecision(Body):
+    completed: bool
 
 
 class GoalDecision(Body):
@@ -124,6 +137,58 @@ def create(body: NewSession):
     return _view(s.session_id, operator=True)
 
 
+def _read_upload(file: UploadFile):
+    try:
+        data = file.file.read(MAX_BYTES + 1)
+        return data, read_pdf(data, load_snapshot())
+    except ReportError as e:
+        raise HTTPException(422, str(e)) from e
+    finally:
+        file.file.close()
+
+
+def _store_pdf(session_id: str, data: bytes):
+    folder = runtime.store.sessions_dir.parent / "uploads"
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / f"{session_id}.pdf"
+    tmp = target.with_suffix(".tmp")
+    tmp.write_bytes(data)
+    tmp.replace(target)
+
+
+@app.post("/api/uploads")
+def upload(file: UploadFile = File(...)):
+    data, student = _read_upload(file)
+    s = runtime.create_session(student=student)
+    _store_pdf(s.session_id, data)
+    return _view(s.session_id)
+
+
+@app.post("/api/sessions/{session_id}/report")
+def replace_report(session_id: str, file: UploadFile = File(...)):
+    _view(session_id)
+    lock = runtime.lock(session_id)
+    if not lock.acquire(blocking=False):
+        raise HTTPException(409, "Wait for the current turn to finish before replacing the report.")
+    try:
+        data, student = _read_upload(file)
+        s = runtime.replace_report(session_id, student)
+        _store_pdf(s.session_id, data)
+        errors.pop(session_id, None)
+        return _view(s.session_id)
+    finally:
+        lock.release()
+
+
+@app.get("/api/sessions/{session_id}/report")
+def source_report(session_id: str):
+    _view(session_id)
+    path = runtime.store.sessions_dir.parent / "uploads" / f"{session_id}.pdf"
+    if not path.is_file():
+        raise HTTPException(404, "No uploaded report in this session.")
+    return FileResponse(path, media_type="application/pdf", headers={"Content-Disposition": 'inline; filename="grade-report.pdf"'})
+
+
 @app.get("/api/sessions/{session_id}")
 def get(session_id: str, operator: bool = False):
     return _view(session_id, operator)
@@ -147,7 +212,10 @@ def _spawn(session_id: str, action):
             runtime.store.trace(session_id, "error", error=errors[session_id])
         finally:
             s.busy = False
-            lock.release()
+            try:
+                runtime.store.save(s)
+            finally:
+                lock.release()
 
     threading.Thread(target=work, daemon=True).start()
     return _view(session_id)
@@ -160,7 +228,13 @@ def message(session_id: str, body: Message):
 
 @app.post("/api/sessions/{session_id}/record")
 def record(session_id: str, body: RecordDecision):
-    return _spawn(session_id, lambda: runtime.record(session_id, [r.model_dump() for r in body.resolve], body.confirm))
+    return _spawn(session_id, lambda: runtime.record(session_id, [r.model_dump() for r in body.resolve], body.confirm,
+                                                    body.profile.model_dump() if body.profile else None))
+
+
+@app.post("/api/sessions/{session_id}/internship")
+def internship(session_id: str, body: InternshipDecision):
+    return _spawn(session_id, lambda: runtime.internship_decision(session_id, body.completed))
 
 
 @app.post("/api/sessions/{session_id}/goal")
@@ -179,5 +253,5 @@ if (DIST / "index.html").exists():
 
     @app.get("/{path:path}", include_in_schema=False)
     def spa(path: str):
-        target = DIST / path
-        return FileResponse(target if path and target.is_file() else DIST / "index.html")
+        target = (DIST / path).resolve()
+        return FileResponse(target if path and target.is_relative_to(DIST.resolve()) and target.is_file() else DIST / "index.html")

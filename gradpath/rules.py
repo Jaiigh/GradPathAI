@@ -29,11 +29,13 @@ def standing(snap: Snapshot, student: StudentState) -> Standing:
         if not snap.earns_credit(r.grade):
             continue
         if r.course_id in snap.courses:
-            st.completed[r.course_id] = snap.courses[r.course_id]["credits"]
-        elif r.category and r.credits:
-            st.external[r.course_id] = (r.credits, r.category)
+            st.completed[r.course_id] = r.credits if r.credits is not None else snap.courses[r.course_id]["credits"]
+        elif r.category and r.credits is not None:
+            st.external[r.course_id] = (r.credits, snap.category_id(r.category))
         else:
             st.unknown_courses.append(r.course_id)
+    if snap.data["policy"].get("internship") and student.internship_completed:
+        st.completed.setdefault("2100301", snap.courses["2100301"]["credits"])
     passed = set(st.completed) | set(st.external)
     st.failed = sorted(c for c in attempted - passed if c in snap.courses)
     return st
@@ -69,6 +71,7 @@ def allocate(snap: Snapshot, courses: dict[str, int], fixed: list[tuple[str, int
     totals = {k: 0 for k in mins}
     assignment: dict[str, str] = {}
     for cat, credits in fixed:
+        cat = snap.category_id(cat)
         totals[cat] = totals.get(cat, 0) + credits
     flexible = {}
     for cid, credits in courses.items():
@@ -91,3 +94,19 @@ def allocate(snap: Snapshot, courses: dict[str, int], fixed: list[tuple[str, int
 
 def deficits(snap: Snapshot, totals: dict[str, int]) -> dict[str, int]:
     return {k: max(0, c["min_credits"] - totals.get(k, 0)) for k, c in snap.categories.items()}
+
+
+def internship_info(snap: Snapshot, student: StudentState) -> dict | None:
+    if not snap.data["policy"].get("internship"):
+        return None
+    from . import terms as T
+    term = T.label(student.entry_year + 2, "S")
+    reported = any(r.course_id == "2100301" and snap.earns_credit(r.grade) for r in student.records)
+    completed = reported or student.internship_completed
+    overdue = T.key(student.next_term) > T.key(term) and not completed
+    return {"term": term, "reported": reported, "completed": completed,
+            "attested": student.internship_completed, "needs_review": overdue,
+            "supplemental_credits": 2 if student.internship_completed and not reported else 0,
+            "message": (f"ไม่พบผลผ่านวิชา 2100301 ซึ่งต้องลงซัมเมอร์ปี 3 ({term}) และพ้นเทอมนี้แล้ว "
+                        "กรุณายืนยันว่าลงทะเบียนและผ่านแล้ว หากยังไม่ผ่านให้ตรวจสอบกับภาควิชา ระบบจะไม่ย้ายเทอมให้อัตโนมัติ") if overdue else
+                       f"วิชา 2100301 ต้องลงซัมเมอร์ปี 3 ({term}) เท่านั้น ไม่สามารถเปลี่ยนเทอมได้"}

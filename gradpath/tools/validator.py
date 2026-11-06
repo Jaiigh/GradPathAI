@@ -47,6 +47,10 @@ def validate(snap: Snapshot, student: StudentState, goal: GoalConstraints, plan:
             if c not in snap.courses:
                 errors.append(f"{c}: unknown course id")
                 continue
+            if c == "2100301" and snap.data["policy"].get("internship"):
+                fixed_term = T.label(student.entry_year + 2, "S")
+                if pt.term != fixed_term:
+                    errors.append(f"2100301: must be in Year 3 summer {fixed_term}; cannot move term")
             info = snap.courses[c]
             if it.credits != info["credits"]:
                 errors.append(f"{c}: {it.credits} credits in plan, {info['credits']} in snapshot")

@@ -4,6 +4,15 @@ Target architecture for the UAT MVP (4 Nov 2026) and the final system (11 Nov 20
 extends pitch v9 slides 3-10 and 12-13 with the decisions in `decisions.md`. The frozen
 `baseline/` implements the v9 two-term version on synthetic data.
 
+Implementation update (7 Nov): `gradpath/ingest/cr60.py` now imports text-readable CR60
+PDFs through `POST /api/uploads`. `GET/POST /api/sessions/{id}/report` opens or replaces the
+source report. Record decisions can include confirmed admission year, planning start term
+and CP 2566 confirmation. Imported CG/CGX totals must reconcile before confirmation.
+Unknown earned-course categories need explicit decisions. Identity headers are not passed
+to the model. Report replacement invalidates previous plans/goals and clears model context.
+OCR and other transcript layouts remain unimplemented. The original architecture descriptions
+below include targets, such as assumption-core diagnosis, beyond the present implementation.
+
 ## Components
 
 ```mermaid
@@ -27,11 +36,11 @@ flowchart LR
 | Component | Responsibility | Module |
 |---|---|---|
 | React UI | record review with NEED_INFO pickers, goal and consent cards, chat, plan view, blocker and stop cards, progress; operator view (`?operator`) that starts a session from a test-set task | `src/` (built) |
-| API | sessions, messages, record, goal and blocker decisions; agent turns run in a background thread and the UI polls; serves `dist/`; binds to 127.0.0.1; transcript upload after UAT | `gradpath/api/app.py` (built) |
+| API | sessions, PDF uploads/replacement, messages, record, goal and blocker decisions; agent turns run in a background thread and the UI polls; serves `dist/`; binds to 127.0.0.1 | `gradpath/api/app.py` (built) |
 | Agent runtime | state machine, per-turn budget, tool dispatch, final gate, fault injection, traces, run record | `gradpath/runtime/agent.py`, `tools.py`, `session.py`, `prompts.py` (built) |
 | LLM client | Ollama chat with tools, `think: false`, per-call timeout equal to the remaining budget, model digest recorded | `gradpath/runtime/llm.py` (built) |
 | Tools | audit, retrieval, planner and validator, all deterministic | `gradpath/tools/` |
-| Ingestion | PDF text extraction with coordinates, record normalizer, quality gate | `gradpath/ingest/` (after UAT) |
+| Ingestion | text-based CR60 extraction with page/row/line evidence, record normalizer and credit reconciliation; scans remain unsupported | `gradpath/ingest/cr60.py` (built) |
 | Snapshot | load, hash and expose the rule snapshot with a status per item | `gradpath/snapshot.py` |
 
 ## State machine
@@ -178,3 +187,12 @@ src/                 React UI
 baseline/            frozen pitch v9 baseline
 local/               gitignored personal data and real-run artefacts
 ```
+
+## Current GenEd rule (7 Nov 2026, D18)
+
+The application default is `cp2566-gened-v1`, with a single `GE` category requiring 12
+credits. `Snapshot.category_id()` maps the four old subject-group IDs to `GE` only under
+this new snapshot. The audit and validator normalize legacy fixed allocations; the
+planner receives the normalized standing. Existing uploaded sessions migrate on load,
+update record/snapshot versions, clear stored candidates and old model context, and mark
+historical plan cards stale. Frozen test-set tasks remain bound to `cp2566-v0` (D15).

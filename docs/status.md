@@ -2,6 +2,44 @@
 
 Newest entries first.
 
+## 7 Nov 2026
+
+### 7 Nov 2026: GenEd rule update (D18)
+
+- New default snapshot `cp2566-gened-v1`: one 12-credit “กลุ่มวิชาศึกษาทั่วไป GenEd”
+  requirement replaces the four subject-group minimums. Audit, solver, validator, retrieval
+  and upload-review options read the same snapshot. Total program credits remain 138.
+- Existing uploaded records migrate when reopened; old category assignments count toward
+  the pool, and previously displayed plans are marked stale. Frozen UAT tasks continue to
+  use the unchanged `cp2566-v0` snapshot.
+- Added regression checks for 12 credits from any single old group, the 3-credit shortfall
+  case, final-validator rejection, migration, and the new category picker.
+
+- Validation: 69 tests passed; production build passed; the existing uploaded report
+  migrated successfully and its browser picker exposes one GenEd option. Ollama remains off.
+
+### CR60 upload implementation
+
+- Default student entry now uploads a complete text-readable CR60 PDF. Synthetic personas
+  remain in `?operator`. New `gradpath/ingest/cr60.py` extracts academic rows from all pages,
+  preserves attempts and leading-zero IDs, checks page order and CG/CGX, and retains page/row evidence.
+- Imported records require explicit curriculum/profile confirmation and category decisions
+  for earned courses outside the snapshot. Report/catalog credit disagreements need review;
+  confirmed report credits feed the audit, solver and validator without silent substitution.
+- New upload/source/replacement API routes keep files under gitignored `local/uploads/`.
+  Replacing a report increments the record version, resets goals/model context, and marks old plans stale.
+- Original PDFs remain local. Extracted session metadata omits identity headers, national IDs and birthdates.
+- Added anonymized parser, PDF, reconciliation, consent, replacement and API tests. No student
+  PDFs or extracted personal fixtures are committed. Scans and unsupported layouts remain out of scope.
+- Corrected Node requirement to 22.13+ for the pinned pnpm release; added macOS run instructions.
+- Validation: 60 automated tests passed; production UI built; desktop/mobile upload,
+  confirmation, persistence and malformed-upload checks passed in a local Chrome session.
+  Both supplied PDFs reconciled (43 rows / 113 credits and 44 rows / 104 credits).
+- On the current M3 / 8 GB Mac, the default 8B model timed out. The 4B model loaded locally
+  and passed T01 (goal 36.4 s, plan 89.2 s). This is a single smoke test, not the full
+  evaluation; it falls short of the earlier UAT responsiveness targets. Documented the
+  `GRADPATH_MODEL=qwen3:4b` launch option without changing the repository's 8B default.
+
 ## 3 Nov 2026 (evening)
 
 - User decisions: D17 accepted; T18 change to 2571/1 confirmed; the UAT machine is the user's
@@ -120,3 +158,9 @@ Newest entries first.
 
 - Pitch v9 presented. The baseline runs end to end on `qwen3:8b` and `qwen3:4b` on a
   synthetic two-term case.
+
+2026-11-07: D19 implemented in `cp2566-internship-v2`. Added independent internship
+attestation UI/API, fixed 2100301 to Year 3 summer in planner and validator, and
+NEED_INFO for missing completion after that term. Uploaded v0/v1 sessions migrate
+without assuming completion; obsolete plans are invalidated. Browser checks cover
+save/reload/revoke with Ollama stopped. PDF credits and GPAX remain unchanged.
