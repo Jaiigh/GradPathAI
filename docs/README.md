@@ -12,6 +12,7 @@ readers are in Thai and end in `.th.md`.
 | [evaluation.md](evaluation.md) | Test set format and quality bar, experiment arms, metrics, UAT design |
 | [dev-setup.md](dev-setup.md) | Development environment and known pitfalls |
 | [status.md](status.md) | Progress log |
+| [report/final_report.html](report/final_report.html) | Final report (Thai), rendered to `report/GradPath_Group2_Final_Report.pdf` |
 
 Evidence behind pitch v9: `baseline/results/slide_ready.md`.
 

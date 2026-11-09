@@ -68,6 +68,10 @@ class GoalDecision(Body):
     approve: bool
 
 
+class Retry(Body):
+    clear_fault: bool = False       # operator view only: retry the same request with the injected fault removed
+
+
 class BlockerDecision(Body):
     card_id: str
     choose: str | None = None
@@ -245,6 +249,16 @@ def goal(session_id: str, body: GoalDecision):
 @app.post("/api/sessions/{session_id}/blocker")
 def blocker(session_id: str, body: BlockerDecision):
     return _spawn(session_id, lambda: runtime.blocker_decision(session_id, body.card_id, body.choose, body.decline))
+
+
+@app.post("/api/sessions/{session_id}/retry")
+def retry(session_id: str, body: Retry):
+    return _spawn(session_id, lambda: runtime.retry(session_id, body.clear_fault))
+
+
+@app.post("/api/sessions/{session_id}/defer")
+def defer(session_id: str):
+    return _spawn(session_id, lambda: runtime.defer_missing(session_id))
 
 
 DIST = ROOT / "dist"

@@ -11,10 +11,10 @@ week 13). Decisions D1-D15 are in `decisions.md`.
 | Tue 3 Nov | UAT plan, test set v1, feedback form; MVP built | see "Tuesday 3 Nov" below |
 | Wed 4 Nov, morning | MVP hardened; feature freeze at 10:00 | every UAT task passes twice on the UAT machine |
 | Wed 4 Nov, 13:15-15:30 | In-class UAT: round 1 with group 4 (13:15-14:15), round 2 with group 7 (14:30-15:30) | feedback collected, traces saved |
-| Thu 5 - Fri 6 Nov | UAT fixes; real CP 2566 snapshot; transcript PDF ingestion | real snapshot loads with provenance; parser passes on the redacted transcript sample |
-| Sat 7 Nov, 23:59 | UAT report submitted on Discord | all sections required by the course |
-| Sun 8 - Mon 9 Nov | Experiment: arms A/B/C on frozen test set v1 | arm C with `qwen3:8b` correct on at least 16 of 20 tasks |
-| Tue 10 Nov | Final report, slides, demo rehearsal | two clean rehearsals |
+| Thu 5 - Fri 6 Nov | UAT fixes; real CP 2566 snapshot; transcript PDF ingestion | done 7 Nov: text-layer CR60 ingestion (no OCR), D18, D19 |
+| Sat 7 Nov, 23:59 | UAT report submitted on Discord | done |
+| Sun 8 - Mon 9 Nov | UAT fixes (D20); experiment: arms A/B/C on frozen test set v1.1 | done 9 Nov: see `evaluation.md`, "Experiment results" |
+| Tue 10 Nov | Final report, demo rehearsal (slides are not listed by the course; a 5-minute pitch is) | report in `docs/report/`; two clean rehearsals still to do |
 | Wed 11 Nov | Final presentation: 5-minute pitch, live demo, final report | - |
 
 ## MVP scope for UAT (D13)
@@ -100,6 +100,7 @@ resolving these conflicts, Gen-Ed groups, 21st-century codes, and elective offer
 
 Cut in this order if the schedule slips: the `qwen3:4b` arm, embeddings, streaming progress
 messages, summer terms, and finally PDF ingestion (falling back to persona or CSV records).
+Applied on 9 Nov: the `qwen3:4b` arm and embeddings are cut; PDF ingestion was built (text layer).
 
 ## Open questions
 

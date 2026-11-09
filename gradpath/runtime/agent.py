@@ -20,15 +20,15 @@ from .. import snapshot as snapshot_mod, terms as T
 from ..contracts import ConsentRef, GoalConstraints, StudentState
 from ..fixtures import load_persona
 from ..ingest.cr60 import reconciliation, refresh_categories
-from ..rules import internship_info
+from ..rules import allocate, internship_info, standing
 from ..snapshot import ROOT, Snapshot
 from ..tools import planner, validator
 from ..tools.audit import audit
 from ..tools.retrieval import Index, retrieve
 from . import llm as llm_mod
-from .prompts import STATE, SYSTEM, lang_of, text
+from .prompts import EXPLAIN, GOAL_DRAFT, STATE, SYSTEM, SYSTEM_B, lang_of, text
 from .session import Card, Session, Store, TurnRecord, new_id
-from .tools import ProposeGoalArgs, parse, schemas
+from .tools import ARGS, ProposeGoalArgs, RetrieveArgs, SolveArgs, SubmitArgs, ValidateArgs, parse, schemas
 
 BUDGET = {"tool_calls": 8, "revisions": 2, "seconds": 120.0}
 SOLVER_TIME_LIMIT_S = 10.0
@@ -43,6 +43,15 @@ PERSONA_LABELS = {
     "y3-unclear-grade": "นิสิตปี 3 (เกรดบางวิชาอ่านไม่ออก)", "y3-unclear-id": "นิสิตปี 3 (รหัสวิชาบางตัวอ่านไม่ออก)",
     "y4-final": "นิสิตปี 4 (เทอมสุดท้าย)",
 }
+ARMS = ("A", "B", "C")      # experiment arms (docs/evaluation.md); C is the product
+LETTERS = re.compile(r"[A-Za-z\u0e00-\u0e7f]")
+TITLE_ID = re.compile(r"((?:[A-Z][\w&-]*|[IVX]+|and|of|for|in|to|the)(?:\s+(?:[A-Z][\w&-]*|[IVX]+|and|of|for|in|to|the))*)"
+                      r"\s*\(\s*(\d{7})\s*\)")
+VAGUE = {"caps": re.compile(r"ไม่หนัก|เบา ?ๆ|ไม่เยอะ|สบาย ?ๆ|\blight\b|not too heavy|\beasy\b|relaxed", re.I),
+         "horizon": re.compile(r"จบเร็ว|จบไว|เร็วที่สุด|ก่อนกำหนด|finish early|graduate early|graduate fast|as soon as", re.I)}
+ONE_CATEGORY = re.compile(r"หมวดเดียว|เพียงหมวด|หนึ่งหมวด|อย่างใดอย่างหนึ่ง|นับซ้ำไม่ได้|ไม่สามารถนับ|ไม่ได้ในเวลาเดียวกัน|"
+                          r"ไม่ได้พร้อมกัน|only one|exactly one|one category|not both|cannot count|either", re.I)
+BOTH_AT_ONCE = re.compile(r"ได้ในเวลาเดียวกัน|ได้พร้อมกัน|นับได้ทั้ง|at the same time|simultaneously|counts? (?:toward|for) both", re.I)
 ALT_LABELS = {"raise_caps": ("เพิ่มเพดานหน่วยกิต", "Raise the credit cap"),
               "allow_summer": ("ใช้ภาคฤดูร้อน", "Use summer terms"),
               "extend_horizon": ("ขยายเวลาจบ", "Extend the finishing term")}
@@ -121,15 +130,21 @@ class Ctx:
 
 
 class Runtime:
-    def __init__(self, llm=None, store: Store | None = None, solver_time_limit_s: float = SOLVER_TIME_LIMIT_S):
+    def __init__(self, llm=None, store: Store | None = None, solver_time_limit_s: float = SOLVER_TIME_LIMIT_S,
+                 arm: str = "C"):
+        if arm not in ARMS:
+            raise ValueError(f"unknown arm {arm!r}")
+        self.arm = arm
         self.llm = llm or llm_mod.OllamaLLM()
         self.store = store or Store()
         self.solver_time_limit_s = solver_time_limit_s
         self.sessions: dict[str, Session] = {}
         self.locks: dict[str, threading.Lock] = {}
         self._snaps: dict[str, tuple[Snapshot, Index]] = {}
-        self.tool_schemas = schemas()
-        self.static = {"git_commit": _git_commit(), "gpu": _gpu(),
+        self.tool_names = [n for n in ARGS if not (arm == "B" and n == "retrieve_courses")]
+        self.tool_schemas = schemas(self.tool_names)
+        self.system = SYSTEM_B if arm == "B" else SYSTEM
+        self.static = {"arm": arm, "git_commit": _git_commit(), "gpu": _gpu(),
                        "test_set_sha256": hashlib.sha256(TEST_SET.read_bytes()).hexdigest() if TEST_SET.exists() else None}
 
     # ------------------------------------------------------------ sessions
@@ -270,7 +285,8 @@ class Runtime:
     def message(self, session_id: str, msg: str) -> Session:
         s = self.get(session_id)
         msg = msg.strip()[:2000]
-        s.lang = lang_of(msg)
+        if LETTERS.search(msg):      # a reply of digits only ("2110415", "18") keeps the conversation language
+            s.lang = lang_of(msg)
         s.add("student", "text", msg)
         self.store.trace(s.session_id, "student_message", text=msg)
         if not s.student.confirmed:
@@ -403,7 +419,7 @@ class Runtime:
                      "or continue with the current goal.")
         self.store.trace(s.session_id, "goal_decision", card_id=card_id, approve=approve,
                          goal_version=s.goal.goal_version if s.goal else None)
-        self._run_agent(s, event)
+        self._run_agent(s, event, "goal_approved" if approve else "goal_declined")
         return s
 
     def blocker_decision(self, session_id: str, card_id: str, choose: str | None = None, decline: bool = False) -> Session:
@@ -438,7 +454,39 @@ class Runtime:
                          goal_version=s.goal.goal_version)
         self._run_agent(s, f"[UI event] The student approved the alternative '{alt['label_en']}'. Goal "
                            f"v{s.goal.goal_version}: {self._goal_summary(s, s.goal)}. Run solve_plan again and submit "
-                           "the plan.")
+                           "the plan.", "alt_approved")
+        return s
+
+    def retry(self, session_id: str, clear_fault: bool = False) -> Session:
+        """Retry after STOP_UNVERIFIED from the same record, goal and conversation (UAT T09)."""
+        s = self.get(session_id)
+        if s.outcome != "STOP_UNVERIFIED":
+            raise ValueError("retry is only available after a stopped turn")
+        if clear_fault and s.fault:
+            self.store.trace(s.session_id, "fault_cleared", fault=s.fault)
+            s.fault = None
+            s.run_record["fault"] = None
+        g = f", goal v{s.goal.goal_version}" if s.goal else ""
+        s.add("system", "event", text("retried", s.lang, r=s.student.record_version, goal=g))
+        self.store.trace(s.session_id, "retry", record_version=s.student.record_version,
+                         goal_version=s.goal.goal_version if s.goal else None)
+        follow = (f"Goal v{s.goal.goal_version} ({self._goal_summary(s, s.goal)}) is still confirmed: run solve_plan "
+                  "again and submit the plan." if s.goal else "Continue with the student's last request.")
+        self._run_agent(s, f"[UI event] The student pressed Retry after the previous turn stopped. The record and the "
+                           f"goal are unchanged. {follow}", "retry")
+        return s
+
+    def defer_missing(self, session_id: str) -> Session:
+        """After NEED_INFO about a course: plan the rest now without it (UAT T11)."""
+        s = self.get(session_id)
+        if s.outcome != "NEED_INFO" or not s.student.confirmed:
+            raise ValueError("this option is only available after the agent asked for missing course information")
+        names = [n["title"] for n in self._unpublished(s)]
+        what = ", ".join(names) if names else "the course whose code is missing"
+        s.add("system", "event", text("deferred", s.lang))
+        self.store.trace(s.session_id, "defer_missing", courses=names)
+        self._run_agent(s, f"[UI event] The student chose to plan the rest now without {what}. Do not ask about it "
+                           "again and do not put it in must_take or interests.", "defer")
         return s
 
     def _card(self, s: Session, card_id: str, kind: str) -> Card:
@@ -487,83 +535,244 @@ class Runtime:
     def _progress(self, s: Session, step: str):
         s.progress.append({"step": step, "at": time.time()})
 
-    def _run_agent(self, s: Session, content: str):
+    def _run_agent(self, s: Session, content: str, event: str = "student"):
+        """One turn. event: student | goal_approved | goal_declined | alt_approved | retry | defer."""
         info = internship_info(self.snap(s)[0], s.student)
         if info and info["needs_review"]:
             s.add("system", "need_info", info["message"])
             self._end(s, "NEED_INFO", reason="internship completion needs confirmation")
             self._save(s)
             return
-        s.llm_messages.append({"role": "user", "content": self._state(s) + "\n\n" + content})
+        if self.arm != "A":
+            s.llm_messages.append({"role": "user", "content": self._state(s) + "\n\n" + content})
         rec = TurnRecord(turn=len(s.turns) + 1, trigger=content[:300], started=time.time())
         s.turns.append(rec)
         s.progress = []
         s.state = "ACT"
         ctx = Ctx(rec)
         llm = llm_mod.FaultyLLM() if s.fault == "model_unavailable" else self.llm
-        nudged = False
         try:
-            while ctx.end is None:
-                if ctx.remaining() <= 0:
-                    raise Stop("reason_budget", what="120 s")
-                if rec.tool_calls >= BUDGET["tool_calls"]:
-                    raise Stop("reason_budget", what=f"{BUDGET['tool_calls']} tool calls")
-                self._progress(s, "think")
-                t0 = time.monotonic()
-                try:
-                    msg, stats = llm.chat([{"role": "system", "content": SYSTEM}] + s.llm_messages,
-                                          self.tool_schemas, ctx.remaining())
-                except llm_mod.ModelUnavailable as e:
-                    raise Stop("reason_model", detail=str(e)) from e
-                rec.llm_calls += 1
-                rec.llm_s = round(rec.llm_s + time.monotonic() - t0, 3)
-                content_out = THINK_RE.sub("", msg.get("content") or "").strip()
-                calls = msg.get("tool_calls") or []
-                self.store.trace(s.session_id, "llm", turn=rec.turn, content=content_out, tool_calls=calls, stats=stats)
-                s.llm_messages.append({"role": "assistant", "content": content_out,
-                                       **({"tool_calls": calls} if calls else {})})
-                if not calls:
-                    calls = self._calls_in_text(content_out)
-                if not calls:
-                    if not nudged and ctx.remaining() > 5:
-                        nudged = True
-                        s.llm_messages.append({"role": "user", "content": "[runtime] Answer by calling a tool "
-                                               "(reply, ask_user, propose_goal, solve_plan or submit_final)."})
-                        continue
-                    self._finish_text(s, ctx, "info", content_out or "-", [])
-                    break
-                for call in calls:
-                    fn = call.get("function") or {}
-                    name, raw = fn.get("name"), fn.get("arguments")
-                    if isinstance(raw, str):
-                        try:
-                            raw = json.loads(raw)
-                        except json.JSONDecodeError:
-                            pass
-                    rec.tool_calls += 1
-                    rec.tools.append(str(name))
-                    if rec.tool_calls > BUDGET["tool_calls"]:
-                        raise Stop("reason_budget", what=f"{BUDGET['tool_calls']} tool calls")
-                    self._progress(s, str(name))
-                    t1 = time.monotonic()
-                    args, err = parse(name, raw)
-                    obs = {"status": "ERROR", "error": err} if err else getattr(self, f"_t_{name}")(s, ctx, args)
-                    rec.tool_s = round(rec.tool_s + time.monotonic() - t1, 3)
-                    self.store.trace(s.session_id, "tool", turn=rec.turn, name=name, args=raw, observation=obs,
-                                     wall_s=round(time.monotonic() - t1, 3))
-                    s.llm_messages.append({"role": "tool", "tool_name": str(name),
-                                           "content": json.dumps(obs, ensure_ascii=False)})
-                    if ctx.end is not None:
-                        break
+            if event == "defer" and s.goal is None:
+                self._defer_turn(s, ctx, llm, content)
+            elif self.arm == "A":
+                self._fixed_turn(s, ctx, llm, event)
+            else:
+                self._agent_loop(s, ctx, llm)
         except Stop as e:
             reason = text(e.key, s.lang, **{k: v for k, v in e.kw.items() if k != "detail"})
-            s.add("system", "stop", text("stop", s.lang, reason=reason), detail=e.kw.get("detail"))
+            s.add("system", "stop", text("stop", s.lang, reason=reason), detail=e.kw.get("detail"),
+                  retry=True)
             self._end(s, "STOP_UNVERIFIED", ctx, reason=f"{e.key}: {e.kw}")
         finally:
             rec.ended = time.time()
             s.progress = []
+            if ctx.end == "NEED_INFO" and s.student.confirmed:
+                self._next_steps(s)
             self.store.trace(s.session_id, "turn", **rec.model_dump())
             self._save(s)
+
+    def _agent_loop(self, s: Session, ctx: Ctx, llm):
+        """Arms B and C: the LLM chooses the tools; the runtime checks every call."""
+        rec, nudged = ctx.rec, False
+        while ctx.end is None:
+            if ctx.remaining() <= 0:
+                raise Stop("reason_budget", what="120 s")
+            if rec.tool_calls >= BUDGET["tool_calls"]:
+                raise Stop("reason_budget", what=f"{BUDGET['tool_calls']} tool calls")
+            self._progress(s, "think")
+            t0 = time.monotonic()
+            try:
+                msg, stats = llm.chat([{"role": "system", "content": self.system}] + s.llm_messages,
+                                      self.tool_schemas, ctx.remaining())
+            except llm_mod.ModelUnavailable as e:
+                raise Stop("reason_model", detail=str(e)) from e
+            rec.llm_calls += 1
+            rec.llm_s = round(rec.llm_s + time.monotonic() - t0, 3)
+            content_out = THINK_RE.sub("", msg.get("content") or "").strip()
+            calls = msg.get("tool_calls") or []
+            self.store.trace(s.session_id, "llm", turn=rec.turn, content=content_out, tool_calls=calls, stats=stats)
+            s.llm_messages.append({"role": "assistant", "content": content_out,
+                                   **({"tool_calls": calls} if calls else {})})
+            if not calls:
+                calls = self._calls_in_text(content_out)
+            if not calls:
+                if not nudged and ctx.remaining() > 5:
+                    nudged = True
+                    s.llm_messages.append({"role": "user", "content": "[runtime] Answer by calling a tool "
+                                           "(reply, ask_user, propose_goal, solve_plan or submit_final)."})
+                    continue
+                self._finish_text(s, ctx, "info", content_out or "-", [])
+                break
+            for call in calls:
+                fn = call.get("function") or {}
+                name, raw = fn.get("name"), fn.get("arguments")
+                if isinstance(raw, str):
+                    try:
+                        raw = json.loads(raw)
+                    except json.JSONDecodeError:
+                        pass
+                if name in self.tool_names:
+                    args, err = parse(name, raw)
+                else:
+                    args, err = None, f"unknown tool {name!r}; allowed: {', '.join(self.tool_names)}"
+                if err:
+                    rec.tool_calls += 1
+                    rec.tools.append(str(name))
+                    if rec.tool_calls > BUDGET["tool_calls"]:
+                        raise Stop("reason_budget", what=f"{BUDGET['tool_calls']} tool calls")
+                    obs = {"status": "ERROR", "error": err}
+                    self.store.trace(s.session_id, "tool", turn=rec.turn, name=name, args=raw, observation=obs, wall_s=0)
+                else:
+                    obs = self._tool(s, ctx, name, args, raw)
+                s.llm_messages.append({"role": "tool", "tool_name": str(name),
+                                       "content": json.dumps(obs, ensure_ascii=False)})
+                if ctx.end is not None:
+                    break
+
+    def _tool(self, s: Session, ctx: Ctx, name: str, args, raw=None) -> dict:
+        """Run one allowed tool with budget accounting and a trace line (all arms)."""
+        rec = ctx.rec
+        rec.tool_calls += 1
+        rec.tools.append(name)
+        if rec.tool_calls > BUDGET["tool_calls"]:
+            raise Stop("reason_budget", what=f"{BUDGET['tool_calls']} tool calls")
+        self._progress(s, name)
+        t1 = time.monotonic()
+        obs = getattr(self, f"_t_{name}")(s, ctx, args)
+        rec.tool_s = round(rec.tool_s + time.monotonic() - t1, 3)
+        self.store.trace(s.session_id, "tool", turn=rec.turn, name=name,
+                         args=raw if raw is not None else args.model_dump(), observation=obs,
+                         wall_s=round(time.monotonic() - t1, 3))
+        return obs
+
+    # ------------------------------------------------------------ arm A: fixed workflow
+    def _fixed_llm(self, s: Session, ctx: Ctx, llm, messages: list[dict], tools: list[dict]) -> dict:
+        self._progress(s, "think")
+        t0 = time.monotonic()
+        try:
+            msg, stats = llm.chat(messages, tools, ctx.remaining())
+        except llm_mod.ModelUnavailable as e:
+            raise Stop("reason_model", detail=str(e)) from e
+        ctx.rec.llm_calls += 1
+        ctx.rec.llm_s = round(ctx.rec.llm_s + time.monotonic() - t0, 3)
+        msg = {**msg, "content": THINK_RE.sub("", msg.get("content") or "").strip()}
+        self.store.trace(s.session_id, "llm", turn=ctx.rec.turn, content=msg["content"],
+                         tool_calls=msg.get("tool_calls") or [], stats=stats)
+        return msg
+
+    def _fixed_turn(self, s: Session, ctx: Ctx, llm, event: str):
+        """Arm A: audit -> retrieval (interests) -> solve -> validate -> final gate, in this order; clarification
+        follows fixed rules. The LLM drafts the goal and writes the explanation, nothing else."""
+        if event == "goal_declined":
+            s.add("agent", "text", text("fixed_goal_declined", s.lang))
+            self._end(s, "WAIT_USER", ctx, reason="goal declined")
+            return
+        if event in ("goal_approved", "alt_approved") or (event == "retry" and s.goal):
+            self._fixed_plan(s, ctx, llm)
+            return
+        said = [i.text for i in s.items if i.role == "student"]
+        latest = said[-1] if said else ""
+        if not re.search(r"\d", latest):
+            for field, pattern in VAGUE.items():
+                if pattern.search(latest):
+                    question = text(f"fixed_clarify_{field}", s.lang)
+                    s.asked.append({"turn": ctx.rec.turn, "kind": "clarify", "fields": [field]})
+                    s.add("agent", "question", question, fields=[field], ask_kind="clarify")
+                    self._end(s, "WAIT_USER", ctx, reason=f"rule clarify {field}")
+                    return
+        msg = self._fixed_llm(s, ctx, llm, [
+            {"role": "system", "content": GOAL_DRAFT},
+            {"role": "user", "content": self._state(s) + "\n\nStudent messages, oldest first:\n" +
+             "\n".join(f"- {t}" for t in said)}], schemas(["propose_goal"]))
+        calls = msg.get("tool_calls") or self._calls_in_text(msg["content"])
+        raw = next(((c.get("function") or {}).get("arguments") for c in calls
+                    if (c.get("function") or {}).get("name") == "propose_goal"), None)
+        if isinstance(raw, str):
+            try:
+                raw = json.loads(raw)
+            except json.JSONDecodeError:
+                raw = None
+        args, err = parse("propose_goal", raw or {})
+        if err:
+            args = ProposeGoalArgs()
+        obs = self._tool(s, ctx, "propose_goal", args)
+        if ctx.end is not None:
+            return                                   # goal card shown
+        if obs["status"] == "APPLIED":
+            self._fixed_plan(s, ctx, llm)
+            return
+        errors = obs.get("missing") or obs.get("errors") or []
+        if any("never choose a number" in e for e in errors):
+            question = text("fixed_clarify_caps", s.lang)
+            s.asked.append({"turn": ctx.rec.turn, "kind": "clarify", "fields": ["caps"]})
+            s.add("agent", "question", question, fields=["caps"], ask_kind="clarify")
+            self._end(s, "WAIT_USER", ctx, reason="rule clarify caps")
+            return
+        ctx.need_info = True
+        s.add("agent", "question", text("fixed_need_info", s.lang, items="; ".join(errors)), fields=["must_take"],
+              ask_kind="need_info")
+        self._end(s, "NEED_INFO", ctx, reason="goal draft rejected")
+
+    def _defer_turn(self, s: Session, ctx: Ctx, llm, content: str):
+        """"Plan the rest now": one restricted goal draft from the student's other wishes, else the default goal."""
+        said = [i.text for i in s.items if i.role == "student"]
+        msg = self._fixed_llm(s, ctx, llm, [
+            {"role": "system", "content": GOAL_DRAFT + " " + content.removeprefix("[UI event] ")},
+            {"role": "user", "content": self._state(s) + "\n\nStudent messages, oldest first:\n" +
+             "\n".join(f"- {t}" for t in said)}], schemas(["propose_goal"]))
+        calls = msg.get("tool_calls") or self._calls_in_text(msg["content"])
+        raw = next(((c.get("function") or {}).get("arguments") for c in calls
+                    if (c.get("function") or {}).get("name") == "propose_goal"), None)
+        if isinstance(raw, str):
+            try:
+                raw = json.loads(raw)
+            except json.JSONDecodeError:
+                raw = None
+        args, err = parse("propose_goal", raw or {})
+        if not err:
+            deferred = {m["title"].lower() for m in self._unpublished(s)}
+            if args.interests:      # the student chose to leave that course out: keep only real topics
+                args.interests = [t for t in args.interests if t.lower().strip() not in deferred] or None
+            if args.must_take:      # and only real course codes (the deferred course has none)
+                args.must_take = [c for c in args.must_take if c in self.snap(s)[0].courses] or None
+            self._tool(s, ctx, "propose_goal", args)
+        if ctx.end is None:
+            self._tool(s, ctx, "propose_goal", ProposeGoalArgs())     # the default goal: end of Year 4, cap 22
+        s.llm_messages.append({"role": "user", "content": self._state(s) + "\n\n" + content +
+                               " GradPath showed the student a goal card without that course."})
+
+    def _fixed_plan(self, s: Session, ctx: Ctx, llm):
+        self._tool(s, ctx, "audit", ARGS["audit"]())
+        preferred = []
+        if s.goal.interests:
+            found = self._tool(s, ctx, "retrieve_courses", RetrieveArgs(query=" ".join(s.goal.interests)[:200]))
+            preferred = [r["course_id"] for r in found["results"] if r.get("course_id")][:12]
+        r = self._tool(s, ctx, "solve_plan", SolveArgs(preferred_course_ids=preferred))
+        if r["status"] == "NEED_INFO":
+            s.add("agent", "question", text("fixed_need_info", s.lang, items="; ".join(r["missing"])),
+                  fields=["record"], ask_kind="need_info")
+            self._end(s, "NEED_INFO", ctx, reason="planner NEED_INFO")
+            return
+        if r["status"] == "INFEASIBLE":
+            facts = (f"No plan meets every hard rule under the student's goal ({self._goal_summary(s, s.goal)}). The "
+                     f"solver proved these alternatives feasible: {json.dumps(r['proven_alternatives'])}. The student "
+                     "chooses one in the UI.")
+            status, ref = "blocker", r["blocker_id"]
+        else:
+            self._tool(s, ctx, "validate_plan", ValidateArgs(plan_id=r["plan_id"]))
+            facts = (f"Verified plan to {s.goal.horizon_end} for the goal ({self._goal_summary(s, s.goal)}). Terms: "
+                     f"{json.dumps(r['terms'], ensure_ascii=False)}. Courses matching the interests: "
+                     f"{r['preferred_in_plan']}.")
+            status, ref = "plan", r["plan_id"]
+        errors = []
+        while ctx.end is None:
+            note = f"\nYour previous text was rejected: {errors}" if errors else ""
+            msg = self._fixed_llm(s, ctx, llm, [
+                {"role": "system", "content": EXPLAIN.format(language="Thai" if s.lang == "th" else "English")},
+                {"role": "user", "content": facts + note}], [])
+            explanation = (msg["content"] or ("แผนนี้ผ่านการตรวจแล้ว" if s.lang == "th" else "This result is verified."))[:1500]
+            out = self._tool(s, ctx, "submit_final", SubmitArgs(status=status, ref=ref, explanation=explanation))
+            errors = out.get("errors", [])
 
     @staticmethod
     def _calls_in_text(content: str) -> list[dict]:
@@ -595,6 +804,72 @@ class Runtime:
     def _ungrounded(self, s: Session, msg: str, plan_ids: set[str] | None = None) -> list[str]:
         allowed = self._allowed_ids(s, plan_ids)
         return sorted({i for i in ID_RE.findall(msg) if i not in allowed})
+
+    def _mislabelled(self, s: Session, msg: str) -> list[str]:
+        """A Latin course title written next to a code that belongs to another course, e.g. "Software-Defined
+        Systems I (2110413)" when 2110413 is Computer Security (UAT T11, 4 Nov)."""
+        snap, _ = self.snap(s)
+        out = []
+        for title, cid in TITLE_ID.findall(msg):
+            c = snap.courses.get(cid)
+            words = {w for w in re.findall(r"[a-z]{3,}", title.lower()) if w not in ("and", "for", "the")}
+            if not c or not words:
+                continue
+            known = set(re.findall(r"[a-z]{3,}", c["name_en"].lower()))
+            if not words & known:
+                out.append(f"{cid} is {c['name_en']}, not {title.strip()}")
+        return out
+
+    def _double_counted(self, s: Session, msg: str) -> list[str]:
+        """An answer that lets one course count toward two categories at once (T08 on 3 and 9 Nov said 2110521
+        counts as a core-level and a department elective "at the same time"); rules.allocate gives each course
+        exactly one category."""
+        if ONE_CATEGORY.search(msg):
+            return []
+        snap, _ = self.snap(s)
+        out = []
+        for cid in sorted(set(ID_RE.findall(msg))):
+            cats = (snap.courses.get(cid) or {}).get("categories", [])
+            named = [k for k in cats if k in msg or snap.categories[k]["name_th"] in msg
+                     or snap.categories[k]["name_en"].lower() in msg.lower()]
+            if len(cats) > 1 and (len(named) > 1 or BOTH_AT_ONCE.search(msg)):
+                out.append(f"{cid} counts toward exactly one of {cats} in a plan, never two at once; say that it may "
+                           "count toward one of them")
+        return out
+
+    def _unpublished(self, s: Session) -> list[dict]:
+        """Curriculum options whose course code is not published (snapshot conflicts C10, C11) that the student named
+        or that retrieval returned in this session."""
+        snap, index = self.snap(s)
+        said = " ".join(i.text for i in s.items if i.role == "student").lower()
+        out = []
+        for p in index.docs:
+            if not p.source_id.startswith("unlisted:"):
+                continue
+            title = p.title.split(" / ")[0]
+            if p.source_id in s.retrieved or title.lower() in said:
+                cat = snap.categories.get(p.meta.get("category"), {})
+                out.append({"title": title, "category": p.meta.get("category"),
+                            "category_name": cat.get("name_th" if s.lang == "th" else "name_en", p.meta.get("category"))})
+        return out
+
+    def _next_steps(self, s: Session):
+        """After NEED_INFO: what is missing and the two ways forward (UAT finding T11)."""
+        snap, _ = self.snap(s)
+        missing = self._unpublished(s)
+        deficits = audit(snap, s.student, s.goal)["category_deficits"]
+        said = " ".join(i.text for i in s.items if i.role == "student")
+        unknown = sorted({c for c in ID_RE.findall(said) if c not in snap.courses})
+        lines = [text("missing_unpublished", s.lang, title=m["title"], snapshot=s.snapshot_id,
+                      category=m["category_name"]) for m in missing]
+        if unknown:
+            lines.append(text("missing_unknown_code", s.lang, codes=", ".join(unknown), snapshot=s.snapshot_id))
+        lines = lines or [text("missing_generic", s.lang)]
+        gap = next(((m["category_name"], deficits[m["category"]]) for m in missing if deficits.get(m["category"])), None)
+        lines.append(text("next_defer", s.lang, deficit=text("next_deficit", s.lang, category=gap[0], credits=gap[1])
+                          if gap else ""))
+        lines.append(text("next_code", s.lang))
+        s.add("system", "next_steps", "\n".join(lines), missing=[m["title"] for m in missing], can_defer=True)
 
     def _finish_text(self, s: Session, ctx: Ctx, kind: str, msg: str, citations: list[str]):
         s.add("agent", "decline" if kind == "decline" else "text", msg, citations=citations)
@@ -665,10 +940,25 @@ class Runtime:
         if chosen:
             errors.append(f"the student never typed the cap {chosen}; never choose a number for them: call ask_user "
                           "with kind \"clarify\" and fields [\"caps\"]")
+        # A course title without a published code is not a study topic (UAT T11: putting it in interests would plan
+        # silently without the course the student must take).
+        unpublished = {o["name_en"].lower() for cat in snap.data["categories"] for o in cat.get("unlisted_options", [])}
+        for topic in update.get("interests", []):
+            low = topic.lower().strip()
+            if any(low == t or (len(low) > 10 and (low in t or t in low)) for t in unpublished):
+                errors.append(f"{topic!r} is a course title without a published code, not a study topic: leave it out "
+                              "of interests (if the student must take it, the missing code needs ask_user kind "
+                              "\"need_info\")")
         done = {r.course_id for r in st.records if snap.earns_credit(r.grade)}
         # Invariant 4: a course ID enters the goal only if the student typed it or retrieval returned it.
         grounded = set(ID_RE.findall(" ".join(i.text for i in s.items if i.role == "student"))) | \
             {sid.split(":", 1)[1] for sid in s.retrieved if sid.startswith("course:")}
+        # Checked before grounding: a required course the student has not passed (a retake, UAT T05) is always
+        # planned, so it is not a goal change and never goes on the goal card for approval.
+        scheduled = [c for c in update.get("must_take", []) if c in snap.courses and c not in done
+                     and snap.courses[c]["kind"] == "required"]
+        if scheduled:
+            update["must_take"] = [c for c in update["must_take"] if c not in scheduled]
         for field in ("must_take", "avoid"):
             for cid in update.get(field, []):
                 if cid not in snap.courses:
@@ -689,8 +979,11 @@ class Runtime:
         new = base.model_copy(update=update)
         changes = [{"field": f, "from": getattr(base, f), "to": getattr(new, f)}
                    for f in GoalConstraints.HARD_FIELDS if getattr(base, f) != getattr(new, f)]
-        note = (f"not applied: caps above the regulation maximum need the dean's approval and are outside "
-                f"GradPath {ignored}") if ignored else None
+        note = "; ".join(filter(None, [
+            (f"not applied: caps above the regulation maximum need the dean's approval and are outside GradPath "
+             f"{ignored}") if ignored else None,
+            (f"{scheduled} left out of must_take: required courses not yet passed are always planned (retakes "
+             "included)") if scheduled else None])) or None
         if s.goal is not None and not changes:
             s.goal = new
             return {"status": "APPLIED", "goal_version": s.goal.goal_version, "note": note or "soft fields only"}
@@ -718,6 +1011,11 @@ class Runtime:
         bad = self._ungrounded(s, args.question)
         if bad:
             return {"status": "ERROR", "error": f"the question mentions unknown course IDs {bad}"}
+        known = sorted({r.course_id for r in s.student.records} & set(ID_RE.findall(args.question)))
+        if known:      # UAT T05: never ask the student to confirm what the confirmed record already shows
+            return {"status": "ERROR", "error": f"{known} are in the student's confirmed record v"
+                    f"{s.student.record_version}; do not ask about them (retakes are scheduled by the planner). "
+                    "Continue without this question."}
         s.asked.append({"turn": ctx.rec.turn, "kind": args.kind, "fields": list(args.fields)})
         s.add("agent", "question", args.question, fields=list(args.fields), ask_kind=args.kind)
         ctx.need_info = ctx.need_info or args.kind == "need_info"
@@ -732,6 +1030,10 @@ class Runtime:
         if bad or unknown_cites:
             return {"status": "ERROR", "error": f"unknown course IDs {bad}; citations not retrieved in this session "
                                                 f"{unknown_cites}"}
+        if wrong := self._mislabelled(s, args.message):
+            return {"status": "ERROR", "error": f"course names do not match their codes: {wrong}"}
+        if wrong := self._double_counted(s, args.message):
+            return {"status": "ERROR", "error": f"the message breaks the one-category rule: {wrong}"}
         self._finish_text(s, ctx, args.kind, args.message, args.citations)
         return {"status": "SENT"}
 
@@ -768,6 +1070,7 @@ class Runtime:
         cand = r["candidate"]
         ctx.blocker = None
         s.candidates[cand.plan_id] = cand
+        s.plan_preferred[cand.plan_id] = list(dict.fromkeys(args.preferred_course_ids))
         return {"status": "PLAN", **self._plan_summary(s, cand, args.preferred_course_ids)}
 
     def _t_validate_plan(self, s, ctx, args):
@@ -789,6 +1092,7 @@ class Runtime:
                     (s.goal.goal_version, s.student.record_version, snap.content_hash):
                 errors.append("the blocker was found under an older goal or record version; run solve_plan again")
             errors += [f"explanation mentions unknown course IDs {bad}" for bad in [self._ungrounded(s, args.explanation)] if bad]
+            errors += [f"course names do not match their codes: {w}" for w in [self._mislabelled(s, args.explanation)] if w]
             if errors:
                 return self._reject(s, ctx, errors)
             card = Card(card_id="X-" + uuid.uuid4().hex[:6], kind="blocker",
@@ -808,6 +1112,8 @@ class Runtime:
         bad = self._ungrounded(s, args.explanation, plan_ids)
         if bad:
             errors.append(f"explanation mentions course IDs that are not in the plan or retrieved results: {bad}")
+        if wrong := self._mislabelled(s, args.explanation):
+            errors.append(f"course names do not match their codes: {wrong}")
         self.store.trace(s.session_id, "final_gate", kind="plan", plan_id=cand.plan_id, plan_hash=cand.plan_hash,
                          valid=v.valid, errors=errors, record_version=s.student.record_version,
                          goal_version=s.goal.goal_version, snapshot_hash=snap.content_hash)
@@ -854,6 +1160,27 @@ class Runtime:
 
     def plan_view(self, s: Session, cand, v) -> dict:
         snap, _ = self.snap(s)
+        retake = set(audit(snap, s.student, s.goal)["must_retake"])
+        preferred = set(s.plan_preferred.get(cand.plan_id, []))
+        goal = s.goal
+
+        def reasons(cid: str, c: dict) -> list[str]:
+            out = []
+            if cid in retake:
+                out.append("retake")
+            if goal and cid in goal.must_take:
+                out.append("must_take")
+            if cid in preferred:
+                out.append("interest")
+            if c["kind"] == "required" and cid not in retake:
+                out.append("required")
+            return out or ["category"]
+
+        st = standing(snap, s.student)
+        before, _ = allocate(snap, dict(st.completed), [(cat, cr) for cr, cat in st.external.values()])
+        categories = [{"id": k, "name_th": c["name_th"], "name_en": c["name_en"], "min": c["min_credits"],
+                       "before": before.get(k, 0), "after": v.category_totals.get(k, 0)}
+                      for k, c in snap.categories.items() if c["min_credits"]]
         terms = []
         for t in cand.terms:
             items = []
@@ -863,7 +1190,7 @@ class Runtime:
                     c = snap.courses[i.course_id]
                     items.append({"course_id": i.course_id, "name_th": c["name_th"], "name_en": c["name_en"],
                                   "credits": i.credits, "category": i.category, "category_th": cat.get("name_th"),
-                                  "flags": i.flags, "kind": c["kind"]})
+                                  "flags": i.flags, "kind": c["kind"], "reasons": reasons(i.course_id, c)})
                 else:
                     items.append({"slot": i.slot, "credits": i.credits, "category": i.category,
                                   "category_th": cat.get("name_th"), "category_en": cat.get("name_en"), "flags": []})
@@ -871,7 +1198,7 @@ class Runtime:
         return {"plan_id": cand.plan_id, "plan_hash": cand.plan_hash, "goal_version": cand.goal_version,
                 "record_version": cand.record_version, "snapshot_id": cand.snapshot_id, "valid": v.valid,
                 "warnings": v.warnings, "total_credits": v.total_credits, "category_totals": v.category_totals,
-                "terms": terms}
+                "categories": categories, "interests": goal.interests if goal else [], "terms": terms}
 
     def _unresolved_text(self, s: Session) -> str:
         names = {"th": {"grade": "เกรด", "course_id": "รหัสวิชา", "credits": "หน่วยกิต", "category": "หมวด",

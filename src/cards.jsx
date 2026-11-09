@@ -5,6 +5,11 @@ const FLAG_TH = {
   offering_unverified: 'ภาคที่เปิดสอนยังไม่ยืนยัน',
   prereqs_unverified: 'วิชาบังคับก่อนยังไม่ยืนยัน'
 };
+const REASON_TH = {
+  retake: () => 'เรียนซ้ำ (เคยไม่ผ่าน)', must_take: () => 'คุณระบุให้ลง', required: () => 'วิชาบังคับ',
+  interest: (item, interests) => `ตรงความสนใจ${interests?.length ? `: ${interests.join(', ')}` : ''}`,
+  category: (item) => `นับในหมวด ${item.category_th}`
+};
 const FIELD_TH = {
   horizon_end: 'เทอมสุดท้ายของแผน', default_cap: 'เพดานหน่วยกิตต่อภาคปกติ', caps: 'เพดานรายเทอม',
   allow_summer: 'ภาคฤดูร้อน', must_take: 'วิชาที่ต้องลง', avoid: 'วิชาที่ไม่ลง'
@@ -72,7 +77,7 @@ export function GoalCard({ card, student, busy, onDecide }) {
   </section>;
 }
 
-function Course({ item }) {
+function Course({ item, interests }) {
   if (item.slot) return <li className="slot">
     <span className="code">ช่องวิชา</span>
     <span className="name">{item.category_th}<small>{item.category_en} · เลือกวิชาเองภายหลัง</small></span>
@@ -81,6 +86,7 @@ function Course({ item }) {
   return <li>
     <span className="code">{item.course_id}</span>
     <span className="name">{item.name_th}<small>{item.name_en} · {item.category_th}</small>
+      {item.reasons?.length > 0 && <span className="reasons">{item.reasons.map(r => <em key={r} className={r}>{REASON_TH[r]?.(item, interests) || r}</em>)}</span>}
       {item.flags.length > 0 && <span className="flags">{item.flags.map(f => <em key={f}>{FLAG_TH[f] || f}</em>)}</span>}
     </span>
     <span className="cr">{item.credits}</span>
@@ -98,9 +104,17 @@ export function PlanCard({ item }) {
     <div className="terms">
       {p.terms.map(t => <div key={t.term} className={`term ${t.kind}`}>
         <div className="term-head"><strong>{termLabel(t.term)}</strong><span>{t.credits}/{t.cap} หน่วยกิต</span></div>
-        {t.items.length ? <ul>{t.items.map((it, i) => <Course key={i} item={it} />)}</ul> : <p className="empty">ไม่ลงเรียน</p>}
+        {t.items.length ? <ul>{t.items.map((it, i) => <Course key={i} item={it} interests={p.interests} />)}</ul> : <p className="empty">ไม่ลงเรียน</p>}
       </div>)}
     </div>
+    {p.categories?.length > 0 && <details className="cat-table" open>
+      <summary>ยอดหน่วยกิตรายหมวด ก่อนและหลังแผน</summary>
+      <table><thead><tr><th>หมวด</th><th>ขั้นต่ำ</th><th>ก่อนแผน</th><th>หลังแผน</th></tr></thead>
+        <tbody>{p.categories.map(c => <tr key={c.id} className={c.after >= c.min ? 'met' : 'short'}>
+          <td>{c.name_th}</td><td>{c.min}</td><td>{c.before}</td><td>{c.after} {c.after >= c.min ? '✓' : ''}</td>
+        </tr>)}</tbody></table>
+      <p className="note">แต่ละวิชานับได้เพียงหมวดเดียว ยอด “หลังแผน” คือการจัดสรรที่ตัวตรวจแผน (validator) ใช้</p>
+    </details>}
     <footer>
       <span>หน่วยกิตรวมเมื่อจบแผน <b>{p.total_credits}</b> / 138</span>
       {p.warnings.length > 0 && <span className="note">ป้าย “ยังไม่ยืนยัน” หมายถึงข้อมูลภาคที่เปิดสอนหรือวิชาบังคับก่อนอนุมานจากแผนการศึกษา ไม่ใช่ข้อมูลทางการ ควรตรวจกับภาควิชาก่อนลงทะเบียน</span>}
@@ -125,20 +139,40 @@ export function BlockerCard({ card, item, busy, onChoose, onDecline }) {
     {item.text && <p className="explain">{item.text}</p>}
     <p className="note">เงื่อนไขปัจจุบัน (goal v{b.goal_version}): {b.goal ? goalText(b.goal) : b.goal_summary}</p>
     <p className="note">solver ตรวจแล้วว่าทางเลือกต่อไปนี้ทำให้จัดแผนได้ การเลือกทางใดทางหนึ่งเป็นการเปลี่ยนเป้าหมายและต้องได้รับอนุมัติจากคุณ</p>
-    <ul className="alts">
-      {b.alternatives.map(a => <li key={a.kind}>
-        <span>{altText(a)}</span>
-        {card.status === 'pending' && <button className="primary small" disabled={busy} onClick={() => onChoose(a.kind)}>อนุมัติทางเลือกนี้</button>}
-      </li>)}
-      {b.alternatives.length === 0 && <li>ไม่พบทางเลือกที่ทำให้จัดแผนได้</li>}
-    </ul>
+    {b.alternatives.length > 0 ? <table className="alt-table">
+      <thead><tr><th>ทางเลือก</th><th>เทอมสุดท้าย</th><th>เพดานหน่วยกิต</th><th>ภาคฤดูร้อน</th><th></th></tr></thead>
+      <tbody>
+        <tr className="current"><td>เป้าหมายเดิม (จัดแผนไม่ได้)</td><td>{b.goal?.horizon_end}</td><td>{b.goal?.default_cap || 22}</td><td>{b.goal?.allow_summer ? 'ใช้' : 'ไม่ใช้'}</td><td /></tr>
+        {b.alternatives.map(a => <tr key={a.kind}>
+          <td>{altText(a)}</td>
+          <td className={a.kind === 'extend_horizon' ? 'diff' : ''}>{a.kind === 'extend_horizon' ? a.horizon_end : b.goal?.horizon_end}</td>
+          <td className={a.kind === 'raise_caps' ? 'diff' : ''}>{a.kind === 'raise_caps' ? Object.entries(a.caps).map(([t, c]) => `${t}: ${c}`).join(', ') : (b.goal?.default_cap || 22)}</td>
+          <td className={a.kind === 'allow_summer' ? 'diff' : ''}>{a.kind === 'allow_summer' || b.goal?.allow_summer ? 'ใช้' : 'ไม่ใช้'}</td>
+          <td>{card.status === 'pending' && <button className="primary small" disabled={busy} onClick={() => onChoose(a.kind)}>อนุมัติทางเลือกนี้</button>}</td>
+        </tr>)}
+      </tbody></table> : <ul className="alts"><li>ไม่พบทางเลือกที่ทำให้จัดแผนได้</li></ul>}
     {card.status === 'pending' && <div className="actions"><button className="ghost" disabled={busy} onClick={onDecline}>คงเป้าหมายเดิม</button></div>}
   </section>;
 }
 
-export function StopCard({ item }) {
+export function StopCard({ item, canRetry, busy, operator, onRetry }) {
   return <section className="card stop-card">
     <header><div><p className="eyebrow">STOP_UNVERIFIED</p><strong>ยังยืนยันแผนไม่ได้</strong></div></header>
     <p>{item.text}</p>
+    {canRetry && <div className="actions">
+      <button className="primary" disabled={busy} onClick={() => onRetry(false)}>ลองใหม่จากจุดเดิม</button>
+      {operator && <button className="ghost" disabled={busy} onClick={() => onRetry(true)}>ผู้ดูแล: ปิด fault แล้วลองใหม่</button>}
+      <span className="note">ใช้ระเบียนและเป้าหมายเดิม ไม่ต้องพิมพ์ใหม่</span>
+    </div>}
+  </section>;
+}
+
+export function NextSteps({ item, active, busy, onDefer }) {
+  return <section className="card next-steps">
+    <header><div><p className="eyebrow">NEED_INFO · ทำอะไรต่อได้</p><strong>{item.data.missing?.length ? `ข้อมูลของ ${item.data.missing.join(', ')} ยังไม่พอสำหรับวางแผน` : 'ยังขาดข้อมูลสำหรับวางแผน'}</strong></div></header>
+    {item.text.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+    {active && item.data.can_defer && <div className="actions">
+      <button className="primary" disabled={busy} onClick={onDefer}>วางแผนส่วนที่เหลือไปก่อน</button>
+    </div>}
   </section>;
 }

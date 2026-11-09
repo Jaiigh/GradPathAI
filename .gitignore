@@ -8,3 +8,6 @@ __pycache__/
 .pytest_cache/
 # Personal data and real-run artefacts (transcripts, sessions, traces)
 local/
+
+# macOS
+.DS_Store

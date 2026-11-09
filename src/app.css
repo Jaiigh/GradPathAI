@@ -166,3 +166,20 @@ h1, h2 { margin: 0; letter-spacing: -.01em; line-height: 1.2 }
 .replace-report summary { color: var(--blue); cursor: pointer; font-size: 14px }
 .replace-report .upload-report { margin-top: 12px; padding: 14px }
 .replace-report .upload-label { font-size: 16px }
+
+/* Plan reasons, category totals, alternatives table, next steps (post-UAT, 9 Nov) */
+.reasons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px }
+.reasons em { font-style: normal; font-size: 10px; background: #eef3f6; color: #33505f; padding: 0 5px; border-radius: 3px }
+.reasons em.retake { background: var(--warn-bg); color: var(--warn) }
+.reasons em.interest, .reasons em.must_take { background: #e6f4ec; color: #1d6b43 }
+.cat-table, .alt-table { margin-top: 10px; font-size: 13px }
+.cat-table summary { cursor: pointer; font-weight: 600 }
+.cat-table table, .alt-table { width: 100%; border-collapse: collapse }
+.cat-table th, .cat-table td, .alt-table th, .alt-table td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #e3e8ea; vertical-align: middle }
+.cat-table tr.short td:last-child { color: var(--warn); font-weight: 600 }
+.alt-table td.diff { font-weight: 700; background: #e6f4ec }
+.alt-table tr.current td { color: var(--muted) }
+.next-steps { border-color: #e0b04f }
+.next-steps p { margin: 4px 0 }
+.stop-card .actions, .next-steps .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px }
+@media (max-width: 640px) { .alt-table th:nth-child(4), .alt-table td:nth-child(4) { display: none } }

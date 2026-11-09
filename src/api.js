@@ -26,5 +26,7 @@ export const api = {
   record: (id, resolve, confirm = true, profile) => call(`/sessions/${id}/record`, { method: 'POST', body: { resolve, confirm, profile } }),
   internship: (id, completed) => call(`/sessions/${id}/internship`, { method: 'POST', body: { completed } }),
   goal: (id, card_id, approve) => call(`/sessions/${id}/goal`, { method: 'POST', body: { card_id, approve } }),
-  blocker: (id, card_id, choose, decline = false) => call(`/sessions/${id}/blocker`, { method: 'POST', body: { card_id, choose, decline } })
+  blocker: (id, card_id, choose, decline = false) => call(`/sessions/${id}/blocker`, { method: 'POST', body: { card_id, choose, decline } }),
+  retry: (id, clear_fault = false) => call(`/sessions/${id}/retry`, { method: 'POST', body: { clear_fault } }),
+  defer: (id) => call(`/sessions/${id}/defer`, { method: 'POST' })
 };

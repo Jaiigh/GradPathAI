@@ -2,6 +2,27 @@
 
 Newest entries first.
 
+## 9 Nov 2026
+
+- Reviewed the 7 Nov commit (CR60 upload, D18, D19): the venv needed `pypdf` and
+  `python-multipart`; 75 tests passed; test set v1.1 on that build, repeat 1: 20/20 (repeat 2 was
+  disturbed by a parallel live test and stopped).
+- Read the UAT-day sessions (`local/sessions/20261104-*`). Found: the T11 code mix-up (2110413
+  explained as Software-Defined Systems I), a language switch after a digits-only reply, and three
+  places where the submitted UAT report differs from the traces (T16 tester chose "extend horizon";
+  T17 tester typed 13; T19 has no planning message). Also: T08 was answered wrongly in every run
+  since 3 Nov (manual check).
+- D20: NEED_INFO next steps and "plan the rest now", retry after a stop, course name/code check,
+  one-category check, retakes kept off the goal card, language kept for digits, plan reasons and
+  category totals, alternatives table. D21: experiment arms A and B. 93 tests.
+- Experiment (see `evaluation.md`): A 38/40, B 18/40, C 40/40; paraphrases A 14/15, B 8/15, C 15/15.
+  Q3 missed on this day (generation 12.1 vs 18.6 tokens/s on 3 Nov).
+- `data/results_v1.1.csv` (`eval.fill_results`): 10 UAT rows from the forms and traces, 40 arm C rows.
+- Final report: `docs/report/final_report.html` and `GradPath_Group2_Final_Report.pdf`. The roles of
+  Techit and Chanon are left for the team to fill.
+- Still open: commit (the user commits), re-measure turn times on the demo machine, two demo
+  rehearsals, the 5-minute pitch.
+
 ## 7 Nov 2026
 
 ### 7 Nov 2026: GenEd rule update (D18)

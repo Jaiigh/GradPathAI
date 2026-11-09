@@ -235,3 +235,61 @@ labels supplemental credits separately. Changing the academic timeline clears at
 After Year 3 summer, absent completion yields NEED_INFO before calling the model;
 the student must check their status with the department if they have not passed.
 The system never assumes completion based only on study year.
+
+## D20. Post-UAT fixes from the 4 Nov findings
+
+- Status: accepted, 9 Nov 2026 (the project owner asked for every remaining item, including the
+  improvements listed in the UAT report).
+- Evidence: the UAT-day sessions in `local/sessions/20261104-*` (UAT machine, build `a12c6e3`).
+  - T11: the agent asked for the code of Software-Defined Systems I (published code unknown,
+    conflict C10). The tester typed 2110415 (not in the snapshot), the agent switched to English
+    because the reply had no Thai letters, asked again, and after the tester typed 2110413 it
+    explained the plan as "Software-Defined Systems I (2110413)"; 2110413 is Computer Security.
+    The tester did not accept the result: no next step was offered.
+  - T05: no clarifying question appears in either T05 session; the confirmations were the record
+    confirmation and the goal card. A live check on 9 Nov showed the model putting the failed
+    required course 2110327 into `must_take`, which puts it on the goal card for approval.
+  - T09: after the injected planner timeout the only way on was a new session.
+  - T08 (technical round, not in the UAT rounds): in every recorded run (3 Nov, two repeats; 9 Nov)
+    the agent answered that 2110521 counts as a core-level and a department elective "at the same
+    time". The script checks passed; the manual check of T08 failed, so the 40/40 of 3 Nov
+    counts script checks only: with the manual check it is 38/40.
+- Decision (runtime, enforced in code; all arms):
+  1. After a NEED_INFO turn the runtime adds a `next_steps` item: the exact missing data (an
+     unpublished course code named by the student or returned by retrieval, with its category; a
+     typed code that is not in the snapshot) and two ways forward: plan the rest now, or type a
+     code obtained from the department or the registrar. "Plan the rest now" (`POST
+     /api/sessions/{id}/defer`) drafts the goal with one `propose_goal`-only call, removes the
+     deferred course from `interests` and `must_take`, and falls back to the default goal.
+  2. A course title without a published code is rejected as an `interests` topic.
+  3. Text from `reply` and `submit_final` is rejected when a Latin course title stands next to the
+     code of a different course, e.g. "Software-Defined Systems I (2110413)".
+  4. A message without letters (digits only) keeps the conversation language.
+  5. `must_take` drops required courses that are not yet passed (retakes included): the planner
+     always schedules them, so they are not a goal change and do not go on the goal card.
+     `ask_user` questions that mention a course from the confirmed record are rejected.
+  6. STOP_UNVERIFIED can be retried from the same record, goal and conversation (`POST
+     /api/sessions/{id}/retry`); the operator view can retry with the injected fault removed.
+  7. The plan view shows a reason per course (retake, requested, interest, required, category)
+     and the category totals before and after the plan; the blocker card compares the
+     alternatives in one table.
+  8. An info `reply` that lets one course count toward two of its categories at once is rejected
+     unless it also says the course counts toward one category only (T08).
+- Not changed: the frozen test set v1.1 and `cp2566-v0`; the 4 Nov UAT results stay as recorded.
+
+## D21. Experiment arms
+
+- Status: accepted, 9 Nov 2026; implements the arms of pitch v9 slide 15 (`evaluation.md`).
+- `Runtime(arm=...)`, `eval.run_tasks --arm A|B|C`. Every arm uses the same snapshot, record
+  gate, goal cards, tool guards, final gate, budget and model settings; only control and tools
+  differ.
+  - A, fixed workflow: the runtime runs audit, retrieval for the goal's interests, solve,
+    validate and the final gate in this order. The LLM makes one `propose_goal`-only call to draft
+    the goal and writes the explanation as plain text. Vague workload or finishing-time words
+    without a number trigger a fixed clarifying question; a rejected draft ends in NEED_INFO with
+    the guard's message; a declined goal card gets a fixed reply.
+  - B: the arm C agent without `retrieve_courses` (removed from the tool list and the system
+    prompt; a call to it is an unknown tool).
+  - C: the full agent (the product).
+- The optional arm C run on `qwen3:4b` is cut (D12): the model is not installed on the UAT
+  machine and the earlier 4B run kept reasoning despite `think: false`.

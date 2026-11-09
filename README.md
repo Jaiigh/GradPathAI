@@ -71,7 +71,7 @@ not a full evaluation of the smaller model, and does not meet the documented UAT
 Project documentation (requirements, architecture, decisions, plan, evaluation) is indexed
 in `docs/README.md`.
 
-## Status (7 November 2026)
+## Status (9 November 2026)
 
 - Working: the `cp2566-v0` snapshot built from public sources, planning every term to the end
   of Year 4, record review with NEED_INFO, goal and consent cards, evidenced blockers with
@@ -79,7 +79,12 @@ in `docs/README.md`.
   set v1.1 (20 tasks) with an automatic runner.
 - Working: text-based CR60 PDF upload, full coursework extraction, credit reconciliation,
   category/profile review, source-page links, and report replacement.
-- Not built yet: scanned-PDF OCR, arbitrary transcript layouts, experiment arms A and B, embeddings.
+- Working (9 Nov, after the UAT): NEED_INFO next steps with "plan the rest now", retry after a
+  stop, per-course reasons and category totals in the plan, an alternatives table on the blocker
+  card, and experiment arms A (fixed workflow) and B (no retrieval) next to the product, arm C
+  (`docs/decisions.md`, D20 and D21; results in `docs/evaluation.md`).
+- Not built: scanned-PDF OCR (the upload reads the PDF's text layer), arbitrary transcript
+  layouts, embeddings, a `qwen3:4b` arm.
 
 ## Run GradPath
 
@@ -110,6 +115,15 @@ Tests, the test-set runner and the UAT machine check:
 .venv\Scripts\python.exe -m pytest -q
 .venv\Scripts\python.exe -m eval.run_tasks
 .venv\Scripts\python.exe scripts\uat_check.py
+```
+
+Experiment (arms A, B and C on the frozen test set, two repeats each), the comparison table,
+and the results table filled from the UAT forms and traces (macOS paths):
+
+```bash
+for a in C A B; do .venv/bin/python -m eval.run_tasks --arm $a --repeat 2; done
+.venv/bin/python -m eval.summarize local/eval/<A>.csv local/eval/<B>.csv local/eval/<C>.csv
+.venv/bin/python -m eval.fill_results --tech local/eval/<C>.csv
 ```
 
 ## Run the Python baseline

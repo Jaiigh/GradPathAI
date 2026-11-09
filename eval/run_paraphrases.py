@@ -1,15 +1,20 @@
 """Robustness check: human-round tasks with the first student message reworded, plus two free-form probes.
 
-Usage (from the repository root): .venv\\Scripts\\python.exe -m eval.run_paraphrases
+Usage (from the repository root): .venv\\Scripts\\python.exe -m eval.run_paraphrases [--arm A|B|C]
+Writes local/eval/<timestamp>-paraphrases-arm<X>.csv (9 Nov 2026: also used to compare the experiment arms).
 Testers use their own words, so the frozen wording in data/test_set.jsonl is not enough. These variants are not
 part of the test set and are not scored for the experiment. 15/15 passed on the development machine, 2 Nov 2026.
 """
 from __future__ import annotations
 
+import argparse
 import copy
+import csv
 import sys
+import time
 
 from gradpath.runtime.agent import Runtime, load_tasks
+from gradpath.runtime.session import LOCAL
 
 from .run_tasks import run_task
 from .score import score
@@ -32,8 +37,11 @@ PROBES = [("off-topic, expect a decline", "ช่วยเขียนการ�
            "Does 2110521 count as both a core elective and a department elective?")]
 
 
-def main():
-    tasks, rt, fails = load_tasks(), Runtime(), 0
+def main(argv=None):
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--arm", default="C", choices=["A", "B", "C"])
+    args = ap.parse_args(argv)
+    tasks, rt, fails, rows = load_tasks(), Runtime(arm=args.arm), 0, []
     for tid, texts in VARIANTS.items():
         for text in texts:
             t = copy.deepcopy(tasks[tid])
@@ -41,6 +49,9 @@ def main():
             s = run_task(rt, t)
             r = score(rt, s, t)
             fails += r["technical_result"] != "PASS"
+            rows.append({"arm": args.arm, "task_id": tid, "text": text, "result": r["technical_result"],
+                         "final_state": r["final_state"], "checks_failed": "; ".join(r["checks_failed"]),
+                         "max_turn_s": r["max_turn_s"], "run_id": s.session_id})
             print(f"{tid} {r['technical_result']:4} {r['final_state']} lang={r['reply_lang']} | {text} | "
                   f"{'; '.join(r['checks_failed'])} | {s.session_id}", flush=True)
     for label, text in PROBES:
@@ -49,8 +60,17 @@ def main():
         s = run_task(rt, t)
         last = s.items[-1]
         print(f"PROBE ({label}): {s.outcome} {last.kind}: {last.text[:200]}", flush=True)
+        rows.append({"arm": args.arm, "task_id": "PROBE", "text": text, "result": "manual",
+                     "final_state": s.outcome, "checks_failed": f"{last.kind}: {last.text[:300]}",
+                     "max_turn_s": "", "run_id": s.session_id})
     total = sum(map(len, VARIANTS.values()))
     print(f"\n{total - fails}/{total} PASS")
+    out = LOCAL / "eval" / f"{time.strftime('%Y%m%d-%H%M%S')}-paraphrases-arm{args.arm}.csv"
+    with open(out, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    print(f"results in {out}")
     return 0 if not fails else 1
 
 

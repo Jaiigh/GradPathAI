@@ -48,7 +48,8 @@ def main():
     check("UI built (dist/index.html)", (ROOT / "dist" / "index.html").exists(), "run: corepack pnpm build")
     ts = ROOT / "data" / "test_set.jsonl"
     check("test set", ts.exists(), f"{len(load_tasks())} tasks, SHA-256 {hashlib.sha256(ts.read_bytes()).hexdigest()[:16]}")
-    check("snapshot", True, f"cp2566-v0 content_hash {load().content_hash}")
+    check("snapshot", True, f"cp2566-v0 (UAT and test set) content_hash {load('cp2566-v0').content_hash}; "
+                            f"default for uploads {load().snapshot_id} {load().content_hash}")
     if not args.quick:
         from eval.run_tasks import run_task
         from eval.score import score

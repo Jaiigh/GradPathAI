@@ -30,7 +30,7 @@ class Item(BaseModel):
     """One entry of the conversation as the UI shows it."""
     seq: int
     role: Literal["student", "agent", "system"]
-    kind: str            # text | need_info | question | goal_card | plan | blocker_card | stop | decline | event
+    kind: str            # text | need_info | question | goal_card | plan | blocker_card | stop | decline | event | next_steps
     text: str = ""
     data: dict = Field(default_factory=dict)
     at: float = Field(default_factory=time.time)
@@ -69,6 +69,7 @@ class Session(BaseModel):
     llm_messages: list[dict] = Field(default_factory=list)
     candidates: dict[str, PlanCandidate] = Field(default_factory=dict)
     blockers: dict[str, dict] = Field(default_factory=dict)
+    plan_preferred: dict[str, list[str]] = Field(default_factory=dict)   # plan_id -> preferred courses it was solved with
     retrieved: list[str] = Field(default_factory=list)
     asked: list[dict] = Field(default_factory=list)          # ask_user calls, for scoring and the trace
     consent_events: list[dict] = Field(default_factory=list)

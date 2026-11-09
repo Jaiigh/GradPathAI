@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from './api.js';
-import { BlockerCard, GoalCard, PlanCard, StopCard, goalText } from './cards.jsx';
+import { BlockerCard, GoalCard, NextSteps, PlanCard, StopCard, goalText } from './cards.jsx';
 
 const OPERATOR = new URLSearchParams(window.location.search).has('operator');
 const ROUNDS = [['รอบ 1 (Group 4)', ['T01', 'T05', 'T09', 'T13', 'T17']], ['รอบ 2 (Group 7)', ['T03', 'T07', 'T11', 'T16', 'T19']]];
@@ -212,7 +212,12 @@ function Chat({ view, busy, act }) {
     if (it.kind === 'blocker_card') return <BlockerCard card={cards[it.data.card_id]} item={it} busy={busy}
       onChoose={(kind) => act(() => api.blocker(view.session_id, it.data.card_id, kind))}
       onDecline={() => act(() => api.blocker(view.session_id, it.data.card_id, null, true))} />;
-    if (it.kind === 'stop') return <StopCard item={it} />;
+    const last = it.seq === view.items[view.items.length - 1]?.seq;
+    if (it.kind === 'stop') return <StopCard item={it} busy={busy} operator={OPERATOR}
+      canRetry={last && view.outcome === 'STOP_UNVERIFIED' && it.data.retry}
+      onRetry={(clear) => act(() => api.retry(view.session_id, clear))} />;
+    if (it.kind === 'next_steps') return <NextSteps item={it} busy={busy} active={last && view.outcome === 'NEED_INFO'}
+      onDefer={() => act(() => api.defer(view.session_id))} />;
     if (it.kind === 'event') return null;
     return <p>{it.text}</p>;
   };
@@ -224,7 +229,7 @@ function Chat({ view, busy, act }) {
         ? <div key={it.seq} className="event">{it.text}</div>
         : <div key={it.seq} className={`message ${it.role === 'student' ? 'student' : 'agent'} ${it.kind}`}>
           {it.role !== 'student' && <div className="avatar">{it.role === 'system' ? '!' : 'G'}</div>}
-          <div className={`bubble ${['goal_card', 'plan', 'blocker_card', 'stop'].includes(it.kind) ? 'wide' : ''}`}>
+          <div className={`bubble ${['goal_card', 'plan', 'blocker_card', 'stop', 'next_steps'].includes(it.kind) ? 'wide' : ''}`}>
             {it.kind === 'question' && <span className="tag">คำถามจากระบบ</span>}
             {it.kind === 'need_info' && <span className="tag warn">NEED_INFO</span>}
             {it.kind === 'decline' && <span className="tag">ปฏิเสธคำขอ</span>}

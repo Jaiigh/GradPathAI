@@ -13,6 +13,11 @@ to the model. Report replacement invalidates previous plans/goals and clears mod
 OCR and other transcript layouts remain unimplemented. The original architecture descriptions
 below include targets, such as assumption-core diagnosis, beyond the present implementation.
 
+Post-UAT update (9 Nov, D20 and D21): `POST /api/sessions/{id}/retry` (after STOP_UNVERIFIED, same
+record and goal) and `POST /api/sessions/{id}/defer` ("plan the rest now" after NEED_INFO);
+`Runtime(arm="A"|"B"|"C")` for the experiment, where C is the product. New guards are listed
+at the end of the runtime-guards table.
+
 ## Components
 
 ```mermaid
@@ -119,6 +124,12 @@ the prompt (`gradpath/runtime/agent.py`, decision D17):
 | Blocker first | After an INFEASIBLE `solve_plan` in a turn, `ask_user` and `reply` are rejected until `submit_final` sends the blocker (or a later solve finds a plan), so the model cannot ask about goal changes on its own. |
 | Faults and UNKNOWN | `planner_timeout`, solver `UNKNOWN`, `model_unavailable`, an exhausted budget or a third gate rejection end the turn in STOP_UNVERIFIED with a fixed message that does not claim impossibility. |
 | Plain text | A reply without a tool call is nudged once; JSON text that parses as a tool call is accepted; otherwise the text is kept as an info reply. |
+| NEED_INFO next steps (D20) | After a NEED_INFO turn the runtime, not the model, adds what is missing (unpublished course code with its category, or a typed code outside the snapshot) and the two ways forward; "plan the rest now" drafts a goal without that course. |
+| Course titles (D20) | A course title without a published code is not accepted as an interest. `reply` and `submit_final` texts are rejected when a Latin course title stands next to another course's code. |
+| Record courses (D20) | Unpassed required courses (retakes) are dropped from `must_take` with a note, since the planner always schedules them; `ask_user` may not ask about courses in the confirmed record. |
+| Language (D20) | A message without letters keeps the conversation language. |
+| One category (D20) | An info reply that names two categories of one course (or says "at the same time") without saying it counts toward one only is rejected. |
+| Retry (D20) | STOP_UNVERIFIED can be retried from the same state; the stop item carries `retry`. |
 | Context | The system prompt is fixed and the message history is append-only, so Ollama reuses its prompt cache. Each turn's first message opens with a `[State, written by GradPath]` block: record summary (credits, required retakes), goal state and the student's language at the start of that turn. UI decisions reach the model as `[UI event]` messages; consent is read only from the UI. |
 
 ## Planner (CP-SAT)
