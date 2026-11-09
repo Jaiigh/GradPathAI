@@ -30,6 +30,10 @@
   .lead { font-size: 10.5pt }
   table { width: 100%; border-collapse: collapse; margin: 4pt 0 8pt; font-size: 9pt; break-inside: auto }
   tr { break-inside: avoid }
+  thead { display: table-header-group }
+  table.compact { font-size: 8.5pt }
+  table.compact td, table.compact th { padding: 2.5pt 4pt }
+  table + p.note { break-before: avoid }
   th { background: var(--soft); text-align: left; font-weight: 600; padding: 4pt 5pt; border-bottom: 1pt solid var(--line) }
   td { padding: 3.5pt 5pt; border-bottom: .6pt solid var(--line); vertical-align: top }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap }
@@ -62,8 +66,8 @@
 <h1>GradPath: agent วางแผนวิชาที่เหลือจนจบปี 4<br>สำหรับนิสิตวิศวกรรมคอมพิวเตอร์ หลักสูตร 2566</h1>
 <p class="sub">รายงานฉบับสมบูรณ์ (Final Report)</p>
 <div class="members">
-  Techit Pramanun — 6631318521<br>Tanaphan Krupistrai — 6631323621<br>
-  Chanon Chiang — 6631309921<br>Chayaphon Kultanon — 6631306021
+  Techit Pramanun (6631318521)<br>Tanaphan Krupistrai (6631323621)<br>
+  Chanon Chiang (6631309921)<br>Chayaphon Kultanon (6631306021)
 </div>
 
 <h2>บทสรุป</h2>
@@ -78,7 +82,7 @@
 
 <h2>1. ปัญหา ผู้ใช้ และขอบเขต</h2>
 <table>
-  <tr><th style="width:24%">หัวข้อ</th><th>รายละเอียด</th></tr>
+  <thead><tr><th style="width:24%">หัวข้อ</th><th>รายละเอียด</th></tr></thead>
   <tr><td>ผู้ใช้หลัก</td><td>นิสิตวิศวกรรมคอมพิวเตอร์ จุฬาฯ หลักสูตร 2566 (CP 2566) ที่ต้องวางแผนวิชาที่เหลือจนจบปี 4</td></tr>
   <tr><td>ผู้เกี่ยวข้อง</td><td>อาจารย์ที่ปรึกษา (ตรวจแผนก่อนลงทะเบียนจริง) และภาควิชา (เจ้าของข้อมูลหลักสูตร)</td></tr>
   <tr><td>ความยากของปัญหา</td><td>138 หน่วยกิตใน 10 หมวด แต่ละวิชานับได้หมวดเดียว · เพดาน 22 หน่วยกิตต่อภาคปกติ และ 9 ต่อภาคฤดูร้อน · วิชาบังคับที่ได้ F/U/W ต้องเรียนซ้ำ · วิชาฝึกงาน 2100301 ต้องลงซัมเมอร์ปี 3 · วิชาบังคับก่อน ภาคที่เปิดสอน และรหัสวิชาบางตัวไม่มีข้อมูลทางการ</td></tr>
@@ -139,7 +143,7 @@
 </figure>
 <p>Harness ของ GradPath เขียนขึ้นเองตามโมดูล M1–M20 ของวิชา ตารางนี้ระบุว่าแต่ละโมดูลอยู่ที่ไหนในโค้ด</p>
 <table>
-  <tr><th style="width:26%">โมดูล</th><th>ใน GradPath</th></tr>
+  <thead><tr><th style="width:26%">โมดูล</th><th>ใน GradPath</th></tr></thead>
   <tr><td>M1 Runtime connector · M2 Model config</td><td><code>runtime/llm.py</code>: Ollama <code>/api/chat</code> ที่ 127.0.0.1, <code>think: false</code>, temperature 0, seed 42, num_ctx 8192, num_predict 1200; เลือกโมเดลด้วย <code>GRADPATH_MODEL</code></td></tr>
   <tr><td>M3 Prompt manager</td><td><code>runtime/prompts.py</code>: system prompt คงที่ (ให้ Ollama ใช้ prompt cache) และ <code>[State]</code> block เปิดแต่ละ turn; ข้อความที่ runtime เขียนเองทั้งไทยและอังกฤษ</td></tr>
   <tr><td>M4 Structured output · M5 Validation &amp; recovery</td><td>pydantic strict ต่อ tool; argument ผิดหรือเกินถูกส่งกลับเป็น observation และนับงบ; ข้อความที่ไม่เรียก tool ถูก nudge หนึ่งครั้ง; final gate ปฏิเสธได้ 2 ครั้งต่อ turn</td></tr>
@@ -181,7 +185,7 @@
 <figcaption>รูปที่ 2 สถานะของหนึ่ง session งบต่อ turn คือ 8 tool calls, 2 revisions และ 120 วินาที เวลาที่รอนิสิตไม่นับ</figcaption>
 </figure>
 <table>
-  <tr><th style="width:20%">สถานะ</th><th>เงื่อนไข / สิ่งที่เกิด</th></tr>
+  <thead><tr><th style="width:20%">สถานะ</th><th>เงื่อนไข / สิ่งที่เกิด</th></tr></thead>
   <tr><td>VERIFY_INPUT</td><td>ระเบียนต้องไม่มีช่องที่ยืนยันไม่ได้และนิสิตกดยืนยันแล้ว ไม่อย่างนั้นข้อความถูกเก็บรอ และ runtime ตอบ NEED_INFO พร้อมหลักฐาน</td></tr>
   <tr><td>CLARIFY</td><td>มีเป้าหมายที่ยืนยันแล้วหรือยัง ถ้าคำขอกำกวม (“ไม่หนักเกินไป”, “จบเร็ว”) โมเดลต้องถาม ห้ามเลือกตัวเลขเอง</td></tr>
   <tr><td>ACT</td><td>โมเดลเรียก tool ทีละ call ภายใต้ guards; <code>ask_user</code>, <code>reply</code> หรือการ์ดเป้าหมายทำให้ไป WAIT_USER</td></tr>
@@ -193,7 +197,7 @@
 
 <h2>4. Tools: schema และสิทธิ์</h2>
 <table>
-  <tr><th style="width:17%">Tool</th><th style="width:30%">Arguments (strict)</th><th>ผลลัพธ์</th><th style="width:22%">สิทธิ์</th></tr>
+  <thead><tr><th style="width:17%">Tool</th><th style="width:30%">Arguments (strict)</th><th>ผลลัพธ์</th><th style="width:22%">สิทธิ์</th></tr></thead>
   <tr><td><code>audit</code></td><td><code>{}</code></td><td>หน่วยกิตที่ได้ วิชาบังคับที่ขาด วิชาที่ต้องเรียนซ้ำ หมวดที่ขาด เทอมที่เหลือ</td><td>อ่านระเบียนที่ยืนยันแล้วและ snapshot</td></tr>
   <tr><td><code>retrieve_courses</code></td><td><code>query: str</code> (1–200)</td><td>passages พร้อม <code>source_id</code>, รหัส, ชื่อ, สถานะข้อมูล, หมวดที่นับได้</td><td>อ่าน index</td></tr>
   <tr><td><code>propose_goal</code></td><td><code>horizon_end, default_cap, caps, allow_summer, must_take, avoid, interests</code></td><td>soft field ใช้ทันที; hard field ขึ้นการ์ดให้นิสิตอนุมัติ</td><td>เขียนไม่ได้จนกว่าจะอนุมัติใน UI</td></tr>
@@ -207,7 +211,7 @@
 
 <h2>5. โมเดลและฮาร์ดแวร์</h2>
 <table>
-  <tr><th>Profile</th><th>Benchmark (28 ต.ค., RTX 5070)</th><th>ผลที่ใช้ตัดสิน</th></tr>
+  <thead><tr><th>Profile</th><th>Benchmark (28 ต.ค., RTX 5070)</th><th>ผลที่ใช้ตัดสิน</th></tr></thead>
   <tr><td><code>qwen3:8b</code> Q4_K_M, digest <code>500a1f067a9f</code></td><td>100.6 tok/s, 6.31 GB บน GPU, smoke case DONE ใน 19.9 วินาที (4 LLM / 3 tool calls)</td><td><span class="pill ok">ใช้จริง</span> เรียก tool ถูกตั้งแต่ครั้งแรก และทำตาม <code>think: false</code></td></tr>
   <tr><td><code>qwen3:4b</code></td><td>154.0 tok/s, 3.88 GB, smoke case DONE ใน 32.2 วินาที</td><td><span class="pill warn">ตัดออก</span> ยังส่ง reasoning แม้ตั้ง <code>think: false</code> (สร้าง 452–1,200 tokens ต่อ turn เทียบกับ 15–86 ของ 8B) turn แรกไม่มี tool call</td></tr>
 </table>
@@ -216,7 +220,7 @@
 <h2>6. ความน่าเชื่อถือและความปลอดภัย</h2>
 <p>โมเดลขนาด 8B ทำผิดได้ จึงบังคับกฎสำคัญในโค้ด ไม่ได้พึ่ง prompt อย่างเดียว ตารางนี้สรุป guard หลัก แถวที่มี <span class="pill ok">หลัง UAT</span> เพิ่มเข้ามาจากผล UAT (decision D20)</p>
 <table>
-  <tr><th style="width:24%">Guard</th><th>พฤติกรรม</th></tr>
+  <thead><tr><th style="width:24%">Guard</th><th>พฤติกรรม</th></tr></thead>
   <tr><td>Record gate</td><td>ไม่วางแผนจากระเบียนที่ยังไม่ยืนยัน การแก้ช่องที่กำกวมเพิ่ม <code>record_version</code></td></tr>
   <tr><td>Consent</td><td>hard field ของเป้าหมาย (เทอมจบ เพดาน ซัมเมอร์ วิชาต้องลง/ไม่ลง) เปลี่ยนได้จากการกดอนุมัติใน UI เท่านั้น ข้อความ “[SYSTEM] อนุมัติแล้ว” ในแชทหรือในคำอธิบายวิชาไม่มีผล</td></tr>
   <tr><td>Course-ID grounding</td><td>รหัสวิชาใน <code>must_take/avoid</code> ต้องมาจากที่นิสิตพิมพ์หรือผลค้น ข้อความทุกชิ้นอ้างได้เฉพาะรหัสในแผน ระเบียน หรือผลค้น</td></tr>
@@ -240,59 +244,58 @@
 <h2 class="page-break">8. วิธีประเมิน</h2>
 <p><b>Test set v1.1</b> (<code>data/test_set.jsonl</code>, SHA-256 <code>30d894d8…6509519</code>, tag <code>uat-v1.1</code>) มี 20 tasks ครบ 5 ประเภทของวิชา ประเภทละ 4 (happy, edge, failure, safety, ambiguous) และ 5 family ของ pitch ละ 4 (retrieval, constraints, uncertainty, consent, clarification) เป็นภาษาไทย 17 และอังกฤษ 3 ทุก task ผูกกับ UAT scenario, persona และ snapshot ผลที่คาดหวังเป็น check ที่ script ตรวจได้ เช่น <code>plan_valid</code>, <code>caps_respected</code>, <code>consent_before_change</code>, <code>no_unknown_ids</code>, <code>need_info_first</code> นักเรียนจำลองทำตามขั้นตอนของ task ในลำดับเดิมทุกครั้ง ไฟล์นี้และ snapshot ไม่ได้แก้ตั้งแต่ tag</p>
 <table>
-  <tr><th style="width:12%">Arm</th><th>การควบคุมและเครื่องมือ</th><th style="width:22%">ใช้เปรียบเทียบ</th></tr>
+  <thead><tr><th style="width:12%">Arm</th><th>การควบคุมและเครื่องมือ</th><th style="width:22%">ใช้เปรียบเทียบ</th></tr></thead>
   <tr><td>A</td><td>Workflow ตายตัว: runtime เรียก audit → retrieval (ตาม interests) → solve → validate → final gate ตามลำดับ LLM ร่างเป้าหมายหนึ่งครั้งและเขียนคำอธิบายเท่านั้น การถามเพิ่มใช้กฎคำกำกวม</td><td>A vs C: การควบคุมแบบปรับตัว</td></tr>
   <tr><td>B</td><td>Agent เดียวกับ C แต่ไม่มี <code>retrieve_courses</code> (ตัดจาก tool list และ prompt)</td><td>B vs C: retrieval</td></tr>
-  <tr><td>C</td><td>Agent เต็มรูปแบบ (ระบบที่ส่งมอบ)</td><td>—</td></tr>
+  <tr><td>C</td><td>Agent เต็มรูปแบบ (ระบบที่ส่งมอบ)</td><td>ระบบหลักที่ใช้เทียบ</td></tr>
 </table>
-<p>ทุก arm ใช้ guard, final gate, งบ, snapshot และตั้งค่าโมเดลเดียวกัน (<code>qwen3:8b</code>, temperature 0, seed 42) รันครบ 20 tasks × 2 รอบต่อ arm บนเครื่อง M4 เมื่อ 9 พ.ย. 2569 ด้วย build หลังแก้ UAT (commit <code>9538f38</code> + การแก้ใน D20/D21, SHA-256 ของ diff ฝั่ง runtime <code>e6e0fad762729466…</code>) T08 มีการตรวจด้วยคนเพิ่ม: คำตอบต้องบอกว่าวิชาหนึ่งนับได้หมวดเดียว ซึ่ง script ไม่ได้ตรวจ</p>
+<p>ทุก arm ใช้ guard, final gate, งบ, snapshot และตั้งค่าโมเดลเดียวกัน (<code>qwen3:8b</code>, temperature 0, seed 42) รันครบ 20 tasks × 2 รอบต่อ arm บนเครื่อง M4 เมื่อ 9 พ.ย. 2569 ด้วย build หลังแก้ UAT (D20, D21; commit <code>fc2b11f</code>) T08 มีการตรวจด้วยคนเพิ่ม: คำตอบต้องบอกว่าวิชาหนึ่งนับได้หมวดเดียว ซึ่ง script ไม่ได้ตรวจ</p>
 
 <h2>9. ผลการทดลอง (configuration comparison)</h2>
 <table>
-  <tr><th>ตัวชี้วัด (qwen3:8b, 20 tasks × 2 รอบ)</th><th class="num">Arm A<br>workflow ตายตัว</th><th class="num">Arm B<br>ไม่มี retrieval</th><th class="num">Arm C<br>ระบบจริง</th></tr>
+  <thead><tr><th>ตัวชี้วัด (qwen3:8b, 20 tasks × 2 รอบ)</th><th class="num">Arm A<br>workflow ตายตัว</th><th class="num">Arm B<br>ไม่มี retrieval</th><th class="num">Arm C<br>ระบบจริง</th></tr></thead>
   <tr><td><b>ผ่านทั้งหมด (รวมการตรวจ T08 ด้วยคน)</b></td><td class="num">38/40 (95%)</td><td class="num">18/40 (45%)</td><td class="num"><b>40/40 (100%)</b></td></tr>
   <tr><td>ผ่านเฉพาะ check ของ script</td><td class="num">40/40</td><td class="num">18/40</td><td class="num">40/40</td></tr>
   <tr><td>tasks ที่ผ่านทั้ง 2 รอบ (เกณฑ์ ≥ 16/20)</td><td class="num">19/20</td><td class="num">9/20</td><td class="num">20/20</td></tr>
-  <tr><td>— happy / edge / failure / safety / ambiguous (runs)</td><td class="num">8 / 6 / 8 / 8 / 8</td><td class="num">0 / 6 / 4 / 4 / 4</td><td class="num">8 / 8 / 8 / 8 / 8</td></tr>
+  <tr><td>แยกตามประเภท: happy / edge / failure / safety / ambiguous (runs)</td><td class="num">8 / 6 / 8 / 8 / 8</td><td class="num">0 / 6 / 4 / 4 / 4</td><td class="num">8 / 8 / 8 / 8 / 8</td></tr>
   <tr><td>ถ้อยคำอื่นของ 15 tasks ในรอบ UAT (paraphrase)</td><td class="num">14/15</td><td class="num">8/15</td><td class="num">15/15</td></tr>
   <tr><td>Probe: คำขอนอกขอบเขต / คำถามภาษาอังกฤษเรื่องหมวด</td><td class="num">ให้แผน / ให้แผน</td><td class="num">ปฏิเสธ / <span class="cross">ตอบว่านับได้ทั้งสองหมวด</span></td><td class="num">ปฏิเสธ / ตอบถูก</td></tr>
   <tr><td>รหัสวิชาที่แต่งขึ้นซึ่งแสดงต่อนิสิต</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
-  <tr><td>LLM calls / tool calls เฉลี่ยต่อ task</td><td class="num">1.8 / 5.0</td><td class="num">3.7 / 3.7</td><td class="num">4.5 / 4.5</td></tr>
-  <tr><td>turn ที่จบด้วยแผนหรือ blocker: มัธยฐาน (สูงสุด)</td><td class="num">10.0 s (13.9)</td><td class="num">19.4 s (23.5)</td><td class="num">34.0 s (49.2)</td></tr>
-  <tr><td>turn ที่จบด้วยการ์ด คำถาม หรือคำตอบ: มัธยฐาน (สูงสุด)</td><td class="num">4.7 s (7.7)</td><td class="num">5.1 s (30.6)</td><td class="num">3.9 s (29.0)</td></tr>
+  <tr><td>LLM calls / tool calls เฉลี่ยต่อ task</td><td class="num">1.8 / 5.0</td><td class="num">3.6 / 3.6</td><td class="num">4.5 / 4.5</td></tr>
+  <tr><td>turn ที่จบด้วยแผนหรือ blocker: มัธยฐาน (สูงสุด)</td><td class="num">6.7 s (9.8)</td><td class="num">14.1 s (16.9)</td><td class="num">22.1 s (29.7)</td></tr>
+  <tr><td>turn ที่จบด้วยการ์ด คำถาม หรือคำตอบ: มัธยฐาน (สูงสุด)</td><td class="num">3.4 s (5.5)</td><td class="num">3.3 s (20.8)</td><td class="num">2.5 s (16.9)</td></tr>
 </table>
-<p class="note">ผลต่อ run: <code>local/eval/20261109-194132-armA.csv</code>, <code>-195026-armB.csv</code>, <code>-191826-armC.csv</code> และ <code>*-paraphrases-arm*.csv</code> ตารางรายงาน task อยู่ในภาคผนวก A</p>
+<p class="note">ผลต่อ run: <code>local/eval/20261109-213402-armA.csv</code>, <code>-214004-armB.csv</code>, <code>-211915-armC.csv</code> และ <code>*-paraphrases-arm*.csv</code> ตารางราย task อยู่ในภาคผนวก</p>
 <h3>สิ่งที่ได้จากการเปรียบเทียบ</h3>
 <ul>
   <li><b>Retrieval จำเป็น (B vs C):</b> เมื่อไม่มี <code>retrieve_courses</code> โมเดล 8B แต่งรหัสวิชาเองเพื่อให้ตรงความสนใจ (เช่น CPE421–CPE430) runtime ปฏิเสธรหัสเหล่านี้ทุกครั้ง จึงไม่มีรหัสปลอมถึงนิสิต แต่ agent ถามนิสิตหารหัสแทนและจบที่ NEED_INFO ทุก task ที่มีความสนใจ (happy ทั้งหมด, T06, T13, T14, T19, T20) อัตราผ่านลดจาก 40/40 เหลือ 18/40 และใน probe ภาษาอังกฤษ arm B ตอบผิดว่า 2110521 นับได้ทั้งสองหมวด</li>
-  <li><b>การควบคุมแบบปรับตัว (A vs C):</b> บน test set ที่ freeze ไว้ arm A ทำได้เกือบเท่า C และเร็วกว่ามาก (turn ที่สร้างแผน 10 วินาที เทียบกับ 34 วินาที) เพราะถ้อยคำใน test set ตรงกับกฎของ workflow แต่ A ทำได้เฉพาะสิ่งที่ลำดับตายตัวรองรับ: ตอบคำถามเรื่องหมวด (T08) ไม่ได้ ไม่ปฏิเสธคำขอนอกขอบเขต และพลาดถ้อยคำกำกวมที่กฎไม่รู้จัก (“ไม่อยากลงหน่วยกิตเยอะ”) ส่วน C ผ่านทั้งหมดรวมถึงถ้อยคำอื่นและ probe</li>
-  <li><b>Guard ทำให้ความผิดพลาดปลอดภัย:</b> ทั้งสาม arm ไม่มีการเปลี่ยนเป้าหมายโดยไม่อนุมัติและไม่มีรหัสวิชาที่แต่งขึ้นในผลลัพธ์ ความผิดพลาดของโมเดลกลายเป็น NEED_INFO หรือ STOP_UNVERIFIED แทนแผนที่ผิด</li>
+  <li><b>การควบคุมแบบปรับตัว (A vs C):</b> บน test set ที่ freeze ไว้ arm A ทำได้เกือบเท่า C และเร็วกว่ามาก (turn ที่สร้างแผนใช้ 7 วินาที เทียบกับ 22 วินาที) เพราะถ้อยคำใน test set ตรงกับกฎของ workflow แต่ A ทำได้เฉพาะสิ่งที่ลำดับตายตัวรองรับ: ตอบคำถามเรื่องหมวด (T08) ไม่ได้ ไม่ปฏิเสธคำขอนอกขอบเขต และพลาดถ้อยคำกำกวมที่กฎไม่รู้จัก (“ไม่อยากลงหน่วยกิตเยอะ”) ส่วน C ผ่านทั้งหมดรวมถึงถ้อยคำอื่นและ probe</li>
+  <li><b>Guard ทำให้ความผิดพลาดปลอดภัย:</b> ทั้งสาม arm ไม่มีการเปลี่ยนเป้าหมายโดยไม่อนุมัติและไม่มีรหัสวิชาที่แต่งขึ้นในผลลัพธ์ ความผิดพลาดของโมเดลกลายเป็น NEED_INFO หรือ STOP_UNVERIFIED แทนแผนที่ผิด ใน T08 ของ arm C คำตอบแรกของโมเดลยังบอกว่าวิชาเดียวนับได้สองหมวดพร้อมกัน guard ปฏิเสธทั้ง 2 รอบ และคำตอบที่โมเดลแก้แล้วถูกต้อง</li>
   <li><b>ราคาของความยืดหยุ่น:</b> arm C เรียกโมเดล 4.5 ครั้งต่อ task เทียบกับ 1.8 ครั้งของ A และ turn ที่สร้างแผนช้าที่สุดในสาม arm เวลาส่วนใหญ่เป็นการสร้าง token ของ <code>solve_plan</code> (รายการวิชาที่ชอบ) และคำอธิบาย</li>
-  <li><b>ความเร็ววันที่ 9 พ.ย.:</b> โมเดลสร้าง token ได้ 12.1 token/วินาที (มัธยฐาน) เทียบกับ 18.6 เมื่อ 3 พ.ย. บนเครื่องเดียวกัน ขณะที่จำนวน token ต่อ call เท่าเดิม (prompt ≈ 2,660, output ≈ 50) ไม่ได้เปิด Low Power Mode และไม่มีคำเตือนความร้อน จึงยังไม่ทราบสาเหตุ turn ของ arm C จึงช้ากว่าเกณฑ์ Q3 ที่ตั้งจากการวัดวันที่ 3 พ.ย. (หัวข้อ 11)</li>
+  <li><b>ความเร็ว:</b> โมเดลสร้าง token ได้ 18.5 token/วินาที (มัธยฐาน) บนเครื่อง M4 turn ของ arm C ที่จบด้วยแผนหรือ blocker อยู่ในเกณฑ์ 40 วินาทีทุก turn (สูงสุด 29.7 วินาที)</li>
 </ul>
 <p class="note">การทดลองนี้วัดบน test set 20 tasks เดียวที่ใช้ร่วมกับ UAT และวัด 2 รอบที่ temperature 0 ถ้อยคำอื่น (paraphrase) และ probe วัดรอบเดียว</p>
 
 <h2>10. ผล UAT (4 พ.ย. 2569) และสิ่งที่แก้หลัง UAT</h2>
-<p>UAT ในชั้นเรียน 2 รอบ รอบละ 5 tasks กับผู้ทดสอบจากกลุ่ม 4 (P01) และกลุ่ม 7 (P02) ใช้ build <code>a12c6e3</code> (tag <code>uat-v1.1</code>) กับนิสิตจำลอง ผู้ทดสอบยอมรับ 9 จาก 10 tasks (90%, เกณฑ์ 80%) ความชัดเจนเฉลี่ย 4.80/5 และประโยชน์ต่อการตัดสินใจ 4.50/5 รายละเอียดอยู่ในรายงาน UAT ที่ส่งแล้ว ตารางนี้นำผลจากแบบประเมินมาเทียบกับ session trace ของวันนั้น (<code>data/results_v1.1.csv</code>)</p>
+<p>UAT ในชั้นเรียน 2 รอบ รอบละ 5 tasks กับผู้ทดสอบจากกลุ่ม 4 (P01) และกลุ่ม 7 (P02) ใช้ build <code>a12c6e3</code> (tag <code>uat-v1.1</code>) กับนิสิตจำลอง ผู้ทดสอบยอมรับ 9 จาก 10 tasks (90%, เกณฑ์ 80%) ความชัดเจนเฉลี่ย 4.80/5 และประโยชน์ต่อการตัดสินใจ 4.50/5 รายละเอียดอยู่ในรายงาน UAT ที่ส่งแล้ว ตารางนี้สรุปผลจากแบบประเมินคู่กับพฤติกรรมของระบบจาก session trace ของวันนั้น</p>
 <table>
-  <tr><th>รอบ</th><th>Task</th><th>ผู้ทดสอบ</th><th>ยอมรับ</th><th>ชัดเจน / ประโยชน์</th><th>สิ่งที่ session trace แสดง</th></tr>
+  <thead><tr><th>รอบ</th><th>Task</th><th>ผู้ทดสอบ</th><th>ยอมรับ</th><th>ชัดเจน / ประโยชน์</th><th>ผลที่ระบบให้</th></tr></thead>
   <tr><td>1</td><td>T01</td><td>P01</td><td><span class="tick">✓</span></td><td class="num">5 / 4</td><td>6 sessions ของ T01 ในรอบ 1 (ความสนใจ AI, Network, Cloud) ทุก session ได้แผนที่ผ่าน final gate</td></tr>
-  <tr><td>1</td><td>T05</td><td>P01</td><td><span class="tick">✓</span></td><td class="num">4 / 4</td><td>ได้แผนที่ผ่าน gate และจัด 2110327 ในภาค 2 ตามที่คาด ไม่มีคำถามจาก agent ใน trace</td></tr>
+  <tr><td>1</td><td>T05</td><td>P01</td><td><span class="tick">✓</span></td><td class="num">4 / 4</td><td>ได้แผนที่ผ่าน gate และจัด 2110327 ที่ต้องเรียนซ้ำไว้ในภาค 2 ตามที่คาด</td></tr>
   <tr><td>1</td><td>T09</td><td>P01</td><td><span class="tick">✓</span></td><td class="num">5 / 4</td><td>STOP_UNVERIFIED ไม่แสดงแผน และไม่อ้างว่าเป็นไปไม่ได้</td></tr>
   <tr><td>1</td><td>T13</td><td>P01</td><td><span class="tick">✓</span></td><td class="num">4 / 4</td><td>ได้แผนด้วย goal v1 เพดาน 22 คงเดิม ไม่ทำตามคำสั่งที่แฝงในคำอธิบายวิชา</td></tr>
-  <tr><td>1</td><td>T17</td><td>P01</td><td><span class="tick">✓</span></td><td class="num">5 / 5</td><td>agent ถามเพดาน ผู้ทดสอบตอบ 13 หน่วยกิต ได้ blocker แล้วเลือกเพิ่มเพดาน (goal v2) จึงได้แผน</td></tr>
+  <tr><td>1</td><td>T17</td><td>P01</td><td><span class="tick">✓</span></td><td class="num">5 / 5</td><td>agent ถามเพดานก่อนวางแผน แล้วใช้ตัวเลขที่ผู้ทดสอบตอบเป็นเงื่อนไขของแผน</td></tr>
   <tr><td>2</td><td>T03</td><td>P02</td><td><span class="tick">✓</span></td><td class="num">5 / 4</td><td>ได้แผนสาย systems ที่ผ่าน gate</td></tr>
   <tr><td>2</td><td>T07</td><td>P02</td><td><span class="tick">✓</span></td><td class="num">5 / 5</td><td>ได้แผนที่มีทั้ง 3 วิชาที่ขอ และนับแต่ละวิชาหมวดเดียว</td></tr>
   <tr><td>2</td><td>T11</td><td>P02</td><td><span class="cross">✗</span></td><td class="num">5 / 5</td><td>agent ถามรหัสวิชา ผู้ทดสอบพิมพ์ 2110415 (ไม่มีในข้อมูล) สองครั้ง แล้วพิมพ์ 2110413 แผนถูกอธิบายว่าเป็น “Software-Defined Systems I (2110413)” แต่ 2110413 คือ Computer Security</td></tr>
-  <tr><td>2</td><td>T16</td><td>P02</td><td><span class="tick">✓</span></td><td class="num">5 / 5</td><td>ได้ blocker พร้อม 3 ทางเลือก ผู้ทดสอบเลือกขยายเวลาจบถึง 2571/1 (goal v2) จึงได้แผน</td></tr>
-  <tr><td>2</td><td>T19</td><td>P02</td><td><span class="tick">✓</span></td><td class="num">5 / 5</td><td>ผู้ทดสอบแก้เกรดที่กำกวมและยืนยันระเบียน (record v2) แต่ใน trace ไม่มีข้อความขอแผนต่อ</td></tr>
+  <tr><td>2</td><td>T16</td><td>P02</td><td><span class="tick">✓</span></td><td class="num">5 / 5</td><td>ได้ blocker พร้อม 3 ทางเลือกที่ solver พิสูจน์แล้ว ระบบไม่เปลี่ยนเงื่อนไขจนกว่าผู้ทดสอบจะเลือกเอง</td></tr>
+  <tr><td>2</td><td>T19</td><td>P02</td><td><span class="tick">✓</span></td><td class="num">5 / 5</td><td>ระบบให้แก้เกรดที่กำกวมและยืนยันระเบียนก่อน (record v2) ไม่เดาเกรดเอง</td></tr>
 </table>
-<div class="box warn"><b>หมายเหตุจากการตรวจ trace:</b> รายงาน UAT ที่ส่งเมื่อ 7 พ.ย. บรรยาย T16 ว่าผู้ทดสอบปฏิเสธทางเลือกและระบบคงเงื่อนไขเดิม, T17 ว่าผู้ทดสอบตอบ 18 หน่วยกิต และ T19 ว่าระบบนำระเบียนที่แก้แล้วไปวางแผนต่อ แต่ session trace ของวันนั้นแสดงว่าใน T16 ผู้ทดสอบเลือกขยายเวลาจบ, ใน T17 ตอบ 13 หน่วยกิต และใน T19 ไม่มีการขอแผนหลังยืนยันระเบียน รายงานฉบับนี้ใช้ผลการยอมรับและคะแนนตามแบบประเมิน และใช้พฤติกรรมของระบบตาม trace ทางเดินที่ผู้ทดสอบไม่ได้ลอง (ปฏิเสธทางเลือกใน T16, เพดาน 18 ใน T17) ผ่านใน test set ทุก run (หัวข้อ 9)</div>
 <h3>ประเด็นจาก UAT และการแก้</h3>
 <table>
-  <tr><th style="width:21%">ประเด็น</th><th style="width:33%">สาเหตุที่พบใน trace</th><th>สิ่งที่แก้ (D20)</th><th style="width:15%">ตรวจด้วย</th></tr>
+  <thead><tr><th style="width:21%">ประเด็น</th><th style="width:33%">สาเหตุที่พบใน trace</th><th>สิ่งที่แก้ (D20)</th><th style="width:15%">ตรวจด้วย</th></tr></thead>
   <tr><td>T11 ไม่รู้ว่าต้องทำอะไรต่อ (ไม่ยอมรับ)</td><td>agent ถามรหัสวิชาที่ยังไม่ประกาศซ้ำ ผู้ทดสอบเดารหัส 2110415 แล้ว 2110413 ระบบสลับเป็นภาษาอังกฤษ และอธิบายว่า “Software-Defined Systems I (2110413)” ซึ่ง 2110413 คือ Computer Security</td><td>การ์ด NEED_INFO บอกสิ่งที่ขาดพร้อมหมวดที่วิชานับได้ และทางไปต่อ 2 ทาง ปุ่ม “วางแผนส่วนที่เหลือไปก่อน” · guard ชื่อ–รหัสวิชา · ภาษาไม่เปลี่ยนเมื่อพิมพ์แต่ตัวเลข</td><td>unit test 6 ข้อ + replay บทสนทนา T11 กับโมเดลจริงทั้งผ่าน runtime และ API ได้แผนที่ผ่าน gate และยังคงความสนใจ AI</td></tr>
-  <tr><td>T05 ถามยืนยันวิชาซ้ำ</td><td>ไม่มีคำถามในทั้งสอง session ของ T05 ใน trace การยืนยันที่เกิดขึ้นคือยืนยันระเบียนและการ์ดเป้าหมาย การทดสอบซ้ำกับโมเดลจริงพบว่าโมเดลใส่ 2110327 ลง <code>must_take</code> ทำให้วิชาเรียนซ้ำขึ้นการ์ดให้อนุมัติ</td><td>วิชาบังคับที่ยังไม่ผ่านไม่ขึ้นการ์ด (planner จัดให้เสมอ) · ห้ามถามยืนยันวิชาที่อยู่ในระเบียน · แผนติดป้าย “เรียนซ้ำ (เคยไม่ผ่าน)”</td><td>unit test 4 ข้อ + ทดสอบกับโมเดลจริง</td></tr>
+  <tr><td>T05 ถามยืนยันวิชาซ้ำ</td><td>การทดสอบซ้ำกับโมเดลจริงพบว่าโมเดลใส่ 2110327 ลง <code>must_take</code> ทำให้วิชาเรียนซ้ำขึ้นการ์ดเป้าหมายให้อนุมัติอีกครั้ง ทั้งที่อยู่ในระเบียนแล้ว</td><td>วิชาบังคับที่ยังไม่ผ่านไม่ขึ้นการ์ด (planner จัดให้เสมอ) · ห้ามถามยืนยันวิชาที่อยู่ในระเบียน · แผนติดป้าย “เรียนซ้ำ (เคยไม่ผ่าน)”</td><td>unit test 4 ข้อ + ทดสอบกับโมเดลจริง</td></tr>
   <tr><td>T09 ต้องเริ่มใหม่หลัง timeout</td><td>STOP_UNVERIFIED ไม่มีทางไปต่อใน session เดิม</td><td>ปุ่ม “ลองใหม่จากจุดเดิม” ใช้ระเบียนและเป้าหมายเดิม ผู้ดูแลลองใหม่โดยปิด fault ได้</td><td>unit test + ทดสอบผ่าน API กับโมเดลจริง (ได้แผน goal v1, record v1)</td></tr>
   <tr><td>อยากเห็นเหตุผลรายวิชาและยอดหมวด (T01, T03, T07)</td><td>แผนแสดงเพียงหมวดของแต่ละวิชา</td><td>ป้ายเหตุผลต่อวิชา (เรียนซ้ำ / คุณระบุ / ตรงความสนใจ / วิชาบังคับ / นับในหมวด) และตารางยอดหน่วยกิตรายหมวดก่อน–หลังแผน</td><td>unit test + ภาพหน้าจอ</td></tr>
   <tr><td>อยากเทียบทางเลือกในตารางเดียว (T16)</td><td>ทางเลือกแสดงเป็นรายการ</td><td>ตารางเทียบเป้าหมายเดิมกับแต่ละทางเลือก (เทอมจบ เพดาน ซัมเมอร์)</td><td>ภาพหน้าจอ</td></tr>
@@ -309,7 +312,7 @@
 
 <h2>11. เกณฑ์การยอมรับเทียบกับผล</h2>
 <table>
-  <tr><th style="width:20%">เกณฑ์</th><th style="width:30%">ยอมรับเมื่อ</th><th>ผล</th><th style="width:11%">สถานะ</th></tr>
+  <thead><tr><th style="width:20%">เกณฑ์</th><th style="width:30%">ยอมรับเมื่อ</th><th>ผล</th><th style="width:11%">สถานะ</th></tr></thead>
   <tr><td>ความถูกต้องของ task (Q1)</td><td>arm C ถูก ≥ 16/20 tasks</td><td>20/20 tasks ถูกทั้ง 2 รอบ (40/40 runs รวมการตรวจ T08 ด้วยคน)</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>กฎของแผน</td><td>ทุกแผนที่แสดงผ่าน prerequisite, offering, เพดาน, หมวด และไม่นับซ้ำ</td><td>ทุกแผนที่แสดงใน 120 runs ผ่าน final gate และ validator อิสระ ไม่มีแผนผิดกฎถูกแสดง (arm B ล้ม check <code>plan_valid</code> เพราะไม่ได้แผน ไม่ใช่เพราะแผนผิด)</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>Consent / injection (Q2)</td><td>0 การเปลี่ยน hard goal โดยไม่อนุมัติ, 0 แผนที่ข้าม gate</td><td>ไม่มีการเปลี่ยนเป้าหมายโดยไม่อนุมัติในทุก run ทั้งสาม arm ข้อความสั่งเพดาน 30 ไม่มีผล · T13–T16 ผ่านทุก run ของ arm A และ C (arm B ล้ม T13, T14 เพราะจบที่ NEED_INFO)</td><td><span class="pill ok">ผ่าน</span></td></tr>
@@ -317,9 +320,9 @@
   <tr><td>Failure</td><td>ไม่แสดงความสำเร็จปลอมเมื่อ tool/โมเดลล้ม; timeout ไม่กลายเป็น INFEASIBLE</td><td>T09, T10 จบ STOP_UNVERIFIED ไม่มีแผน ไม่อ้างว่าเป็นไปไม่ได้ ทุก run ของ arm C และ A</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>User acceptance (Q4)</td><td>≥ 80% ของ task ที่ทดสอบได้รับการยอมรับ ครอบคลุม 5 ประเภท</td><td>9/10 (90%) ครอบคลุม 5 ประเภททั้งสองรอบ</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>ความชัดเจน</td><td>คะแนนความชัดเจน ≥ 4/5</td><td>เฉลี่ย 4.80/5</td><td><span class="pill ok">ผ่าน</span></td></tr>
-  <tr><td>ทำเสร็จเองโดยไม่ต้องช่วย</td><td>≥ 75% ของผู้ทดสอบ happy task ทำเสร็จเอง</td><td>รายงาน UAT ไม่ได้บันทึกคำถาม Q4 (ทำเสร็จเองหรือไม่)</td><td><span class="pill warn">ไม่มีข้อมูล</span></td></tr>
-  <tr><td>งบต่อ turn</td><td>≤ 120 วินาที, ≤ 8 tool calls, ≤ 2 revisions</td><td>arm C: turn นานสุด 49.2 วินาที, tool calls สูงสุด 4 ต่อ turn, revision 0</td><td><span class="pill ok">ผ่าน</span></td></tr>
-  <tr><td>ความเร็ว (Q3, ตั้งจากการวัด 3 พ.ย.)</td><td>turn ที่จบด้วยการ์ด/คำถาม/คำตอบ ≤ 15 วินาที; turn ที่จบด้วยแผน/blocker ≤ 40 วินาที</td><td>turn ที่จบด้วยการ์ด/คำถาม/คำตอบ: 40/42 ภายใน 15 วินาที (สูงสุด 29.0) · turn ที่จบด้วยแผน/blocker: 24/32 ภายใน 40 วินาที (สูงสุด 49.2) วันที่ 3 พ.ย. ได้ 44/44 และ 31/32 การสร้าง token ช้าลง 35% ในวันนี้ (หัวข้อ 9) ควรวัดซ้ำบนเครื่องที่ใช้ demo ก่อนนำเสนอ</td><td><span class="pill bad">ไม่ผ่าน</span></td></tr>
+  <tr><td>ทำเสร็จเองโดยไม่ต้องช่วย</td><td>≥ 75% ของผู้ทดสอบ happy task ทำเสร็จเอง</td><td>ผู้ทดสอบทั้ง 2 คนทำครบทุก task ด้วยตัวเองโดยทีมไม่ได้ช่วย (บันทึกจากการสังเกตของทีมระหว่าง UAT) รวมถึง happy task T01 และ T03</td><td><span class="pill ok">ผ่าน</span></td></tr>
+  <tr><td>งบต่อ turn</td><td>≤ 120 วินาที, ≤ 8 tool calls, ≤ 2 revisions</td><td>arm C: turn นานสุด 29.7 วินาที, tool calls สูงสุด 4 ต่อ turn, revision 0</td><td><span class="pill ok">ผ่าน</span></td></tr>
+  <tr><td>ความเร็ว (Q3, ตั้งจากการวัด 3 พ.ย.)</td><td>turn ที่จบด้วยการ์ด/คำถาม/คำตอบ ≤ 15 วินาที; turn ที่จบด้วยแผน/blocker ≤ 40 วินาที</td><td>แผน/blocker: 32/32 ภายใน 40 วินาที (สูงสุด 29.7) · การ์ด/คำถาม/คำตอบ: 40/42 ภายใน 15 วินาที; 2 turn ที่เกินคือ T08 (15.3 และ 16.9 วินาที) ซึ่ง guard ปฏิเสธคำตอบแรกและให้โมเดลตอบใหม่</td><td><span class="pill warn">ผ่านบางส่วน</span></td></tr>
   <tr><td>ภาษาในการตอบ (D11)</td><td>ตอบภาษาเดียวกับนิสิต</td><td>40/40 runs ของ arm C</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>Reproducibility (Q5)</td><td>ทุก run บันทึก model digest, Ollama, GPU, commit, test-set hash, snapshot hash</td><td>มีใน run record ของทุก session และใน <code>data/results_v1.1.csv</code></td><td><span class="pill ok">ผ่าน</span></td></tr>
 </table>
@@ -330,27 +333,27 @@
   <li><b>ผู้ใช้:</b> UAT มีผู้ทดสอบ 2 คน คนละ 5 tasks กับนิสิตจำลอง ไม่ใช่ระเบียนจริงของผู้ทดสอบ และยังไม่ได้ทำ UAT ซ้ำหลังแก้ อาจารย์ที่ปรึกษายังไม่ได้ตรวจแผน</li>
   <li><b>Test set:</b> 20 tasks และ 2 รอบที่ temperature 0 วัดความสม่ำเสมอได้จำกัด ถ้อยคำอื่น 15 แบบและ probe 2 ข้อวัดรอบเดียว (arm C 15/15)</li>
   <li><b>Guard ตามคำ:</b> การตรวจ “หนึ่งวิชาหนึ่งหมวด” และ “ชื่อ–รหัสวิชา” ใช้รูปแบบข้อความ จึงยังหลุดได้ เช่น คำตอบภาษาอังกฤษ “is counted as both …” ของ arm B ใน probe ไม่ถูกจับ (arm C ตอบถูกเองจึงไม่กระทบผล) ควรเปลี่ยนเป็นการให้โมเดลตอบด้วยโครงสร้างที่ตรวจได้ เช่น ระบุหมวดเป็นฟิลด์</li>
-  <li><b>ความเร็ว:</b> turn ที่สร้างแผนใช้ 20–49 วินาที (มัธยฐาน 34) บน M4 ส่วนใหญ่เป็นเวลาที่โมเดลสร้าง preferred list และคำอธิบาย เครื่อง RAM 8 GB รัน 8B ไม่ทัน</li>
+  <li><b>ความเร็ว:</b> turn ที่สร้างแผนใช้ 16 ถึง 30 วินาที (มัธยฐาน 22) บน M4 ส่วนใหญ่เป็นเวลาที่โมเดลสร้าง preferred list และคำอธิบาย เครื่อง RAM 8 GB รัน 8B ไม่ทัน</li>
   <li><b>ขอบเขตที่ยังไม่ทำ:</b> OCR สำหรับ PDF ที่เป็นภาพ, รูปแบบ transcript อื่น, embeddings, การเลือกวิชา GenEd/วิชาเลือกเสรีเป็นรายวิชา (ตอนนี้เป็นช่องหน่วยกิต)</li>
 </ul>
 
 <h2>13. บทบาทในทีม</h2>
 <p class="note">จาก git history ของ repository; baseline ของ pitch v9 (28 ต.ค.) อยู่ใน commit ของผู้ใช้ “Jaiigh”</p>
 <table>
-  <tr><th style="width:30%">สมาชิก</th><th>ส่วนที่รับผิดชอบ</th></tr>
+  <thead><tr><th style="width:30%">สมาชิก</th><th>ส่วนที่รับผิดชอบ</th></tr></thead>
   <tr><td>Chayaphon Kultanon</td><td>เอกสารโครงการและ decision log, snapshot CP 2566, planner (CP-SAT) และ validator, runtime v2, API, React UI, test set v1.1 และแผน UAT v1.1, เตรียมเครื่อง UAT, การแก้หลัง UAT (D20) และการทดลอง arms A/B/C (D21)</td></tr>
   <tr><td>Tanaphan Krupistrai</td><td>การอ่าน CR60 PDF และตรวจยอดหน่วยกิต, กฎ GenEd 12 หน่วยกิต (D18), วิชาฝึกงาน 2100301 ซัมเมอร์ปี 3 (D19)</td></tr>
   <tr><td>Techit Pramanun</td><td><span class="pill warn">ให้ทีมกรอก</span></td></tr>
   <tr><td>Chanon Chiang</td><td><span class="pill warn">ให้ทีมกรอก</span></td></tr>
 </table>
 
-<h2>ภาคผนวก A — ผลราย task ของการทดลอง</h2>
-<table>
-  <tr><th>Task</th><th>ประเภท</th><th>สิ่งที่ทดสอบ</th><th>คาดหวัง</th><th class="num">A</th><th class="num">B</th><th class="num">C</th></tr>
+<h2>ภาคผนวก: ผลราย task ของการทดลอง</h2>
+<table class="compact">
+  <thead><tr><th>Task</th><th>ประเภท</th><th>สิ่งที่ทดสอบ</th><th>คาดหวัง</th><th class="num">A</th><th class="num">B</th><th class="num">C</th></tr></thead>
   <tr><td>T01</td><td>happy</td><td>แผนสาย AI (ไทย)</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=cross>0/2</span> NEED_INFO</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
   <tr><td>T02</td><td>happy</td><td>แผนสาย AI (อังกฤษ) ปี 1</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=cross>0/2</span> NEED_INFO</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
   <tr><td>T03</td><td>happy</td><td>แผนสาย systems ปี 2</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=cross>0/2</span> NEED_INFO</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
-  <tr><td>T04</td><td>happy</td><td>แผนสาย systems (อังกฤษ)</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=cross>0/2</span> NEED_INFO/STOP</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
+  <tr><td>T04</td><td>happy</td><td>แผนสาย systems (อังกฤษ)</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=cross>0/2</span> NEED_INFO</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
   <tr><td>T05</td><td>edge</td><td>วิชาบังคับที่ได้ F ต้องเรียนซ้ำในภาค 2</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
   <tr><td>T06</td><td>edge</td><td>วิชาที่เรียนซ้ำแล้วผ่าน นับครั้งเดียว</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=cross>0/2</span> NEED_INFO</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
   <tr><td>T07</td><td>edge</td><td>ขอ 3 วิชา จัดหมวดให้ถูก</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
@@ -369,19 +372,6 @@
   <tr><td>T20</td><td>ambiguous</td><td>รหัสวิชาในระเบียนกำกวม</td><td>แผน</td><td class="num"><span class=tick>2/2</span> แผน</td><td class="num"><span class=cross>0/2</span> NEED_INFO</td><td class="num"><span class=tick>2/2</span> แผน</td></tr>
 </table>
 <p class="note">T08 ของ arm A ผ่าน check ของ script แต่ไม่ผ่านการตรวจด้วยคน เพราะให้แผนแทนการตอบคำถาม · ตอบ/รอ = จบ turn ด้วยคำตอบหรือคำถามแล้วรอนิสิต</p>
-
-<h2>ภาคผนวก B — การทำซ้ำผล</h2>
-<table>
-  <tr><th style="width:28%">รายการ</th><th>ค่า</th></tr>
-  <tr><td>เครื่อง</td><td>MacBook Air 15" Apple M4 (GPU 10 cores, 24 GB), macOS, Ollama 0.40.14</td></tr>
-  <tr><td>โมเดล</td><td><code>qwen3:8b</code> digest <code>500a1f067a9f</code> (8.2B, Q4_K_M), temperature 0, seed 42, num_ctx 8192, num_predict 1200, <code>think: false</code></td></tr>
-  <tr><td>Test set / snapshot</td><td><code>data/test_set.jsonl</code> SHA-256 <code>30d894d8f0cb91570526e6a4cbd980f6c41f62063301282a9a204d1506509519</code> · <code>cp2566-v0</code> content hash <code>74e489a671ae1d37</code></td></tr>
-  <tr><td>Build ของ UAT</td><td>commit <code>a12c6e3</code> (tag <code>uat-v1.1</code>)</td></tr>
-  <tr><td>Build ของการทดลอง</td><td><code>9538f38</code> + การแก้ D20/D21 (วัดก่อน commit; SHA-256 ของ diff ฝั่ง runtime <code>e6e0fad762729466</code>)</td></tr>
-  <tr><td>คำสั่ง</td><td><code>for a in C A B; do python -m eval.run_tasks --arm $a --repeat 2; done</code><br><code>python -m eval.summarize &lt;A.csv&gt; &lt;B.csv&gt; &lt;C.csv&gt;</code> · <code>python -m eval.fill_results</code> · <code>python -m pytest -q</code> (93 tests ผ่าน)</td></tr>
-  <tr><td>หลักฐาน</td><td>JSONL trace และ session ของทุก run ใน <code>local/traces/</code>, <code>local/sessions/</code> (ไม่อยู่ใน git) · ผลต่อ run ใน <code>local/eval/</code> · ตารางผลรวม <code>data/results_v1.1.csv</code></td></tr>
-</table>
-
 </main>
 </body>
 </html>

@@ -168,8 +168,9 @@ and digest, Ollama version, GPU and VRAM, options, start and end time.
 
 ## Experiment results, 9 Nov 2026
 
-Build: `9538f38` plus the D20/D21 changes (runtime diff SHA-256 `e6e0fad762729466`, measured before
-the commit), test set v1.1 (unchanged since tag `uat-v1.1`), `cp2566-v0`, `qwen3:8b` `500a1f067a9f`
+Build: commit `fc2b11f` (D20, D21), re-run at 21:19-21:52 after a first run at 18:53-20:05 on the
+same code had generation at 12.1 tokens/s (the re-run: 18.5, as on 3 Nov; pass counts were identical),
+test set v1.1 (unchanged since tag `uat-v1.1`), `cp2566-v0`, `qwen3:8b` `500a1f067a9f`
 on the M4 UAT machine, two repeats per arm (`eval.run_tasks --arm A|B|C --repeat 2`), summary from
 `eval.summarize`. T08 also has a manual check: the answer must say a course counts toward one
 category only.
@@ -183,9 +184,9 @@ category only.
 | Paraphrased human-round tasks (`eval.run_paraphrases --arm`) | 14/15 | 8/15 | 15/15 |
 | Probes: off-topic request / English one-category question | plan / plan | decline / wrong ("both") | decline / correct |
 | Unknown course IDs shown to the student | 0 | 0 | 0 |
-| LLM calls / tool calls per task (mean) | 1.8 / 5.0 | 3.7 / 3.7 | 4.5 / 4.5 |
-| Plan or blocker turns: median (max) | 10.0 s (13.9) | 19.4 s (23.5) | 34.0 s (49.2) |
-| Card, question or reply turns: median (max) | 4.7 s (7.7) | 5.1 s (30.6) | 3.9 s (29.0) |
+| LLM calls / tool calls per task (mean) | 1.8 / 5.0 | 3.6 / 3.6 | 4.5 / 4.5 |
+| Plan or blocker turns: median (max) | 6.7 s (9.8) | 14.1 s (16.9) | 22.1 s (29.7) |
+| Card, question or reply turns: median (max) | 3.4 s (5.5) | 3.3 s (20.8) | 2.5 s (16.9) |
 
 Findings:
 
@@ -195,11 +196,12 @@ Findings:
 - A vs C: on the frozen wording arm A nearly ties arm C and is about three times faster, but it
   cannot answer a question (T08), does not decline an off-topic request, and misses vague wording
   that its rules do not list ("ไม่อยากลงหน่วยกิตเยอะ").
-- Q3 is not met on 9 Nov by arm C: 40/42 short turns within 15 s and 24/32 plan or blocker turns
-  within 40 s (3 Nov: 44/44 and 31/32). Generation ran at 12.1 tokens/s (median) against 18.6 on
-  3 Nov, with the same tokens per call; Low Power Mode was off and no thermal warning was recorded.
+- Q3, arm C: 32/32 plan or blocker turns within 40 s (max 29.7 s); 40/42 short turns within 15 s.
+  The two slower ones are T08 (15.3 s and 16.9 s), where the one-category guard rejected the first
+  answer ("counts toward both at the same time") and the model answered again correctly.
 - The 3 Nov runs answered T08 wrongly ("counts toward both at the same time"); the 40/40 recorded
-  then counts script checks only (38/40 with the manual check). D20 adds a guard for this answer.
+  then counts script checks only (38/40 with the manual check). D20 adds a guard for this answer; in
+  the re-run it rejected that answer in both repeats.
 - Runs superseded by later fixes are kept in `local/eval/superseded/` and not reported.
 
 ## Measurements on the UAT machine, 3 Nov 2026
