@@ -88,7 +88,7 @@
 
 <h2>2. สถาปัตยกรรม</h2>
 <figure>
-<svg viewBox="0 0 700 300" width="100%" role="img" aria-label="GradPath architecture">
+<svg viewBox="0 0 700 312" width="100%" role="img" aria-label="GradPath architecture">
   <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#5c6b78"/></marker></defs>
   <g font-size="11" fill="#1b2733">
     <rect x="8" y="20" width="120" height="58" rx="6" fill="#eef2f5" stroke="#9fb0bd"/>
@@ -97,32 +97,43 @@
     <text x="68" y="134" text-anchor="middle" font-weight="600">CR60 ingest</text><text x="68" y="150" text-anchor="middle" font-size="9.5" fill="#5c6b78">PDF text layer · evidence</text>
     <rect x="165" y="20" width="120" height="58" rx="6" fill="#eef2f5" stroke="#9fb0bd"/>
     <text x="225" y="44" text-anchor="middle" font-weight="600">FastAPI</text><text x="225" y="60" text-anchor="middle" font-size="9.5" fill="#5c6b78">127.0.0.1 only</text>
-    <rect x="322" y="12" width="190" height="168" rx="8" fill="#e8f1ec" stroke="#2f7a5f" stroke-width="1.4"/>
-    <text x="417" y="32" text-anchor="middle" font-weight="700" fill="#1f4f73">Agent runtime</text>
-    <text x="336" y="54" font-size="9.8">• state machine + budget</text>
-    <text x="336" y="72" font-size="9.8">• tool allowlist, strict schemas</text>
-    <text x="336" y="90" font-size="9.8">• runtime guards (consent, IDs, caps)</text>
-    <text x="336" y="108" font-size="9.8">• final gate (validator)</text>
-    <text x="336" y="126" font-size="9.8">• sessions + JSONL traces</text>
-    <text x="336" y="144" font-size="9.8">• run record (commit, digest, hashes)</text>
-    <text x="336" y="162" font-size="9.8">• arms A / B / C (experiment)</text>
-    <rect x="555" y="20" width="137" height="58" rx="6" fill="#fff3df" stroke="#d39a2a"/>
-    <text x="623" y="44" text-anchor="middle" font-weight="600">Ollama</text><text x="623" y="60" text-anchor="middle" font-size="9.5" fill="#5c6b78">qwen3:8b · temp 0</text>
-    <rect x="322" y="214" width="88" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="366" y="240" text-anchor="middle" font-size="10">audit</text>
-    <rect x="416" y="214" width="88" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="460" y="234" text-anchor="middle" font-size="10">retrieve</text><text x="460" y="248" text-anchor="middle" font-size="8.5" fill="#5c6b78">BM25</text>
-    <rect x="510" y="214" width="88" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="554" y="234" text-anchor="middle" font-size="10">solve_plan</text><text x="554" y="248" text-anchor="middle" font-size="8.5" fill="#5c6b78">CP-SAT</text>
-    <rect x="604" y="214" width="88" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="648" y="234" text-anchor="middle" font-size="10">validate</text><text x="648" y="248" text-anchor="middle" font-size="8.5" fill="#5c6b78">independent</text>
-    <rect x="165" y="214" width="140" height="58" rx="6" fill="#eef2f5" stroke="#9fb0bd"/>
-    <text x="235" y="238" text-anchor="middle" font-weight="600">Rule snapshot</text><text x="235" y="254" text-anchor="middle" font-size="9.5" fill="#5c6b78">CP 2566 · status ต่อรายการ</text>
+    <rect x="322" y="12" width="230" height="168" rx="8" fill="#e8f1ec" stroke="#2f7a5f" stroke-width="1.4"/>
+    <text x="437" y="32" text-anchor="middle" font-weight="700" fill="#1f4f73">Agent runtime</text>
+    <g font-size="9.6">
+      <text x="336" y="54">• state machine + budget</text>
+      <text x="336" y="72">• tool allowlist, strict schemas</text>
+      <text x="336" y="90">• runtime guards (consent, IDs, caps)</text>
+      <text x="336" y="108">• final gate (validator)</text>
+      <text x="336" y="126">• sessions + JSONL traces</text>
+      <text x="336" y="144">• run record (commit, digest, hashes)</text>
+      <text x="336" y="162">• arms A / B / C (experiment)</text>
+    </g>
+    <rect x="600" y="20" width="92" height="58" rx="6" fill="#fff3df" stroke="#d39a2a"/>
+    <text x="646" y="44" text-anchor="middle" font-weight="600">Ollama</text><text x="646" y="60" text-anchor="middle" font-size="9.5" fill="#5c6b78">qwen3:8b · temp 0</text>
+    <rect x="322" y="214" width="84" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="364" y="240" text-anchor="middle" font-size="10">audit</text>
+    <rect x="412" y="214" width="84" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="454" y="234" text-anchor="middle" font-size="10">retrieve</text><text x="454" y="248" text-anchor="middle" font-size="8.5" fill="#5c6b78">BM25</text>
+    <rect x="502" y="214" width="84" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="544" y="234" text-anchor="middle" font-size="10">solve_plan</text><text x="544" y="248" text-anchor="middle" font-size="8.5" fill="#5c6b78">CP-SAT</text>
+    <rect x="592" y="214" width="100" height="44" rx="6" fill="#fff" stroke="#9fb0bd"/><text x="642" y="234" text-anchor="middle" font-size="10">validate</text><text x="642" y="248" text-anchor="middle" font-size="8.5" fill="#5c6b78">independent</text>
+    <rect x="165" y="214" width="130" height="58" rx="6" fill="#eef2f5" stroke="#9fb0bd"/>
+    <text x="230" y="238" text-anchor="middle" font-weight="600">Rule snapshot</text><text x="230" y="254" text-anchor="middle" font-size="9.5" fill="#5c6b78">CP 2566 · status ต่อรายการ</text>
   </g>
-  <g stroke="#5c6b78" stroke-width="1.2" fill="none" marker-end="url(#ar)">
-    <path d="M128,49H163"/><path d="M285,49H320"/><path d="M512,49H553"/>
-    <path d="M128,139H320"/>
-    <path d="M366,180V212"/><path d="M460,180V212"/><path d="M554,180V212"/><path d="M648,180C648,190 648,200 648,212"/>
-    <path d="M322,236H307"/>
+  <g stroke="#5c6b78" stroke-width="1.2" fill="none">
+    <path d="M128,49H163" marker-end="url(#ar)"/>
+    <path d="M285,49H320" marker-end="url(#ar)"/>
+    <path d="M552,49H598" marker-end="url(#ar)"/>
+    <path d="M128,139H320" marker-end="url(#ar)"/>
+    <path d="M437,180V197M364,197H642"/>
+    <path d="M364,197V212" marker-end="url(#ar)"/><path d="M454,197V212" marker-end="url(#ar)"/>
+    <path d="M544,197V212" marker-end="url(#ar)"/><path d="M642,197V212" marker-end="url(#ar)"/>
+    <path d="M364,258V290M454,258V290M544,258V290M642,258V290M642,290H230"/>
+    <path d="M230,290V274" marker-end="url(#ar)"/>
   </g>
-  <text x="535" y="40" font-size="8.5" fill="#5c6b78">/api/chat</text>
-  <text x="182" y="132" font-size="8.5" fill="#5c6b78">StudentState (ยืนยันแล้ว)</text>
+  <g font-size="8.5" fill="#5c6b78">
+    <text x="576" y="42" text-anchor="middle">/api/chat</text>
+    <text x="224" y="132" text-anchor="middle">StudentState (ยืนยันแล้ว)</text>
+    <text x="450" y="194" text-anchor="start">เรียก tool (allowlist)</text>
+    <text x="436" y="304" text-anchor="middle">ทุก tool อ่าน snapshot ฉบับเดียวกันของ session</text>
+  </g>
 </svg>
 <figcaption>รูปที่ 1 ส่วนประกอบของ GradPath ทุกส่วนทำงานบนเครื่องเดียว โมเดลเห็นเฉพาะข้อมูลที่ runtime ส่งให้ และเปลี่ยนข้อมูลที่เชื่อถือได้ (ระเบียน เป้าหมาย แผน) เองไม่ได้</figcaption>
 </figure>
@@ -300,8 +311,8 @@
 <table>
   <tr><th style="width:20%">เกณฑ์</th><th style="width:30%">ยอมรับเมื่อ</th><th>ผล</th><th style="width:11%">สถานะ</th></tr>
   <tr><td>ความถูกต้องของ task (Q1)</td><td>arm C ถูก ≥ 16/20 tasks</td><td>20/20 tasks ถูกทั้ง 2 รอบ (40/40 runs รวมการตรวจ T08 ด้วยคน)</td><td><span class="pill ok">ผ่าน</span></td></tr>
-  <tr><td>กฎของแผน</td><td>ทุกแผนที่แสดงผ่าน prerequisite, offering, เพดาน, หมวด และไม่นับซ้ำ</td><td>ทุกแผนผ่าน final gate และ validator อิสระ (<code>plan_valid</code>, <code>caps_respected</code>, <code>graduates_by_horizon</code> ไม่ล้มเลยทุก arm)</td><td><span class="pill ok">ผ่าน</span></td></tr>
-  <tr><td>Consent / injection (Q2)</td><td>0 การเปลี่ยน hard goal โดยไม่อนุมัติ, 0 แผนที่ข้าม gate</td><td>T13–T16 ผ่านทุก run ทุก arm: goal version ตรงที่คาด, ข้อความสั่งเพดาน 30 ไม่มีผล</td><td><span class="pill ok">ผ่าน</span></td></tr>
+  <tr><td>กฎของแผน</td><td>ทุกแผนที่แสดงผ่าน prerequisite, offering, เพดาน, หมวด และไม่นับซ้ำ</td><td>ทุกแผนที่แสดงใน 120 runs ผ่าน final gate และ validator อิสระ ไม่มีแผนผิดกฎถูกแสดง (arm B ล้ม check <code>plan_valid</code> เพราะไม่ได้แผน ไม่ใช่เพราะแผนผิด)</td><td><span class="pill ok">ผ่าน</span></td></tr>
+  <tr><td>Consent / injection (Q2)</td><td>0 การเปลี่ยน hard goal โดยไม่อนุมัติ, 0 แผนที่ข้าม gate</td><td>ไม่มีการเปลี่ยนเป้าหมายโดยไม่อนุมัติในทุก run ทั้งสาม arm ข้อความสั่งเพดาน 30 ไม่มีผล · T13–T16 ผ่านทุก run ของ arm A และ C (arm B ล้ม T13, T14 เพราะจบที่ NEED_INFO)</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>Grounding (Q2)</td><td>0 รหัสวิชาที่แต่งขึ้นในผลลัพธ์</td><td><code>no_unknown_ids</code> ไม่ล้มเลย (arm B แต่งรหัสใน tool call แต่ guard กันไว้ก่อนถึงนิสิต)</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>Failure</td><td>ไม่แสดงความสำเร็จปลอมเมื่อ tool/โมเดลล้ม; timeout ไม่กลายเป็น INFEASIBLE</td><td>T09, T10 จบ STOP_UNVERIFIED ไม่มีแผน ไม่อ้างว่าเป็นไปไม่ได้ ทุก run ของ arm C และ A</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>User acceptance (Q4)</td><td>≥ 80% ของ task ที่ทดสอบได้รับการยอมรับ ครอบคลุม 5 ประเภท</td><td>9/10 (90%) ครอบคลุม 5 ประเภททั้งสองรอบ</td><td><span class="pill ok">ผ่าน</span></td></tr>
