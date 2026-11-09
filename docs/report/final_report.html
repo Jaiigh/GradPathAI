@@ -62,7 +62,7 @@
 <body>
 <main>
 
-<p class="sub">2110576 Agentic AI for Computer Engineering · Group 2 · Final presentation, 11 Nov 2026</p>
+<p class="sub">2110576 Agentic AI for Computer Engineering · Group 2 · Final presentation</p>
 <h1>GradPath: agent วางแผนวิชาที่เหลือจนจบปี 4<br>สำหรับนิสิตวิศวกรรมคอมพิวเตอร์ หลักสูตร 2566</h1>
 <p class="sub">รายงานฉบับสมบูรณ์ (Final Report)</p>
 <div class="members">
@@ -75,7 +75,7 @@
 <div class="kpis">
   <div class="kpi"><b>40/40</b><span>arm C (ระบบจริง) ผ่าน test set 20 tasks × 2 รอบ เกณฑ์ ≥ 16/20</span></div>
   <div class="kpi"><b>38/40 · 18/40</b><span>arm A (workflow ตายตัว) · arm B (ไม่มี retrieval) ชุดเดียวกัน</span></div>
-  <div class="kpi"><b>9/10</b><span>tasks ที่ผู้ทดสอบยอมรับใน UAT 4 พ.ย. (90%, เกณฑ์ 80%)</span></div>
+  <div class="kpi"><b>9/10</b><span>tasks ที่ผู้ทดสอบยอมรับใน UAT (90%, เกณฑ์ 80%)</span></div>
   <div class="kpi"><b>0</b><span>การเปลี่ยนเป้าหมายโดยไม่ได้อนุมัติ / แผนที่ข้าม final gate ในทุก run</span></div>
 </div>
 <p>ในการทดลองเทียบ 3 แบบบน test set 20 tasks × 2 รอบ ระบบจริง (arm C) ผ่าน 40/40 runs, workflow ตายตัว (arm A) ผ่าน 38/40 แต่ทำได้เฉพาะคำขอที่อยู่ในลำดับตายตัว และ agent ที่ไม่มี retrieval (arm B) ผ่านเพียง 18/40 เพราะโมเดลแต่งรหัสวิชาเองแล้วถูก guard ปฏิเสธ หลัง UAT ทีมแก้ประเด็นที่พบ 7 เรื่อง ได้แก่ T11 ที่ระบบบอกไม่ได้ว่าต้องทำอะไรต่อ (ตอนนี้บอกข้อมูลที่ขาดและมีปุ่ม “วางแผนส่วนที่เหลือไปก่อน”), การชื่อวิชาไม่ตรงรหัส, การสลับภาษาเมื่อพิมพ์แต่ตัวเลข, การนำวิชาเรียนซ้ำขึ้นการ์ดเป้าหมาย (T05), การลองใหม่หลัง timeout (T09) การแสดงเหตุผลรายวิชากับยอดหมวดข้างแผน และคำตอบ T08 ที่เคยบอกว่าวิชาเดียวนับได้สองหมวดพร้อมกัน ทุกข้อมี unit test และ flow หลัก (T11, T05, T09, T08) ตรวจกับโมเดลจริงหรือผ่าน API แล้ว</p>
@@ -211,7 +211,7 @@
 
 <h2>5. โมเดลและฮาร์ดแวร์</h2>
 <table>
-  <thead><tr><th>Profile</th><th>Benchmark (28 ต.ค., RTX 5070)</th><th>ผลที่ใช้ตัดสิน</th></tr></thead>
+  <thead><tr><th>Profile</th><th>Benchmark (RTX 5070)</th><th>ผลที่ใช้ตัดสิน</th></tr></thead>
   <tr><td><code>qwen3:8b</code> Q4_K_M, digest <code>500a1f067a9f</code></td><td>100.6 tok/s, 6.31 GB บน GPU, smoke case DONE ใน 19.9 วินาที (4 LLM / 3 tool calls)</td><td><span class="pill ok">ใช้จริง</span> เรียก tool ถูกตั้งแต่ครั้งแรก และทำตาม <code>think: false</code></td></tr>
   <tr><td><code>qwen3:4b</code></td><td>154.0 tok/s, 3.88 GB, smoke case DONE ใน 32.2 วินาที</td><td><span class="pill warn">ตัดออก</span> ยังส่ง reasoning แม้ตั้ง <code>think: false</code> (สร้าง 452–1,200 tokens ต่อ turn เทียบกับ 15–86 ของ 8B) turn แรกไม่มี tool call</td></tr>
 </table>
@@ -249,7 +249,7 @@
   <tr><td>B</td><td>Agent เดียวกับ C แต่ไม่มี <code>retrieve_courses</code> (ตัดจาก tool list และ prompt)</td><td>B vs C: retrieval</td></tr>
   <tr><td>C</td><td>Agent เต็มรูปแบบ (ระบบที่ส่งมอบ)</td><td>ระบบหลักที่ใช้เทียบ</td></tr>
 </table>
-<p>ทุก arm ใช้ guard, final gate, งบ, snapshot และตั้งค่าโมเดลเดียวกัน (<code>qwen3:8b</code>, temperature 0, seed 42) รันครบ 20 tasks × 2 รอบต่อ arm บนเครื่อง M4 เมื่อ 9 พ.ย. 2569 ด้วย build หลังแก้ UAT (D20, D21; commit <code>fc2b11f</code>) T08 มีการตรวจด้วยคนเพิ่ม: คำตอบต้องบอกว่าวิชาหนึ่งนับได้หมวดเดียว ซึ่ง script ไม่ได้ตรวจ</p>
+<p>ทุก arm ใช้ guard, final gate, งบ, snapshot และตั้งค่าโมเดลเดียวกัน (<code>qwen3:8b</code>, temperature 0, seed 42) รันครบ 20 tasks × 2 รอบต่อ arm บนเครื่อง M4 ด้วย build หลังแก้ UAT (D20, D21; commit <code>fc2b11f</code>) T08 มีการตรวจด้วยคนเพิ่ม: คำตอบต้องบอกว่าวิชาหนึ่งนับได้หมวดเดียว ซึ่ง script ไม่ได้ตรวจ</p>
 
 <h2>9. ผลการทดลอง (configuration comparison)</h2>
 <table>
@@ -265,7 +265,6 @@
   <tr><td>turn ที่จบด้วยแผนหรือ blocker: มัธยฐาน (สูงสุด)</td><td class="num">6.7 s (9.8)</td><td class="num">14.1 s (16.9)</td><td class="num">22.1 s (29.7)</td></tr>
   <tr><td>turn ที่จบด้วยการ์ด คำถาม หรือคำตอบ: มัธยฐาน (สูงสุด)</td><td class="num">3.4 s (5.5)</td><td class="num">3.3 s (20.8)</td><td class="num">2.5 s (16.9)</td></tr>
 </table>
-<p class="note">ผลต่อ run: <code>local/eval/20261109-213402-armA.csv</code>, <code>-214004-armB.csv</code>, <code>-211915-armC.csv</code> และ <code>*-paraphrases-arm*.csv</code> ตารางราย task อยู่ในภาคผนวก</p>
 <h3>สิ่งที่ได้จากการเปรียบเทียบ</h3>
 <ul>
   <li><b>Retrieval จำเป็น (B vs C):</b> เมื่อไม่มี <code>retrieve_courses</code> โมเดล 8B แต่งรหัสวิชาเองเพื่อให้ตรงความสนใจ (เช่น CPE421–CPE430) runtime ปฏิเสธรหัสเหล่านี้ทุกครั้ง จึงไม่มีรหัสปลอมถึงนิสิต แต่ agent ถามนิสิตหารหัสแทนและจบที่ NEED_INFO ทุก task ที่มีความสนใจ (happy ทั้งหมด, T06, T13, T14, T19, T20) อัตราผ่านลดจาก 40/40 เหลือ 18/40 และใน probe ภาษาอังกฤษ arm B ตอบผิดว่า 2110521 นับได้ทั้งสองหมวด</li>
@@ -276,7 +275,7 @@
 </ul>
 <p class="note">การทดลองนี้วัดบน test set 20 tasks เดียวที่ใช้ร่วมกับ UAT และวัด 2 รอบที่ temperature 0 ถ้อยคำอื่น (paraphrase) และ probe วัดรอบเดียว</p>
 
-<h2>10. ผล UAT (4 พ.ย. 2569) และสิ่งที่แก้หลัง UAT</h2>
+<h2>10. ผล UAT และสิ่งที่แก้หลัง UAT</h2>
 <p>UAT ในชั้นเรียน 2 รอบ รอบละ 5 tasks กับผู้ทดสอบจากกลุ่ม 4 (P01) และกลุ่ม 7 (P02) ใช้ build <code>a12c6e3</code> (tag <code>uat-v1.1</code>) กับนิสิตจำลอง ผู้ทดสอบยอมรับ 9 จาก 10 tasks (90%, เกณฑ์ 80%) ความชัดเจนเฉลี่ย 4.80/5 และประโยชน์ต่อการตัดสินใจ 4.50/5 รายละเอียดอยู่ในรายงาน UAT ที่ส่งแล้ว ตารางนี้สรุปผลจากแบบประเมินคู่กับพฤติกรรมของระบบจาก session trace ของวันนั้น</p>
 <table>
   <thead><tr><th>รอบ</th><th>Task</th><th>ผู้ทดสอบ</th><th>ยอมรับ</th><th>ชัดเจน / ประโยชน์</th><th>ผลที่ระบบให้</th></tr></thead>
@@ -304,9 +303,9 @@
 <figcaption>รูปที่ 3 การ์ด NEED_INFO หลังแก้ (replay ของ T11): บอกว่ารหัสของ Software-Defined Systems I ยังไม่ประกาศ อยู่หมวดใด รหัส 2110415 ที่พิมพ์มาไม่มีในข้อมูล และทางไปต่อ 2 ทาง</figcaption></figure>
 <div>
 <figure><img class="shot" src="img/plan_reasons.png" style="width:80%" alt="แผนที่มีป้ายเหตุผลรายวิชา">
-<figcaption>รูปที่ 4 แผนของ T05 (arm C, 9 พ.ย.): 2110327 ติดป้าย “เรียนซ้ำ (เคยไม่ผ่าน)” และวิชา AI ติดป้าย “ตรงความสนใจ: AI”</figcaption></figure>
+<figcaption>รูปที่ 4 แผนของ T05 (arm C): 2110327 ติดป้าย “เรียนซ้ำ (เคยไม่ผ่าน)” และวิชา AI ติดป้าย “ตรงความสนใจ: AI”</figcaption></figure>
 <figure><img class="shot" src="img/t16_alternatives.png" style="width:80%" alt="ตารางเทียบทางเลือกของ blocker">
-<figcaption>รูปที่ 5 blocker ของ T16 (arm C, 9 พ.ย.): ตารางเทียบเป้าหมายเดิมกับทางเลือกที่ solver พิสูจน์แล้ว นิสิตเลือก “คงเป้าหมายเดิม”</figcaption></figure>
+<figcaption>รูปที่ 5 blocker ของ T16 (arm C): ตารางเทียบเป้าหมายเดิมกับทางเลือกที่ solver พิสูจน์แล้ว นิสิตเลือก “คงเป้าหมายเดิม”</figcaption></figure>
 </div>
 <p class="note">ข้อเสนอที่ยังไม่ทำ: ปุ่มเลือกเพดานยอดนิยม (T17) และการแยกคำอธิบายวิชาออกจากข้อความเตือนของระบบให้เห็นชัด (T13) ผลรอบแรกของ UAT เก็บไว้ตามเดิม ยังไม่ได้ทำ UAT ซ้ำกับผู้ใช้หลังแก้</p>
 
@@ -322,7 +321,7 @@
   <tr><td>ความชัดเจน</td><td>คะแนนความชัดเจน ≥ 4/5</td><td>เฉลี่ย 4.80/5</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>ทำเสร็จเองโดยไม่ต้องช่วย</td><td>≥ 75% ของผู้ทดสอบ happy task ทำเสร็จเอง</td><td>ผู้ทดสอบทั้ง 2 คนทำครบทุก task ด้วยตัวเองโดยทีมไม่ได้ช่วย (บันทึกจากการสังเกตของทีมระหว่าง UAT) รวมถึง happy task T01 และ T03</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>งบต่อ turn</td><td>≤ 120 วินาที, ≤ 8 tool calls, ≤ 2 revisions</td><td>arm C: turn นานสุด 29.7 วินาที, tool calls สูงสุด 4 ต่อ turn, revision 0</td><td><span class="pill ok">ผ่าน</span></td></tr>
-  <tr><td>ความเร็ว (Q3, ตั้งจากการวัด 3 พ.ย.)</td><td>turn ที่จบด้วยการ์ด/คำถาม/คำตอบ ≤ 15 วินาที; turn ที่จบด้วยแผน/blocker ≤ 40 วินาที</td><td>แผน/blocker: 32/32 ภายใน 40 วินาที (สูงสุด 29.7) · การ์ด/คำถาม/คำตอบ: 40/42 ภายใน 15 วินาที; 2 turn ที่เกินคือ T08 (15.3 และ 16.9 วินาที) ซึ่ง guard ปฏิเสธคำตอบแรกและให้โมเดลตอบใหม่</td><td><span class="pill warn">ผ่านบางส่วน</span></td></tr>
+  <tr><td>ความเร็ว (Q3, ตั้งจากการวัดบนเครื่อง UAT ก่อนวันทดสอบ)</td><td>turn ที่จบด้วยการ์ด/คำถาม/คำตอบ ≤ 15 วินาที; turn ที่จบด้วยแผน/blocker ≤ 40 วินาที</td><td>แผน/blocker: 32/32 ภายใน 40 วินาที (สูงสุด 29.7) · การ์ด/คำถาม/คำตอบ: 40/42 ภายใน 15 วินาที; 2 turn ที่เกินคือ T08 (15.3 และ 16.9 วินาที) ซึ่ง guard ปฏิเสธคำตอบแรกและให้โมเดลตอบใหม่</td><td><span class="pill warn">ผ่านบางส่วน</span></td></tr>
   <tr><td>ภาษาในการตอบ (D11)</td><td>ตอบภาษาเดียวกับนิสิต</td><td>40/40 runs ของ arm C</td><td><span class="pill ok">ผ่าน</span></td></tr>
   <tr><td>Reproducibility (Q5)</td><td>ทุก run บันทึก model digest, Ollama, GPU, commit, test-set hash, snapshot hash</td><td>มีใน run record ของทุก session และใน <code>data/results_v1.1.csv</code></td><td><span class="pill ok">ผ่าน</span></td></tr>
 </table>
@@ -338,7 +337,7 @@
 </ul>
 
 <h2>13. บทบาทในทีม</h2>
-<p class="note">จาก git history ของ repository; baseline ของ pitch v9 (28 ต.ค.) อยู่ใน commit ของผู้ใช้ “Jaiigh”</p>
+<p class="note">จาก git history ของ repository; baseline ของ pitch v9 อยู่ใน commit ของผู้ใช้ “Jaiigh”</p>
 <table>
   <thead><tr><th style="width:30%">สมาชิก</th><th>ส่วนที่รับผิดชอบ</th></tr></thead>
   <tr><td>Chayaphon Kultanon</td><td>เอกสารโครงการและ decision log, snapshot CP 2566, planner (CP-SAT) และ validator, runtime v2, API, React UI, test set v1.1 และแผน UAT v1.1, เตรียมเครื่อง UAT, การแก้หลัง UAT (D20) และการทดลอง arms A/B/C (D21)</td></tr>
