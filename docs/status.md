@@ -10,6 +10,10 @@ Newest entries first.
   letter-graded term without its summary is still rejected. Checked on two more real reports (not
   committed): 28 rows / 65 credits and 38 rows / 95 credits, both reconciled. 96 tests.
 - Final report restructured to the course's eleven sections (10 pages); slides made as a Slides deck.
+- Found live: "ช่วยวางแผนให้หน่อย" produced a goal with interests ["AI"] the student never stated. D20
+  item 9: unstated interests are removed. Re-check on qwen3:8b: both bare requests (Thai, English) now
+  give empty interests; test set arm C 40/40 (plan turns 32/32 within 40 s, max 29.9 s; short turns
+  40/42 within 15 s); paraphrases 15/15. 101 tests.
 
 ## 9 Nov 2026
 

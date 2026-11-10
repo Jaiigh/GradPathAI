@@ -184,7 +184,7 @@ def test_course_title_without_a_code_is_not_an_interest(make):
         [("propose_goal", {"interests": ["AI"]})],
     ])
     s = start(rt)
-    rt.message(s.session_id, "ต้องการลงวิชา Software-Defined Systems I ให้ได้")
+    rt.message(s.session_id, "ต้องการลงวิชา Software-Defined Systems I ให้ได้ อยากเน้น AI ด้วย")
     assert "not a study topic" in json.dumps(last_obs(s.llm_messages[:-2], "propose_goal"))
     assert s.pending("goal").data["goal"]["interests"] == ["AI"]
 
@@ -221,3 +221,20 @@ def test_a_retake_taken_from_the_state_block_is_dropped_before_grounding(make):
     s = start(rt, persona="y3-retake-open")
     rt.message(s.session_id, "จากประวัติที่มี ช่วยจัดแผนสาย AI จนจบปี 4 ให้หน่อย")     # the code is never typed
     assert s.pending("goal").data["goal"]["must_take"] == [] and s.turns[-1].tools == ["propose_goal"]
+
+
+def test_an_interest_the_student_never_stated_is_dropped(make):
+    rt = make([[("propose_goal", {"interests": ["AI"]})]])
+    s = start(rt)
+    rt.message(s.session_id, "ช่วยวางแผนให้หน่อย")
+    assert s.pending("goal").data["goal"]["interests"] == []
+    assert "did not state" in last_obs(s.llm_messages, "propose_goal")["note"]
+
+
+@pytest.mark.parametrize("said,topic", [("ชอบปัญญาประดิษฐ์", "AI"), ("อยากไปสาย system ครับ", "systems"),
+                                        ("สนใจ machine learning", "AI"), ("I like AI", "AI")])
+def test_an_interest_in_the_students_words_is_kept(make, said, topic):
+    rt = make([[("propose_goal", {"interests": [topic]})]])
+    s = start(rt)
+    rt.message(s.session_id, said)
+    assert s.pending("goal").data["goal"]["interests"] == [topic]

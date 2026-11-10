@@ -52,6 +52,11 @@ VAGUE = {"caps": re.compile(r"ไม่หนัก|เบา ?ๆ|ไม่เ�
 ONE_CATEGORY = re.compile(r"หมวดเดียว|เพียงหมวด|หนึ่งหมวด|อย่างใดอย่างหนึ่ง|นับซ้ำไม่ได้|ไม่สามารถนับ|ไม่ได้ในเวลาเดียวกัน|"
                           r"ไม่ได้พร้อมกัน|only one|exactly one|one category|not both|cannot count|either", re.I)
 BOTH_AT_ONCE = re.compile(r"ได้ในเวลาเดียวกัน|ได้พร้อมกัน|นับได้ทั้ง|at the same time|simultaneously|counts? (?:toward|for) both", re.I)
+# Interests must be topics the student stated; each group lists words that count as the same topic.
+TOPIC_WORDS = [{"ai", "artificial intelligence", "ปัญญาประดิษฐ์", "เอไอ", "machine learning", "ml"},
+               {"systems", "system", "ระบบ"}, {"security", "cyber", "ความปลอดภัย", "ความมั่นคง"},
+               {"data", "ข้อมูล"}, {"network", "networks", "เครือข่าย"}, {"software", "ซอฟต์แวร์"},
+               {"cloud", "คลาวด์"}, {"graphics", "กราฟิก"}, {"hardware", "ฮาร์ดแวร์"}]
 ALT_LABELS = {"raise_caps": ("เพิ่มเพดานหน่วยกิต", "Raise the credit cap"),
               "allow_summer": ("ใช้ภาคฤดูร้อน", "Use summer terms"),
               "extend_horizon": ("ขยายเวลาจบ", "Extend the finishing term")}
@@ -949,6 +954,12 @@ class Runtime:
                 errors.append(f"{topic!r} is a course title without a published code, not a study topic: leave it out "
                               "of interests (if the student must take it, the missing code needs ask_user kind "
                               "\"need_info\")")
+        # An interest the student never stated is the model's own idea (10 Nov: "ช่วยวางแผนให้หน่อย" became
+        # interests ["AI"]): it is dropped, so preferred courses come only from what the student asked for.
+        said = " ".join(i.text for i in s.items if i.role == "student").lower()
+        unstated = [t for t in update.get("interests", []) if not self._stated(t, said)]
+        if unstated:
+            update["interests"] = [t for t in update["interests"] if t not in unstated]
         done = {r.course_id for r in st.records if snap.earns_credit(r.grade)}
         # Invariant 4: a course ID enters the goal only if the student typed it or retrieval returned it.
         grounded = set(ID_RE.findall(" ".join(i.text for i in s.items if i.role == "student"))) | \
@@ -983,7 +994,8 @@ class Runtime:
             (f"not applied: caps above the regulation maximum need the dean's approval and are outside GradPath "
              f"{ignored}") if ignored else None,
             (f"{scheduled} left out of must_take: required courses not yet passed are always planned (retakes "
-             "included)") if scheduled else None])) or None
+             "included)") if scheduled else None,
+            (f"interests {unstated} removed: the student did not state them") if unstated else None])) or None
         if s.goal is not None and not changes:
             s.goal = new
             return {"status": "APPLIED", "goal_version": s.goal.goal_version, "note": note or "soft fields only"}
@@ -997,6 +1009,12 @@ class Runtime:
         s.add("agent", "goal_card", "", card_id=card.card_id)
         self._end(s, "WAIT_USER", ctx, reason="goal card")
         return {"status": "WAITING_FOR_STUDENT", "card_id": card.card_id, **({"note": note} if note else {})}
+
+    @staticmethod
+    def _stated(topic: str, said: str) -> bool:
+        t = topic.lower().strip()
+        words = {t, t.removesuffix("s")} | next((g for g in TOPIC_WORDS if t in g), set())
+        return any(w and w in said for w in words)
 
     def _blocker_waiting(self, ctx) -> dict | None:
         if ctx.blocker:

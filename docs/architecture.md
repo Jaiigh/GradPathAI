@@ -128,6 +128,7 @@ the prompt (`gradpath/runtime/agent.py`, decision D17):
 | Course titles (D20) | A course title without a published code is not accepted as an interest. `reply` and `submit_final` texts are rejected when a Latin course title stands next to another course's code. |
 | Record courses (D20) | Unpassed required courses (retakes) are dropped from `must_take` with a note, since the planner always schedules them; `ask_user` may not ask about courses in the confirmed record. |
 | Language (D20) | A message without letters keeps the conversation language. |
+| Stated interests (D20) | An interest the student did not state (directly or by a listed synonym) is removed from the goal, with a note to the model. |
 | One category (D20) | An info reply that names two categories of one course (or says "at the same time") without saying it counts toward one only is rejected. |
 | Retry (D20) | STOP_UNVERIFIED can be retried from the same state; the stop item carries `retry`. |
 | Context | The system prompt is fixed and the message history is append-only, so Ollama reuses its prompt cache. Each turn's first message opens with a `[State, written by GradPath]` block: record summary (credits, required retakes), goal state and the student's language at the start of that turn. UI decisions reach the model as `[UI event]` messages; consent is read only from the UI. |
