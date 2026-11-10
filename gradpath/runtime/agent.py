@@ -57,6 +57,7 @@ TOPIC_WORDS = [{"ai", "artificial intelligence", "ปัญญาประดิ
                {"systems", "system", "ระบบ"}, {"security", "cyber", "ความปลอดภัย", "ความมั่นคง"},
                {"data", "ข้อมูล"}, {"network", "networks", "เครือข่าย"}, {"software", "ซอฟต์แวร์"},
                {"cloud", "คลาวด์"}, {"graphics", "กราฟิก"}, {"hardware", "ฮาร์ดแวร์"}]
+GENERIC_WORDS = {"computer", "computing", "engineering", "course", "courses", "subject", "with", "from", "study"}
 ALT_LABELS = {"raise_caps": ("เพิ่มเพดานหน่วยกิต", "Raise the credit cap"),
               "allow_summer": ("ใช้ภาคฤดูร้อน", "Use summer terms"),
               "extend_horizon": ("ขยายเวลาจบ", "Extend the finishing term")}
@@ -1012,8 +1013,11 @@ class Runtime:
 
     @staticmethod
     def _stated(topic: str, said: str) -> bool:
+        """The whole topic, a listed synonym, or one distinctive word of it (4+ letters) appears in the student's
+        text, so a typo elsewhere ("software archetecture") or a reworded phrase ("cloud compute") still counts."""
         t = topic.lower().strip()
         words = {t, t.removesuffix("s")} | next((g for g in TOPIC_WORDS if t in g), set())
+        words |= {w.removesuffix("s") for w in re.findall(r"[a-z]{4,}", t) if w not in GENERIC_WORDS}
         return any(w and w in said for w in words)
 
     def _blocker_waiting(self, ctx) -> dict | None:

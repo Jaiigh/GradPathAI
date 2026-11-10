@@ -238,3 +238,20 @@ def test_an_interest_in_the_students_words_is_kept(make, said, topic):
     s = start(rt)
     rt.message(s.session_id, said)
     assert s.pending("goal").data["goal"]["interests"] == [topic]
+
+
+@pytest.mark.parametrize("said,topic", [("อยากเรียน software archetecture", "software architecture"),
+                                        ("อยากเรียน cloud compute", "cloud computing"),
+                                        ("อยากเรียน wireless", "wireless networks")])
+def test_a_typo_or_reworded_topic_still_counts_as_stated(make, said, topic):
+    rt = make([[("propose_goal", {"interests": [topic]})]])
+    s = start(rt)
+    rt.message(s.session_id, said)
+    assert s.pending("goal").data["goal"]["interests"] == [topic]
+
+
+def test_a_generic_shared_word_does_not_make_a_topic_stated(make):
+    rt = make([[("propose_goal", {"interests": ["computer security"]})]])
+    s = start(rt)
+    rt.message(s.session_id, "อยากเน้น computer graphics")
+    assert s.pending("goal").data["goal"]["interests"] == []

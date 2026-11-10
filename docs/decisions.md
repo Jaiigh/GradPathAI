@@ -275,9 +275,10 @@ The system never assumes completion based only on study year.
      alternatives in one table.
   8. An info `reply` that lets one course count toward two of its categories at once is rejected
      unless it also says the course counts toward one category only (T08).
-  9. (10 Nov) `interests` keeps only topics the student stated (with a small synonym table, for
-     example ปัญญาประดิษฐ์ or machine learning for AI); the model had turned "ช่วยวางแผนให้หน่อย" into
-     interests ["AI"].
+  9. (10 Nov) `interests` keeps only topics the student stated: the whole topic, a listed synonym (for
+     example ปัญญาประดิษฐ์ or machine learning for AI) or one distinctive word of it (4+ letters, not
+     "computer" or "engineering"), so typos elsewhere still count; the model had turned "ช่วยวางแผนให้
+     หน่อย" into interests ["AI"].
 - Not changed: the frozen test set v1.1 and `cp2566-v0`; the 4 Nov UAT results stay as recorded.
 
 ## D21. Experiment arms
