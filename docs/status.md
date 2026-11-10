@@ -2,6 +2,15 @@
 
 Newest entries first.
 
+## 10 Nov 2026
+
+- CR60 import: a term whose grades are all outside the GPA (for example an S/U-only summer) has no
+  CA/CG row in the report; it is now accepted, listed in `report.terms_without_summary`, and checked
+  through the next term's CGX (a trailing one adds its earned credits to the reported total). A
+  letter-graded term without its summary is still rejected. Checked on two more real reports (not
+  committed): 28 rows / 65 credits and 38 rows / 95 credits, both reconciled. 96 tests.
+- Final report restructured to the course's eleven sections (10 pages); slides made as a Slides deck.
+
 ## 9 Nov 2026
 
 - Reviewed the 7 Nov commit (CR60 upload, D18, D19): the venv needed `pypdf` and

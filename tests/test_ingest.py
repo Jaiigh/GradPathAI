@@ -216,3 +216,51 @@ def test_interrupted_session_can_be_resumed_after_restart(rt):
     restored = rt.get(s.session_id)
     assert not restored.busy and restored.outcome == 'STOP_UNVERIFIED'
     assert not rt.store.load(s.session_id).busy
+
+
+def summer_pages(summer_rows, closing="", trailing=False):
+    """One-page report with an S/U-only summer session that CR60 prints without a CA/CG row."""
+    head = """CHULALONGKORN UNIVERSITY
+PAGE 1 / 1
+Student ID. 000 00000 00
+Admission Jul 01, 2023
+Field of Study Computer Engineering
+COURSE NO ABBREVIATED NAME CREDIT GRADE
+1ST SEMESTER 2023
+2110101 COMP PROG 3.0 A
+CA CG GPA CAX CGX GPAX GPX
+3.00 3.00 4.00 3.00 3.00 4.00 12.00
+SUMMER SESSION 2023
+""" + summer_rows + closing
+    if not trailing:
+        head += """1ST SEMESTER 2024
+2110215 PROG METH I 3.0 B
+CA CG GPA CAX CGX GPAX GPX
+3.00 3.00 3.00 6.00 12.00 3.50 21.00
+"""
+    return [head + """CA = CREDIT ATTEMPTED
+Student Grade Report
+As of 06 November 2026
+"""]
+
+
+SU_SUMMER = "3200106 FUND ORAL BIO HLTH 3.0 S\n3700110 GOOD HEALTH 3.0 S\n"
+
+
+def test_summer_of_s_grades_without_a_summary_row_is_read_and_reconciled():
+    st = parse_pages(summer_pages(SU_SUMMER), SNAP, "hash")
+    assert st.report["terms_without_summary"] == ["2566/S"]
+    assert [r.term for r in st.records].count("2566/S") == 2
+    assert st.report["reconciliation_errors"] == []          # the 2567/1 CGX (12) includes the summer S credits
+    assert st.report["reported_earned"] == 12
+
+
+def test_a_trailing_s_only_summer_adds_its_credits_to_the_reported_total():
+    st = parse_pages(summer_pages(SU_SUMMER, trailing=True), SNAP, "hash")
+    assert st.report["last_term"] == "2566/S" and st.report["reported_earned"] == 3 + 6
+    assert st.next_term == "2567/1"
+
+
+def test_a_letter_graded_term_without_its_summary_is_still_rejected():
+    with pytest.raises(ReportError, match="Missing credit summary for 2566/S"):
+        parse_pages(summer_pages("2110200 DISCRETE STRUC 3.0 B\n"), SNAP, "hash")

@@ -123,6 +123,7 @@ function RecordsPanel({ view, busy, onConfirm, onUploaded, onInternship }) {
       {report.reconciliation_errors.length > 0
         ? <div className="error" role="alert"><strong>ยอดหน่วยกิตยังไม่ตรงกับรายงาน</strong><ul>{report.reconciliation_errors.map(e => <li key={e}>{e}</li>)}</ul><p>ตรวจเกรดที่ไม่ชัดเจนหรืออัปโหลดรายงานที่ครบทุกหน้า</p></div>
         : <p className="reconciled">✓ ยอดหน่วยกิตรายเทอมและสะสมตรงกับ PDF</p>}
+      {report.terms_without_summary?.length > 0 && <p className="note">{report.terms_without_summary.join(', ')} มีแต่เกรด S/U/W รายงานจึงไม่พิมพ์แถวสรุปหน่วยกิต ระบบนับหน่วยกิตของเทอมนี้และตรวจผ่านยอดสะสม (CGX) ของเทอมถัดไป</p>}
     </div>}
     {report && !st.confirmed && <div className="profile-review">
       <label>ปีที่เข้าศึกษา (พ.ศ.)<input type="number" min="2566" value={entryYear} disabled={busy} onChange={e => setEntryYear(e.target.value)} /></label>

@@ -49,6 +49,15 @@ def reconciliation(student: StudentState, snap: Snapshot) -> list[str]:
     return errors
 
 
+def _summary_free(term: str, records: list[Record], snap: Snapshot) -> bool:
+    """CR60 prints no CA/CG row for a term whose grades are all outside the GPA (for example a summer session
+    of S/U courses). Only such a term may close without its summary; its credits are still checked through the
+    next term's cumulative CGX."""
+    rs = [r for r in records if r.term == term]
+    grades = snap.data["grades"]
+    return bool(rs) and all(r.grade in grades and not grades[r.grade]["in_gpa"] for r in rs)
+
+
 def read_pdf(data: bytes, snap: Snapshot) -> StudentState:
     if not data or len(data) > MAX_BYTES:
         raise ReportError("Upload a PDF smaller than 10 MB.")
@@ -74,6 +83,7 @@ def parse_pages(pages: list[str], snap: Snapshot, document_hash: str) -> Student
     admissions, identities = set(), set()
     term = None
     term_closed = True
+    no_summary = []
     seen_terms = set()
     seen_rows = set()
     report_date = None
@@ -116,12 +126,15 @@ def parse_pages(pages: list[str], snap: Snapshot, document_hash: str) -> Student
             match = TERM.fullmatch(line)
             if match:
                 if term is not None and not term_closed:
-                    raise ReportError(f"Missing credit summary for {term}.")
+                    if not _summary_free(term, records, snap):
+                        raise ReportError(f"Missing credit summary for {term}.")
+                    no_summary.append(term)
                 year = int(match[2])
                 year = year + 543 if year < 2400 else year
                 sem = {"1ST": "1", "2ND": "2", "SUMMER": "S"}[match[1].upper()]
                 term = T.label(year, sem)
-                if term in seen_terms or (summaries and T.key(term) <= T.key(summaries[-1]["term"])):
+                last_seen = max(seen_terms, key=T.key) if seen_terms else None
+                if term in seen_terms or (last_seen and T.key(term) <= T.key(last_seen)):
                     raise ReportError("Semester sections are repeated or out of order.")
                 seen_terms.add(term)
                 term_closed = False
@@ -161,6 +174,9 @@ def parse_pages(pages: list[str], snap: Snapshot, document_hash: str) -> Student
             records.append(r)
         if waiting_summary:
             raise ReportError(f"Missing credit summary on page {page_no}.")
+    if term is not None and not term_closed and _summary_free(term, records, snap):
+        no_summary.append(term)
+        term_closed = True
     if len(admissions) != 1 or len(identities) > 1:
         raise ReportError("The pages appear to belong to different student reports.")
     if not records or not summaries or not term_closed:
@@ -178,7 +194,10 @@ def parse_pages(pages: list[str], snap: Snapshot, document_hash: str) -> Student
                            entry_year=entry_year, next_term=following, records=records, unresolved=unresolved,
                            report={"format": "CR60", "pages": len(pages), "as_of": report_date,
                                    "last_term": last_term, "terms": summaries,
-                                   "reported_earned": summaries[-1]["cumulative_granted"],
+                                   "reported_earned": summaries[-1]["cumulative_granted"] + earned(
+                                       [r for r in records if r.term in no_summary
+                                        and T.key(r.term) > T.key(summaries[-1]["term"])], snap),
+                                   "terms_without_summary": no_summary,
                                    "gpax": summaries[-1]["gpax"], "profile_confirmed": False})
     refresh_categories(student, snap)
     student.report["reconciliation_errors"] = reconciliation(student, snap)
