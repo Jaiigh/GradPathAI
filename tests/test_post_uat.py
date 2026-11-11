@@ -255,3 +255,96 @@ def test_a_generic_shared_word_does_not_make_a_topic_stated(make):
     s = start(rt)
     rt.message(s.session_id, "อยากเน้น computer graphics")
     assert s.pending("goal").data["goal"]["interests"] == []
+
+
+def test_a_plain_answer_after_audit_is_kept_instead_of_nudged(make):
+    answer = "คุณยังต้องลงอีก 22 หน่วยกิต วิชาบังคับที่ยังไม่ได้ลงคือ 2110488 และ 2110489"
+    rt = make([[("audit", {})], answer])
+    s = start(rt)
+    rt.message(s.session_id, "ตอนนี้ผมเหลือต้องลงอะไรบ้าง")
+    assert s.outcome == "WAIT_USER" and s.items[-1].text == answer and s.turns[-1].llm_calls == 2
+
+
+def test_plain_text_without_a_read_tool_is_still_nudged(make):
+    rt = make(["สวัสดีครับ", [("reply", {"kind": "info", "message": "บอกเป้าหมายได้เลย"})]])
+    s = start(rt)
+    rt.message(s.session_id, "สวัสดี")
+    assert s.items[-1].text == "บอกเป้าหมายได้เลย" and s.turns[-1].llm_calls == 2
+
+
+def test_an_ungrounded_plain_answer_is_still_nudged(make):
+    rt = make([[("audit", {})], "คุณต้องลง 2119999 เพิ่ม", [("reply", {"kind": "info", "message": "เหลือ 22 หน่วยกิต"})]])
+    s = start(rt)
+    rt.message(s.session_id, "ตอนนี้ผมเหลือต้องลงอะไรบ้าง")
+    assert s.items[-1].text == "เหลือ 22 หน่วยกิต"
+
+
+# ---------------------------------------------------------------- 11 Nov probes outside the test set
+def test_one_of_two_categories_with_or_is_accepted(make):
+    ok = "วิชา 2110477 นับเป็นหมวด DEPT_ELECTIVE หรือ FREE ได้หนึ่งในสองหมวดเท่านั้น และต้องผ่าน 2110476 ก่อน"
+    rt = make([[("retrieve_courses", {"query": "2110477"})], [("reply", {"kind": "info", "message": ok})]])
+    s = start(rt)
+    rt.message(s.session_id, "ต้องผ่านวิชาอะไรก่อนถึงจะลง 2110477 ได้")
+    assert s.items[-1].text == ok and s.turns[-1].tools == ["retrieve_courses", "reply"]
+
+
+def test_two_categories_joined_by_and_are_still_rejected(make):
+    wrong = "วิชา 2110477 นับเป็นหมวด DEPT_ELECTIVE และ FREE"
+    rt = make([[("retrieve_courses", {"query": "2110477"})], [("reply", {"kind": "info", "message": wrong})],
+               [("reply", {"kind": "info", "message": "นับได้หมวดเดียว"})]])
+    s = start(rt)
+    rt.message(s.session_id, "2110477 นับหมวดไหน")
+    assert s.items[-1].text == "นับได้หมวดเดียว"
+
+
+def test_retrieval_lists_prerequisites_with_their_status(make):
+    rt = make([[("retrieve_courses", {"query": "2110477"})], [("reply", {"kind": "info", "message": "ok"})]])
+    s = start(rt)
+    rt.message(s.session_id, "ต้องผ่านวิชาอะไรก่อนลง 2110477")
+    row = next(r for r in last_obs(s.llm_messages, "retrieve_courses")["results"] if r.get("course_id") == "2110477")
+    assert row["prerequisites"] == "2110476 (inferred)"
+
+
+def test_an_unknown_citation_is_dropped_and_the_answer_kept(make):
+    rt = make([[("reply", {"kind": "info", "message": "เทอมหน้าลง 15 หน่วยกิต", "citations": ["8e0a5b8d"]})]])
+    s = start(rt)
+    rt.message(s.session_id, "เทอมหน้าผมต้องลงกี่หน่วยกิต")
+    assert s.items[-1].text == "เทอมหน้าลง 15 หน่วยกิต" and s.items[-1].data["citations"] == []
+
+
+def test_need_info_about_something_else_gets_no_course_card(make):
+    rt = make([[("ask_user", {"kind": "need_info", "fields": ["record"], "question": "ต้องการให้ปรับแผนไหม"})]])
+    s = start(rt)
+    rt.message(s.session_id, "ย้าย 2110477 ไปเทอมสุดท้าย")
+    assert s.outcome == "NEED_INFO" and s.items[-1].kind == "question"
+
+
+def test_a_caps_answer_without_a_number_uses_the_regulation_cap(make):
+    rt = make([
+        [("ask_user", {"kind": "clarify", "fields": ["caps"], "question": "เทอมละไม่เกินกี่หน่วยกิต"})],
+        [("propose_goal", {"default_cap": 18})],
+        [("ask_user", {"kind": "clarify", "fields": ["caps"], "question": "เทอมละไม่เกินกี่หน่วยกิต"})],
+        [("propose_goal", {})],
+    ])
+    s = start(rt)
+    rt.message(s.session_id, "อยากได้แผนที่ไม่หนักมาก")
+    rt.message(s.session_id, "ไม่รู้เหมือนกัน แล้วแต่ระบบเลย")
+    g = s.pending("goal").data["goal"]
+    assert g["default_cap"] is None and g["caps"] == {}
+    assert "regulation cap" in json.dumps([m["content"] for m in s.llm_messages if m.get("tool_name")])
+
+
+def test_audit_gives_gpax_only_when_a_report_has_it_and_names_categories(make):
+    rt = make([[("audit", {})], "ok"])
+    s = start(rt)
+    rt.message(s.session_id, "GPAX ผมเท่าไหร่")
+    obs = last_obs(s.llm_messages, "audit")
+    assert obs["gpax"] is None and "never estimate" in obs["gpax_note"]
+    assert obs["category_names"]["CORE"]
+
+
+def test_a_course_question_without_a_missing_code_gets_no_course_card(make):
+    rt = make([[("ask_user", {"kind": "need_info", "fields": ["must_take"], "question": "ยืนยันการย้ายวิชาไหม"})]])
+    s = start(rt)
+    rt.message(s.session_id, "ย้าย 2110477 ไปเทอมสุดท้าย")
+    assert s.outcome == "NEED_INFO" and s.items[-1].kind == "question"

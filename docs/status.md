@@ -2,6 +2,19 @@
 
 Newest entries first.
 
+## 11 Nov 2026 (development machine only; the demo machine keeps the 10 Nov build)
+
+- Probed 12 student requests outside the test set. Fixed in the runtime: a grounded plain-text answer
+  after read-only tools (audit, retrieval) is kept instead of nudged away; a reply's unknown citation
+  (for example a plan_id) is dropped instead of rejecting the answer; the one-category check accepts
+  "หนึ่งใน…" and rejects only "X และ Y" or "at the same time"; retrieval rows list prerequisites with
+  their status; `audit` gives the report's GPAX (or says none is available) and category names; a
+  caps answer without a number uses the regulation cap instead of asking again; the course-code card
+  appears only when a course without a known code was named.
+- After the fixes: 10 of 12 probes answer correctly; still wrong or unsupported: moving a course to a
+  named term, and facts about the plan in free answers (one said a planned course was already taken).
+  Test set arm C 40/40 (plan turns 32/32 within 40 s, max 39.7 s), paraphrases 15/15. 116 tests.
+
 ## 10 Nov 2026
 
 - CR60 import: a term whose grades are all outside the GPA (for example an S/U-only summer) has no

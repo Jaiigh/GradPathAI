@@ -49,8 +49,10 @@ TITLE_ID = re.compile(r"((?:[A-Z][\w&-]*|[IVX]+|and|of|for|in|to|the)(?:\s+(?:[A
                       r"\s*\(\s*(\d{7})\s*\)")
 VAGUE = {"caps": re.compile(r"ไม่หนัก|เบา ?ๆ|ไม่เยอะ|สบาย ?ๆ|\blight\b|not too heavy|\beasy\b|relaxed", re.I),
          "horizon": re.compile(r"จบเร็ว|จบไว|เร็วที่สุด|ก่อนกำหนด|finish early|graduate early|graduate fast|as soon as", re.I)}
-ONE_CATEGORY = re.compile(r"หมวดเดียว|เพียงหมวด|หนึ่งหมวด|อย่างใดอย่างหนึ่ง|นับซ้ำไม่ได้|ไม่สามารถนับ|ไม่ได้ในเวลาเดียวกัน|"
-                          r"ไม่ได้พร้อมกัน|only one|exactly one|one category|not both|cannot count|either", re.I)
+ONE_CATEGORY = re.compile(r"หมวดเดียว|เพียงหมวด|หนึ่งหมวด|หนึ่งใน|เพียงหนึ่ง|อย่างใดอย่างหนึ่ง|นับซ้ำไม่ได้|ไม่สามารถนับ|"
+                          r"ไม่ได้ในเวลาเดียวกัน|ไม่ได้พร้อมกัน|only one|exactly one|one category|one of|not both|"
+                          r"cannot count|either", re.I)
+BOTH_WORDS = re.compile(r"และ|ทั้ง|\band\b|\bboth\b", re.I)
 BOTH_AT_ONCE = re.compile(r"ได้ในเวลาเดียวกัน|ได้พร้อมกัน|นับได้ทั้ง|at the same time|simultaneously|counts? (?:toward|for) both", re.I)
 # Interests must be topics the student stated; each group lists words that count as the same topic.
 TOPIC_WORDS = [{"ai", "artificial intelligence", "ปัญญาประดิษฐ์", "เอไอ", "machine learning", "ml"},
@@ -601,6 +603,12 @@ class Runtime:
                                    **({"tool_calls": calls} if calls else {})})
             if not calls:
                 calls = self._calls_in_text(content_out)
+            if not calls and self._plain_answer_ok(s, ctx, content_out):
+                # 11 Nov: after audit the model wrote a correct answer as plain text; the nudge made it drop the
+                # answer and ask about caps instead. A grounded answer after read-only tools is kept as an info reply.
+                self.store.trace(s.session_id, "plain_answer_kept", turn=rec.turn)
+                self._finish_text(s, ctx, "info", content_out, [])
+                break
             if not calls:
                 if not nudged and ctx.remaining() > 5:
                     nudged = True
@@ -634,6 +642,28 @@ class Runtime:
                                        "content": json.dumps(obs, ensure_ascii=False)})
                 if ctx.end is not None:
                     break
+
+    @classmethod
+    def _prereq_text(cls, expr) -> str:
+        if isinstance(expr, str):
+            return expr
+        if not isinstance(expr, dict):
+            return ""
+        for key, joiner in (("all_of", " and "), ("any_of", " or ")):
+            if expr.get(key):
+                parts = [cls._prereq_text(e) for e in expr[key]]
+                return joiner.join(f"({p})" if (" and " in p or " or " in p) else p for p in parts if p)
+        return ""
+
+    READ_ONLY = {"audit", "retrieve_courses"}
+
+    def _plain_answer_ok(self, s: Session, ctx: Ctx, text: str) -> bool:
+        """Plain text ends the turn as an answer only after read-only tools in this turn (never once a plan or a
+        blocker is in play) and only when it passes the same grounding checks as `reply`."""
+        tools = set(ctx.rec.tools)
+        return (bool(text) and bool(tools & self.READ_ONLY) and tools <= self.READ_ONLY and ctx.blocker is None
+                and not self._ungrounded(s, text) and not self._mislabelled(s, text)
+                and not self._double_counted(s, text))
 
     def _tool(self, s: Session, ctx: Ctx, name: str, args, raw=None) -> dict:
         """Run one allowed tool with budget accounting and a trace line (all arms)."""
@@ -836,9 +866,13 @@ class Runtime:
         out = []
         for cid in sorted(set(ID_RE.findall(msg))):
             cats = (snap.courses.get(cid) or {}).get("categories", [])
-            named = [k for k in cats if k in msg or snap.categories[k]["name_th"] in msg
-                     or snap.categories[k]["name_en"].lower() in msg.lower()]
-            if len(cats) > 1 and (len(named) > 1 or BOTH_AT_ONCE.search(msg)):
+            low = msg.lower()
+            spots = sorted(i for i in (min((p for p in (msg.find(k), msg.find(snap.categories[k]["name_th"]),
+                                                       low.find(snap.categories[k]["name_en"].lower())) if p >= 0),
+                                           default=-1) for k in cats) if i >= 0)
+            # two of its categories joined by "and" (11 Nov: "หนึ่งในสองหมวด" with "หรือ" is correct and must pass)
+            joined = len(spots) > 1 and BOTH_WORDS.search(msg[spots[0]:spots[1]])
+            if len(cats) > 1 and (joined or BOTH_AT_ONCE.search(msg)):
                 out.append(f"{cid} counts toward exactly one of {cats} in a plan, never two at once; say that it may "
                            "count toward one of them")
         return out
@@ -866,6 +900,9 @@ class Runtime:
         deficits = audit(snap, s.student, s.goal)["category_deficits"]
         said = " ".join(i.text for i in s.items if i.role == "student")
         unknown = sorted({c for c in ID_RE.findall(said) if c not in snap.courses})
+        if not (missing or unknown):
+            return      # 11 Nov: the course card showed up after unrelated NEED_INFO questions (move a course, plan
+                        # details); it is shown only when a course without a published or known code was named
         lines = [text("missing_unpublished", s.lang, title=m["title"], snapshot=s.snapshot_id,
                       category=m["category_name"]) for m in missing]
         if unknown:
@@ -884,10 +921,18 @@ class Runtime:
     # ------------------------------------------------------------ tools
     def _t_audit(self, s, ctx, args):
         snap, _ = self.snap(s)
-        return audit(snap, s.student, s.goal)
+        out = audit(snap, s.student, s.goal)
+        report = s.student.report or {}
+        out["gpax"] = report.get("gpax")
+        if out["gpax"] is None:
+            out["gpax_note"] = "not available: this record has no grade report; never estimate a GPAX"
+        key = "name_th" if s.lang == "th" else "name_en"
+        out["category_names"] = {k: snap.categories[k][key] for k in out["category_deficits"]}
+        return out
 
     def _t_retrieve_courses(self, s, ctx, args):
-        _, index = self.snap(s)
+        snap, index = self.snap(s)
+        snap_courses = snap.courses
         results = retrieve(index, args.query)
         for r in results:
             if r["source_id"] not in s.retrieved:
@@ -898,6 +943,10 @@ class Runtime:
             row = {k: r[k] for k in keep if r.get(k) not in (None, "", [])}
             if r.get("categories"):
                 row["may_count_toward_one_of"] = r["categories"]
+            course = snap_courses.get(r.get("course_id") or "")
+            if course:
+                pre = course.get("prereqs") or {}
+                row["prerequisites"] = f"{self._prereq_text(pre) or 'none known'} ({pre.get('status', 'unknown')})"
             out.append(row)
         return {"results": out, "note": "a course counts toward exactly one category"}
 
@@ -944,8 +993,13 @@ class Runtime:
         chosen = sorted({v for v in [update.get("default_cap"), *update.get("caps", {}).values()]
                          if v is not None and str(v) not in typed})
         if chosen:
-            errors.append(f"the student never typed the cap {chosen}; never choose a number for them: call ask_user "
-                          "with kind \"clarify\" and fields [\"caps\"]")
+            if self._caps_answer_without_number(s):
+                # 11 Nov: "แล้วแต่ระบบเลย" after the caps question looped on the same question; use the default
+                errors.append(f"the student answered the caps question without a number, so the regulation cap of "
+                              f"{reg_max} applies: call propose_goal again without default_cap and caps")
+            else:
+                errors.append(f"the student never typed the cap {chosen}; never choose a number for them: call "
+                              "ask_user with kind \"clarify\" and fields [\"caps\"]")
         # A course title without a published code is not a study topic (UAT T11: putting it in interests would plan
         # silently without the course the student must take).
         unpublished = {o["name_en"].lower() for cat in snap.data["categories"] for o in cat.get("unlisted_options", [])}
@@ -1020,6 +1074,13 @@ class Runtime:
         words |= {w.removesuffix("s") for w in re.findall(r"[a-z]{4,}", t) if w not in GENERIC_WORDS}
         return any(w and w in said for w in words)
 
+    @staticmethod
+    def _caps_answer_without_number(s: Session) -> bool:
+        """The caps question was asked in an earlier turn and the student's latest message has no number."""
+        latest = next((i.text for i in reversed(s.items) if i.role == "student"), "")
+        asked_before = any("caps" in a["fields"] and a["turn"] < len(s.turns) for a in s.asked)
+        return asked_before and not NUM_RE.search(latest.translate(THAI_DIGITS))
+
     def _blocker_waiting(self, ctx) -> dict | None:
         if ctx.blocker:
             return {"status": "ERROR", "error": f"solve_plan returned INFEASIBLE in this turn: call submit_final with "
@@ -1033,6 +1094,9 @@ class Runtime:
         bad = self._ungrounded(s, args.question)
         if bad:
             return {"status": "ERROR", "error": f"the question mentions unknown course IDs {bad}"}
+        if "caps" in args.fields and self._caps_answer_without_number(s):
+            return {"status": "ERROR", "error": "the caps question was already asked and the student answered without "
+                    "a number: do not ask again; call propose_goal without default_cap and caps (the regulation cap)"}
         known = sorted({r.course_id for r in s.student.records} & set(ID_RE.findall(args.question)))
         if known:      # UAT T05: never ask the student to confirm what the confirmed record already shows
             return {"status": "ERROR", "error": f"{known} are in the student's confirmed record v"
@@ -1048,10 +1112,10 @@ class Runtime:
         if err := self._blocker_waiting(ctx):
             return err
         bad = self._ungrounded(s, args.message)
-        unknown_cites = [c for c in args.citations if c not in s.retrieved]
-        if bad or unknown_cites:
-            return {"status": "ERROR", "error": f"unknown course IDs {bad}; citations not retrieved in this session "
-                                                f"{unknown_cites}"}
+        if bad:
+            return {"status": "ERROR", "error": f"unknown course IDs {bad}"}
+        # 11 Nov: the model cited a plan_id and the whole answer was rejected; citations are references only
+        args.citations = [c for c in args.citations if c in s.retrieved]
         if wrong := self._mislabelled(s, args.message):
             return {"status": "ERROR", "error": f"course names do not match their codes: {wrong}"}
         if wrong := self._double_counted(s, args.message):
